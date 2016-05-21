@@ -37,34 +37,6 @@ class MLDataset(object):
 
         self.__description = description
 
-    def load(self, path):
-        raise NotImplementedError
-        # try:
-        #     path = os.path.abspath(path)
-        #     with open(path, 'rb') as df:
-        #         dataset = pickle.load(df)
-        #         self.__dict__.update(dataset)
-        #         return self
-        # except IOError as ioe:
-        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
-        # finally:
-        #     raise
-
-    def save(self, path):
-        raise NotImplementedError
-        # try:
-        #     path = os.path.abspath(path)
-        #     with open(path, 'wb') as df:
-        #         save_state = dict(self.__dict__)
-        #         pickle.dump(save_state, df)
-        #         # pickle.dump((self.__data, self.__classes, self.__labels, self.__dtype, self.__description), df)
-        #         return
-        # except IOError as ioe:
-        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
-        # finally:
-        #     raise
-
-
     @property
     def data(self):
         """data in its original dict form."""
@@ -317,4 +289,31 @@ class MLDataset(object):
                 'num_samples',
                 'subject_ids',
                 'add_classes' ]
+
+    def load(self, path):
+        raise NotImplementedError
+        # try:
+        #     path = os.path.abspath(path)
+        #     with open(path, 'rb') as df:
+        #         dataset = pickle.load(df)
+        #         self.__dict__.update(dataset)
+        #         return self
+        # except IOError as ioe:
+        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        # finally:
+        #     raise
+
+    def save(self, path):
+        raise NotImplementedError
+        # try:
+        #     path = os.path.abspath(path)
+        #     with open(path, 'wb') as df:
+        #         save_state = dict(self.__dict__)
+        #         pickle.dump(save_state, df)
+        #         # pickle.dump((self.__data, self.__classes, self.__labels, self.__dtype, self.__description), df)
+        #         return
+        # except IOError as ioe:
+        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        # finally:
+        #     raise
 
