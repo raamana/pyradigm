@@ -1,12 +1,13 @@
 import numpy as np
 from collections import Counter, OrderedDict
 import warnings
-
+import os
+import cPickle as pickle
 
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
 
-    def __init__(self, data=None, labels=None, classes=None):
+    def __init__(self, data=None, labels=None, classes=None, description=''):
         if data is None or labels is None:
             self.__data = OrderedDict()
             self.__labels = OrderedDict()
@@ -19,9 +20,8 @@ class MLDataset(object):
                 assert isinstance(classes, dict), 'labels must be a dict! keys: subject ID or any unique identifier'
 
             assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
-            # TODO need a better way to ensure keys are identical
-            assert data.keys() == labels.keys(), 'data and labels dictionaries must have the same keys!'
-
+            assert set(data.keys()) == set(labels.keys()) == set(classes.keys()), 'data, classes and labels ' \
+                                                                                  'dictionaries must have the same keys!'
             num_features_in_elements = np.unique([len(sample) for sample in data.values()])
             assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
 
@@ -29,11 +29,38 @@ class MLDataset(object):
             # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
             self.__data = OrderedDict(data)
             self.__labels = OrderedDict(labels)
-            self.__classes = classes
+            self.__classes = OrderedDict(classes)
+            self.__dtype = type(data)
 
-        self.__label_set = set(self.labels)
-        self.class_sizes = Counter(self.labels)
-        self.__description = ''
+        self.__description = description
+
+    def load(self, path):
+        raise NotImplementedError
+        # try:
+        #     path = os.path.abspath(path)
+        #     with open(path, 'rb') as df:
+        #         dataset = pickle.load(df)
+        #         self.__dict__.update(dataset)
+        #         return self
+        # except IOError as ioe:
+        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        # finally:
+        #     raise
+
+    def save(self, path):
+        raise NotImplementedError
+        # try:
+        #     path = os.path.abspath(path)
+        #     with open(path, 'wb') as df:
+        #         save_state = dict(self.__dict__)
+        #         pickle.dump(save_state, df)
+        #         # pickle.dump((self.__data, self.__classes, self.__labels, self.__dtype, self.__description), df)
+        #         return
+        # except IOError as ioe:
+        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        # finally:
+        #     raise
+
 
     @property
     def data(self):
@@ -75,12 +102,33 @@ class MLDataset(object):
         else:
             raise ValueError('labels input must be a dictionary!')
 
+    @property
+    def class_sizes(self):
+        return Counter(self.classes)
+
+    @property
+    def __label_set(self):
+        return set(self.labels)
+
     def add_sample(self, subject_id, features, label, class_id=None):
-        """Adds a new sample to the dataset with its features, label and class ID."""
+        """Adds a new sample to the dataset with its features, label and class ID. This is the preferred way to
+        construct the dataset."""
         if subject_id not in self.__data:
-            self.__data[subject_id] = features
-            self.__labels[subject_id] = label
-            self.__classes[subject_id] = class_id
+            if self.num_samples <= 0:
+                self.__data[subject_id] = features
+                self.__labels[subject_id] = label
+                self.__classes[subject_id] = class_id
+                self.__dtype = type(features)
+                self.__num_features = len(features)
+            else:
+                assert self.__num_features == len(features), \
+                    ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
+                    len(features),self.__num_features))
+                assert isinstance(features,self.__dtype), TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
+
+                self.__data[subject_id] = features
+                self.__labels[subject_id] = label
+                self.__classes[subject_id] = class_id
         else:
             raise ValueError('{} already exists in this dataset!'.format(subject_id))
 
@@ -95,6 +143,7 @@ class MLDataset(object):
 
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
+            # need to ensure data are added to data, labels etc in the same order of subject IDs
             data = self.__get_subset_from_dict(self.__data, subset_ids)
             labels = self.__get_subset_from_dict(self.__labels, subset_ids)
             if self.__classes is not None:
@@ -103,18 +152,29 @@ class MLDataset(object):
                 classes = None
             subdataset = MLDataset(data, labels, classes)
             # Appending the history
-            subdataset.description += 'Subset derived from ' + self.description
+            subdataset.description += '\n Subset derived from: ' + self.description
+            return subdataset
         else:
             warnings.warn('subset of IDs requested do not exist in the dataset!')
             return MLDataset()
 
     def __get_subset_from_dict(self, dict, subset):
+        # Using OrderedDict helps ensure data are added to data, labels etc in the same order of subject IDs
         return OrderedDict((sid, dict[sid]) for sid in dict if sid in subset)
 
     @property
     def keys(self):
         """Identifiers (subject IDs, or sample names etc) forming the basis of dict-type MLDataset."""
         return self.__data.keys()
+
+    @property
+    def subject_ids(self):
+        return self.keys
+
+    @property
+    def classes(self):
+        """Identifiers (subject IDs, or sample names etc) forming the basis of dict-type MLDataset."""
+        return self.__classes.values()
 
     @property
     def description(self):
@@ -146,11 +206,13 @@ class MLDataset(object):
 
     @property
     def class_set(self):
-        return set(self.__classes)
+        return set(self.__classes.values())
 
     def add_classes(self, classes):
-        if len(classes) == self.num_classes:
-            self.__label_set = classes
+        assert isinstance(classes,dict), TypeError('Input classes is not a dict!')
+        assert len(classes) == self.num_samples, ValueError('Too few items - need {} keys'.format(self.num_samples))
+        assert all([ key in self.keys for key in classes ]), ValueError('One or more unrecognized keys!')
+        self.__classes = classes
 
     def __len__(self):
         return self.num_samples
@@ -162,17 +224,42 @@ class MLDataset(object):
             return True
 
     def __str__(self):
+        """Returns a concise and useful text summary of the dataset."""
         full_descr = list()
         full_descr.append(self.description)
         full_descr.append('{} samples and {} features.'.format(self.num_samples, self.num_features))
-        for cx in self.class_sizes:
-            full_descr.append('Class {:3d} : {:5d} samples.'.format(cx, self.class_sizes.get(cx)))
+        class_ids = self.class_sizes.keys()
+        max_width = max([len(cls) for cls in class_ids])
+        for cls in class_ids:
+            full_descr.append('Class {:>{}} : {} samples.'.format(cls, max_width, self.class_sizes.get(cls)))
         return '\n'.join(full_descr)
 
     def __format__(self, fmt_str):
         if isinstance(fmt_str, basestring):
-            return '{:d} samples x {:d} features with {:d} classes'.format(self.num_samples, self.num_features,
-                                                                           self.num_classes)
+            return '{} samples x {} features with {} classes'.format(
+                self.num_samples, self.num_features, self.num_classes)
+        else:
+            raise NotImplementedError('Requsted type of format not implemented.')
 
     def __repr__(self):
         return self.__str__()
+
+    def __dir__(self):
+        """Returns the preferred list of attributes to be used with the dataset."""
+        return ['add_sample',
+                'class_set',
+                'class_sizes',
+                'classes',
+                'data',
+                'data_matrix',
+                'description',
+                'get_class',
+                'get_subset',
+                'keys',
+                'labels',
+                'num_classes',
+                'num_features',
+                'num_samples',
+                'subject_ids',
+                'add_classes' ]
+
