@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Counter, OrderedDict
+from itertools import ifilter, takewhile, islice
 import warnings
 import os
 import cPickle as pickle
@@ -8,6 +9,8 @@ class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
 
     def __init__(self, data=None, labels=None, classes=None, description=''):
+        """Default constructor. Suggested way to construct the dataset is via add_sample method."""
+
         if data is None or labels is None:
             self.__data = OrderedDict()
             self.__labels = OrderedDict()
@@ -77,6 +80,7 @@ class MLDataset(object):
 
     @data.setter
     def data(self, values):
+        """Populates this dataset with the provided data."""
         if isinstance(values, dict):
             if self.__labels is not None and len(self.__labels) != len(values):
                 raise ValueError('number of samples do not match the previously assigned labels')
@@ -89,6 +93,7 @@ class MLDataset(object):
 
     @property
     def labels(self):
+        """Returns the array of numerical labels for all the samples."""
         return self.__labels.values()
 
     @labels.setter
@@ -104,15 +109,26 @@ class MLDataset(object):
 
     @property
     def class_sizes(self):
+        """Returns the sizes of different objects in a Counter object."""
         return Counter(self.classes)
 
     @property
     def __label_set(self):
         return set(self.labels)
 
+    def __take(self, nitems, iterable):
+        "Return first n items of the iterable as a list"
+        return dict(islice(iterable, nitems))
+
+    def glance(self, nitems=5):
+        """Quick and partial glance of the data matrix."""
+        nitems = max([1, min([nitems, self.num_samples]) ])
+        return self.__take(nitems, self.__data.iteritems())
+
+
     def add_sample(self, subject_id, features, label, class_id=None):
-        """Adds a new sample to the dataset with its features, label and class ID. This is the preferred way to
-        construct the dataset."""
+        """Adds a new sample to the dataset with its features, label and class ID.
+        This is the preferred way to construct the dataset."""
         if subject_id not in self.__data:
             if self.num_samples <= 0:
                 self.__data[subject_id] = features
@@ -131,6 +147,20 @@ class MLDataset(object):
                 self.__classes[subject_id] = class_id
         else:
             raise ValueError('{} already exists in this dataset!'.format(subject_id))
+
+    def get_feature_subset(self, subset_idx):
+        """Returns the subset of features indexed numerically. """
+
+        subset_idx = np.asarray(subset_idx)
+        assert ( max(subset_idx) < self.__num_features) and (min(subset_idx)>=0), \
+            UnboundLocalError('indices out of range for the dataset. Max index: {}'.format(self.__num_features))
+
+        sub_data = {sub : features[subset_idx] for sub, features in self.__data.items()}
+        new_descr = 'Subset features derived from: \n ' + self.__description
+        subdataset = MLDataset(data=sub_data, labels=self.__labels, classes=self.__classes, description=new_descr)
+
+        return subdataset
+
 
     def get_class(self, class_id):
         """Returns a smaller dataset belonging to the requested classes. """
@@ -155,7 +185,7 @@ class MLDataset(object):
             return self.get_subset(subsets)
 
     def get_subset(self, subset_ids):
-
+        """Returns a smaller dataset identified by their keys/subject IDs."""
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
             # need to ensure data are added to data, labels etc in the same order of subject IDs
@@ -173,9 +203,12 @@ class MLDataset(object):
             warnings.warn('subset of IDs requested do not exist in the dataset!')
             return MLDataset()
 
-    def __get_subset_from_dict(self, dict, subset):
+    def __get_subset_from_dict(self, input_dict, subset):
         # Using OrderedDict helps ensure data are added to data, labels etc in the same order of subject IDs
-        return OrderedDict((sid, dict[sid]) for sid in dict if sid in subset)
+        return OrderedDict((sid, value) for sid, value in input_dict.items() if sid in subset)
+
+        # # statement below doesn't work for some reason
+        # return OrderedDict(ifilter( lambda key: key in subset, input_dict))
 
     @property
     def keys(self):
@@ -217,13 +250,16 @@ class MLDataset(object):
 
     @property
     def num_classes(self):
+        """Total numver of classes in the dataset."""
         return len(self.__label_set)
 
     @property
     def class_set(self):
+        """Set of unique classes in the dataset."""
         return set(self.__classes.values())
 
     def add_classes(self, classes):
+        """Helper to rename the classes, if provided by a dict keyed in by the orignal keys"""
         assert isinstance(classes,dict), TypeError('Input classes is not a dict!')
         assert len(classes) == self.num_samples, ValueError('Too few items - need {} keys'.format(self.num_samples))
         assert all([ key in self.keys for key in classes ]), ValueError('One or more unrecognized keys!')
@@ -264,6 +300,7 @@ class MLDataset(object):
     def __dir__(self):
         """Returns the preferred list of attributes to be used with the dataset."""
         return ['add_sample',
+                'glance',
                 'class_set',
                 'class_sizes',
                 'classes',
@@ -272,6 +309,7 @@ class MLDataset(object):
                 'description',
                 'get_class',
                 'get_subset',
+                'get_feature_subset',
                 'keys',
                 'labels',
                 'num_classes',
