@@ -1,8 +1,8 @@
 
 import sys, os
 import numpy as np
-from mldataset import MLDataset
 import cPickle as pickle
+from mldataset import MLDataset
 
 def read_thickness(path):
     """Dummy function to minic a data reader."""
@@ -30,10 +30,11 @@ def get_features(work_dir, subj_id):
 
 
 work_dir = '/project/ADNI/FreesurferThickness_v4p3'
-class_set = ['Ctrl', 'Alzr']
+class_set = ['Ctrl', 'Alzr', 'Another']
 
 dataset = MLDataset()
 dataset.description = 'ADNI1 baseline: cortical thickness features from Freesurfer v4.3, QCed.'
+print dataset
 
 for class_index, class_id in enumerate(class_set):
     print('Working on class {:>5}'.format(class_id))

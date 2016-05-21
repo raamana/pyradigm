@@ -133,11 +133,26 @@ class MLDataset(object):
             raise ValueError('{} already exists in this dataset!'.format(subject_id))
 
     def get_class(self, class_id):
-        if class_id in self.class_set:
-            subset_in_class = [sub_id for sub_id in self.__classes if self.__classes[sub_id] == class_id]
-            return self.get_subset(subset_in_class)
+        """Returns a smaller dataset belonging to the requested classes. """
+        assert class_id not in [None, ''], "class id can not be empty or None."
+        if isinstance(class_id,basestring):
+            class_ids = [class_id, ]
         else:
-            raise ValueError('Requested class: {} does not exist in this dataset.'.format(class_id))
+            class_ids = class_id
+
+        subsets = list()
+        for class_id in class_ids:
+            if class_id in self.class_set:
+                subsets_this_class = [sub_id for sub_id in self.__classes if self.__classes[sub_id] == class_id]
+                subsets.extend(subsets_this_class)
+            else:
+                warnings.warn('Requested class: {} does not exist in this dataset.'.format(class_id))
+
+        if len(subsets) < 1:
+            warnings.warn("All the classes do not belong the dataset")
+            return None
+        else:
+            return self.get_subset(subsets)
 
     def get_subset(self, subset_ids):
 
@@ -227,11 +242,13 @@ class MLDataset(object):
         """Returns a concise and useful text summary of the dataset."""
         full_descr = list()
         full_descr.append(self.description)
-        full_descr.append('{} samples and {} features.'.format(self.num_samples, self.num_features))
-        class_ids = self.class_sizes.keys()
-        max_width = max([len(cls) for cls in class_ids])
-        for cls in class_ids:
-            full_descr.append('Class {:>{}} : {} samples.'.format(cls, max_width, self.class_sizes.get(cls)))
+        if bool(self):
+            full_descr.append('{} samples and {} features.'.format(self.num_samples, self.num_features))
+            class_ids = self.class_sizes.keys()
+            max_width = max([len(cls) for cls in class_ids])
+            for cls in class_ids:
+                full_descr.append('Class {:>{}} : {} samples.'.format(cls, max_width, self.class_sizes.get(cls)))
+
         return '\n'.join(full_descr)
 
     def __format__(self, fmt_str):
