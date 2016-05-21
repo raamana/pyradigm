@@ -65,8 +65,13 @@ class MLDataset(object):
 
     @property
     def labels(self):
-        """Returns the array of numerical labels for all the samples."""
+        """Returns the array of labels for all the samples."""
         return self.__labels.values()
+
+    @property
+    def target(self):
+        """Returns the array of labels for all the samples."""
+        return self.labels
 
     @labels.setter
     def labels(self, values):
@@ -86,7 +91,7 @@ class MLDataset(object):
 
     @property
     def __label_set(self):
-        return set(self.labels)
+        return set(self.target)
 
     def __take(self, nitems, iterable):
         "Return first n items of the iterable as a list"
