@@ -8,15 +8,18 @@ import cPickle as pickle
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
 
-    def __init__(self, data=None, labels=None, classes=None, description=''):
+    def __init__(self, filepath=None, data=None, labels=None, classes=None, description=''):
         """Default constructor. Suggested way to construct the dataset is via add_sample method."""
 
-        if data is None or labels is None:
+        if filepath is not None and os.path.isfile(filepath):
+            self.__load(filepath)
+        elif data == labels == classes == None:
             self.__data = OrderedDict()
             self.__labels = OrderedDict()
             self.__classes = OrderedDict()
             self.__num_features = 0
-        else:
+            self.__description = description
+        elif data is not None and labels is not None and classes is not None:
             assert isinstance(data, dict), 'data must be a dict! keys: subject ID or any unique identifier'
             assert isinstance(labels, dict), 'labels must be a dict! keys: subject ID or any unique identifier'
             if classes is not None:
@@ -34,8 +37,9 @@ class MLDataset(object):
             self.__labels = OrderedDict(labels)
             self.__classes = OrderedDict(classes)
             self.__dtype = type(data)
-
-        self.__description = description
+            self.__description = description
+        else:
+            raise ValueError('Incorrect way to construct the dataset.')
 
     @property
     def data(self):
@@ -295,30 +299,27 @@ class MLDataset(object):
                 'subject_ids',
                 'add_classes' ]
 
-    def load(self, path):
-        raise NotImplementedError
-        # try:
-        #     path = os.path.abspath(path)
-        #     with open(path, 'rb') as df:
-        #         dataset = pickle.load(df)
-        #         self.__dict__.update(dataset)
-        #         return self
-        # except IOError as ioe:
-        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
-        # finally:
-        #     raise
+    def __load(self, path):
+        try:
+            path = os.path.abspath(path)
+            with open(path, 'rb') as df:
+                # loaded_dataset = pickle.load(df)
+                self.__data, self.__classes, self.__labels, self.__dtype, self.__description, self.__num_features = pickle.load(df)
+        except IOError as ioe:
+            raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        except:
+            raise
 
     def save(self, path):
-        raise NotImplementedError
-        # try:
-        #     path = os.path.abspath(path)
-        #     with open(path, 'wb') as df:
-        #         save_state = dict(self.__dict__)
-        #         pickle.dump(save_state, df)
-        #         # pickle.dump((self.__data, self.__classes, self.__labels, self.__dtype, self.__description), df)
-        #         return
-        # except IOError as ioe:
-        #     raise IOError('Unable to read the dataset from file: {}',format(ioe))
-        # finally:
-        #     raise
+        try:
+            path = os.path.abspath(path)
+            with open(path, 'wb') as df:
+                # pickle.dump(self, df)
+                pickle.dump((self.__data, self.__classes, self.__labels, self.__dtype, self.__description, self.__num_features),
+                            df)
+            return
+        except IOError as ioe:
+            raise IOError('Unable to read the dataset from file: {}',format(ioe))
+        except:
+            raise
 

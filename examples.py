@@ -57,25 +57,11 @@ print dataset
 
 out_file = os.path.join(work_dir,'test.pkl')
 
-# saving the dataset to disk
-try:
-    path = os.path.abspath(out_file)
-    with open(path, 'wb') as df:
-        pickle.dump(dataset, df)
-    print('saved.')
-except:
-    raise
+dataset.save(out_file)
 
-# reloading it
-try:
-    path = os.path.abspath(out_file)
-    with open(path, 'rb') as df:
-        reloaded = pickle.load(df)
+new_dataset = MLDataset(filepath=out_file, description='reloaded dataset')
+print new_dataset
 
-except:
-    raise
 
-print '\n\n reloaded dataset:'
-print reloaded
 
 
