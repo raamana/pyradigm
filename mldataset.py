@@ -19,7 +19,7 @@ class MLDataset(object):
             else:
                 raise IOError('Specified file could not be read.')
         elif in_dataset is not None and isinstance(in_dataset, MLDataset):
-            assert in_dataset, ValueError('Dataset to copy is empty.')
+            assert in_dataset.num_samples>0, ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
             self.__data = OrderedDict()
@@ -389,7 +389,7 @@ class MLDataset(object):
     def extend(self, other):
         """Method to extend the dataset vertically (add samples from  anotehr dataset)."""
         assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
-        assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
+        # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for sample in other.keys:
             self.add_sample(sample, other.data[sample], other.labels[sample], other.classes[sample])
 
