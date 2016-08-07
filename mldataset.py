@@ -6,6 +6,7 @@ import os
 import cPickle as pickle
 import copy
 
+# TODO profile the class for different scales of samples and features
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
 
@@ -136,6 +137,7 @@ class MLDataset(object):
         return self.__take(nitems, self.__data.iteritems())
 
 
+    # TODO try implementing based on pandas
     def add_sample(self, sample_id, features, label, class_id=None):
         """Adds a new sample to the dataset with its features, label and class ID.
         This is the preferred way to construct the dataset."""
@@ -204,6 +206,10 @@ class MLDataset(object):
         else:
             return self.get_subset(subsets)
 
+    # TODO implement random resampling
+    def random_subset(self, perc_per_class = 0.5):
+        raise NotImplementedError
+
     def get_subset(self, subset_ids):
         """Returns a smaller dataset identified by their keys/sample IDs."""
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
@@ -222,6 +228,12 @@ class MLDataset(object):
         else:
             warnings.warn('subset of IDs requested do not exist in the dataset!')
             return MLDataset()
+
+    def __contains__(self, item):
+        if item in self.keys:
+            return True
+        else:
+            return False
 
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):

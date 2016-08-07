@@ -1,3 +1,3 @@
 
-# __all__ [ 'mldataset' ]
+__all__ = [ 'mldataset', 'MLDataset' ]
 
