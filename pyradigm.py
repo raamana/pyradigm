@@ -23,6 +23,7 @@ class MLDataset(object):
             assert in_dataset.num_samples>0, ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
+            # TODO refactor the code to use only basic dict, as it allows for better equality comparisons
             self.__data = OrderedDict()
             self.__labels = OrderedDict()
             self.__classes = OrderedDict()
@@ -215,6 +216,9 @@ class MLDataset(object):
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
             # need to ensure data are added to data, labels etc in the same order of sample IDs
+            # TODO come up with a way to do this even when not using OrderedDict()
+            # putting the access of data, labels and classes in the same loop would ensure there is correspondence
+            # across the three attributes of the class
             data = self.__get_subset_from_dict(self.__data, subset_ids)
             labels = self.__get_subset_from_dict(self.__labels, subset_ids)
             if self.__classes is not None:
@@ -365,8 +369,12 @@ class MLDataset(object):
 
     def __copy(self, other):
         """Copy constructor."""
-        self.__data, self.__classes, self.__labels, self.__dtype, self.__description, self.__num_features = \
-            other.data, other.classes, other.labels, other.dtype, other.description, other.num_features
+        self.__data         = copy.deepcopy(other.data)
+        self.__classes      = copy.deepcopy(other.classes)
+        self.__labels       = copy.deepcopy(other.labels)
+        self.__dtype        = copy.deepcopy(other.dtype)
+        self.__description  = copy.deepcopy(other.description)
+        self.__num_features = copy.deepcopy(other.num_features)
 
         return self
 
@@ -433,6 +441,7 @@ class MLDataset(object):
 
 
     def __sub__(self, other):
+        """Removing one dataset from another."""
         assert isinstance(other, type(self)), TypeError('Incorrect type of dataset provided!')
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
@@ -456,15 +465,18 @@ class MLDataset(object):
         return self.__sub__(other)
 
     def __eq__(self, other):
-        """Equality of two datasets."""
+        """Equality of two datasets in samples and their values."""
         if set(self.keys) != set(other.keys):
             print 'differing sample ids.'
             return False
-        elif self.__data != other.data:
-            print 'differing data for the sample ids.'
-            return False
-        elif self.__classes != other.classes:
+        elif dict(self.__classes) != dict(other.classes):
             print 'differing classes for the sample ids.'
             return False
+        elif id(self.__data) != id(other.data):
+            for key in self.keys:
+                if not np.all(self.data[key] == other.data[key]):
+                    print 'differing data for the sample ids.'
+                    return False
+            return True
         else:
             return True
