@@ -1,3 +1,3 @@
 
-__all__ = [ 'mldataset', 'MLDataset' ]
+__all__ = [ 'pyradigm', 'MLDataset' ]
 
