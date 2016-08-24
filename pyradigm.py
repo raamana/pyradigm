@@ -1,6 +1,7 @@
 import numpy as np
 from collections import Counter, OrderedDict
 from itertools import ifilter, takewhile, islice
+import random
 import warnings
 import os
 import cPickle as pickle
@@ -196,20 +197,55 @@ class MLDataset(object):
         subsets = list()
         for class_id in class_ids:
             if class_id in self.class_set:
-                subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] == class_id]
+                subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] in class_id]
                 subsets.extend(subsets_this_class)
             else:
                 warnings.warn('Requested class: {} does not exist in this dataset.'.format(class_id))
 
         if len(subsets) < 1:
-            warnings.warn("All the classes do not belong the dataset")
+            warnings.warn("Given class[es] do not belong the dataset")
             return None
         else:
             return self.get_subset(subsets)
 
-    # TODO implement random resampling
-    def random_subset(self, perc_per_class = 0.5):
-        raise NotImplementedError
+    # TODO sampling of cross-validation splits?
+    def random_subset(self, perc_per_class = 0.5, random_seed = 143):
+        """Returns a random subset of samples (of specified size by percentage) within each class."""
+
+        class_sizes = self.class_sizes
+        subsets = list()
+
+        if perc_per_class <= 0:
+            warnings.warn('Zero percentage requested - returning an empty dataset!')
+            return MLDataset()
+        elif perc_per_class >=1:
+            warnings.warn('Full or a larger dataset requested - returning a copy!')
+            return MLDataset(in_dataset=self)
+
+        # seeding the random number generator
+        random.seed(random_seed)
+
+        for class_id, class_size in class_sizes.items():
+            # samples belonging to the class
+            this_class = [sample for sample in self.classes if self.classes[sample] in class_id]
+            # shuffling the sample order; shuffling works in-place!
+            random.shuffle(this_class)
+            # calculating the requested number of samples
+            subset_size_this_class = int(round(class_size * perc_per_class))
+            # clipping the range to [0, n]
+            subset_size_this_class = max(0, min(class_size, subset_size_this_class))
+            if subset_size_this_class < 1 or this_class is None:
+                # warning if none were selected
+                warnings.warn('No subjects from class {} were selected.'.format(class_id))
+            else:
+                subsets_this_class = this_class[0:subset_size_this_class]
+                subsets.extend(subsets_this_class)
+
+        if len(subsets) > 0:
+            return self.get_subset(subsets)
+        else:
+            warnings.warn('Zero samples were selected. Returning an empty dataset!')
+            return MLDataset()
 
     def get_subset(self, subset_ids):
         """Returns a smaller dataset identified by their keys/sample IDs."""
@@ -234,6 +270,7 @@ class MLDataset(object):
             return MLDataset()
 
     def __contains__(self, item):
+        "Boolean test of membership of a sample in the dataset."
         if item in self.keys:
             return True
         else:
@@ -357,6 +394,7 @@ class MLDataset(object):
                 'extend',
                 'get_class',
                 'get_subset',
+                'random_subset',
                 'get_feature_subset',
                 'keys',
                 'target',
