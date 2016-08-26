@@ -209,7 +209,7 @@ class MLDataset(object):
             return self.get_subset(subsets)
 
     # TODO sampling of cross-validation splits?
-    def random_subset(self, perc_per_class = 0.5, random_seed = 143):
+    def random_subset(self, perc_per_class = 0.5, random_seed = None):
         """Returns a random subset of samples (of specified size by percentage) within each class."""
 
         class_sizes = self.class_sizes
@@ -223,7 +223,9 @@ class MLDataset(object):
             return MLDataset(in_dataset=self)
 
         # seeding the random number generator
-        random.seed(random_seed)
+        # TODO make sure the default behaviour is to return different subset even without supplying the seed.
+        if random_seed is not None:
+            random.seed(random_seed)
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
