@@ -53,18 +53,23 @@ class MLDataset(object):
         """data in its original dict form."""
         return self.__data
 
-    @property
     def data_and_labels(self):
-        """dataset features and labels in a matrix form for learning."""
+        """
+        Dataset features and labels in a matrix form for learning.
 
+        Also returns sample_ids in the same order.
+
+        """
+
+        sample_ids = self.keys
         label_dict = self.labels
         matrix = np.full([self.num_samples, self.num_features], np.nan)
         labels = np.full([self.num_samples, 1], np.nan)
-        for ix, (sample, features) in enumerate(self.__data.items()):
-            matrix[ix, :] = features
+        for ix, sample in enumerate(sample_ids):
+            matrix[ix, :] = self.__data[sample]
             labels[ix] = label_dict[sample]
 
-        return matrix, np.ravel(labels)
+        return matrix, np.ravel(labels), sample_ids
 
     @data.setter
     def data(self, values):
@@ -207,19 +212,75 @@ class MLDataset(object):
         else:
             return self.get_subset(subsets)
 
-    # TODO sampling of cross-validation splits?
-    def random_subset(self, perc_per_class=0.5, random_seed=143):
-        """Returns a random subset of samples (of specified size by percentage) within each class."""
+    # TODO test
+    def train_test_split_ids(self, train_perc = None, count_per_class = None, random_seed=409):
+        "returns two separate datasets for use in repeated-hold out CV."
+
+        if count_per_class is None and (train_perc>0.001 and train_perc<1):
+            train_set = self.random_subset_ids(perc_per_class=train_perc, random_seed=random_seed)
+        elif train_perc is None and (count_per_class>0 and count_per_class < self.num_samples):
+            train_set = self.random_subset_ids_by_count(count_per_class=count_per_class, random_seed=random_seed)
+        else:
+            raise ValueError('Invalid or out of range selection: only one of count or percentage can be used to select '
+                             'subset.')
+
+        test_set  = set(self.keys) - set(train_set)
+
+        if len(train_set) < 1 or len(test_set) < 1:
+            raise ValueError('Selection resulted in empty training or test set - check your dataset!')
+
+        return train_set, test_set
+
+    # TODO test
+    def random_subset_ids_by_count(self, count_per_class=1, random_seed=374):
+        """Returns a random subset of sample ids (of specified size by percentage) within each class."""
+
+        class_sizes = self.class_sizes
+        subsets = list()
+
+        if count_per_class < 1:
+            warnings.warn('Atleast one sample must be selected from each class')
+            return list()
+        elif count_per_class >= self.num_samples:
+            warnings.warn('All samples requested - returning a copy!')
+            return self.keys
+
+        # seeding the random number generator
+        random.seed(random_seed)
+
+        for class_id, class_size in class_sizes.items():
+            # samples belonging to the class
+            this_class = [sample for sample in self.classes if self.classes[sample] in class_id]
+            # shuffling the sample order; shuffling works in-place!
+            random.shuffle(this_class)
+
+            # clipping the range to [0, class_size]
+            subset_size_this_class = max(0, min(class_size, count_per_class))
+            if subset_size_this_class < 1 or this_class is None:
+                # warning if none were selected
+                warnings.warn('No subjects from class {} were selected.'.format(class_id))
+            else:
+                subsets_this_class = this_class[0:count_per_class]
+                subsets.extend(subsets_this_class)
+
+        if len(subsets) > 0:
+            return subsets
+        else:
+            warnings.warn('Zero samples were selected. Returning an empty list!')
+            return list()
+
+    def random_subset_ids(self, perc_per_class=0.5, random_seed=143):
+        """Returns a random subset of sample ids (of specified size by percentage) within each class."""
 
         class_sizes = self.class_sizes
         subsets = list()
 
         if perc_per_class <= 0:
             warnings.warn('Zero percentage requested - returning an empty dataset!')
-            return MLDataset()
+            return list()
         elif perc_per_class >= 1:
             warnings.warn('Full or a larger dataset requested - returning a copy!')
-            return MLDataset(in_dataset=self)
+            return self.keys
 
         # seeding the random number generator
         random.seed(random_seed)
@@ -240,6 +301,16 @@ class MLDataset(object):
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
 
+        if len(subsets) > 0:
+            return subsets
+        else:
+            warnings.warn('Zero samples were selected. Returning an empty list!')
+            return list()
+
+    def random_subset(self, perc_in_class=0.5):
+        """Returns a random subset of dataset (of specified size by percentage) within each class."""
+
+        subsets = self.random_subset_ids(perc_in_class)
         if len(subsets) > 0:
             return self.get_subset(subsets)
         else:
