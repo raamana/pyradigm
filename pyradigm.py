@@ -7,6 +7,7 @@ import os
 import cPickle as pickle
 import copy
 
+
 # TODO profile the class for different scales of samples and features
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
@@ -21,7 +22,7 @@ class MLDataset(object):
             else:
                 raise IOError('Specified file could not be read.')
         elif in_dataset is not None and isinstance(in_dataset, MLDataset):
-            assert in_dataset.num_samples>0, ValueError('Dataset to copy is empty.')
+            assert in_dataset.num_samples > 0, ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
             # TODO refactor the code to use only basic dict, as it allows for better equality comparisons
@@ -31,24 +32,19 @@ class MLDataset(object):
             self.__num_features = 0
             self.__description = description
         elif data is not None and labels is not None and classes is not None:
-            assert isinstance(data, dict), 'data must be a dict! keys: sample ID or any unique identifier'
-            assert isinstance(labels, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
-            if classes is not None:
-                assert isinstance(classes, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
+            # ensuring the inputs really correspond to each other
+            self.__validate(data, labels, classes)
 
-            assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
-            assert set(data.keys()) == set(labels.keys()) == set(classes.keys()), 'data, classes and labels ' \
-                                                                                  'dictionaries must have the same keys!'
-            num_features_in_elements = np.unique([len(sample) for sample in data.values()])
-            assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
-
-            self.__num_features = num_features_in_elements[0]
             # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
             self.__data = OrderedDict(data)
             self.__labels = OrderedDict(labels)
             self.__classes = OrderedDict(classes)
             self.__dtype = type(data)
             self.__description = description
+
+            sample_ids = data.keys()
+            self.__num_features = len(data[sample_ids[0]])
+
         else:
             raise ValueError('Incorrect way to construct the dataset.')
 
@@ -58,12 +54,17 @@ class MLDataset(object):
         return self.__data
 
     @property
-    def data_matrix(self):
-        """dataset features in a matrix form."""
-        mat = np.zeros([self.num_samples, self.num_features])
+    def data_and_labels(self):
+        """dataset features and labels in a matrix form for learning."""
+
+        label_dict = self.labels
+        matrix = np.full([self.num_samples, self.num_features], np.nan)
+        labels = np.full([self.num_samples, 1], np.nan)
         for ix, (sample, features) in enumerate(self.__data.items()):
-            mat[ix, :] = features
-        return mat
+            matrix[ix, :] = features
+            labels[ix] = label_dict[sample]
+
+        return matrix, np.ravel(labels)
 
     @data.setter
     def data(self, values):
@@ -81,13 +82,8 @@ class MLDataset(object):
     @property
     def labels(self):
         """Returns the array of labels for all the samples."""
-        #TODO numeric label need to be removed, as this can be made up on the fly as needed from str to num encoders.
+        # TODO numeric label need to be removed, as this can be made up on the fly as needed from str to num encoders.
         return self.__labels
-
-    @property
-    def target(self):
-        """Returns the array of labels for all the samples."""
-        return self.__labels.values()
 
     @labels.setter
     def labels(self, values):
@@ -99,7 +95,6 @@ class MLDataset(object):
                 self.__labels = values
         else:
             raise ValueError('labels input must be a dictionary!')
-
 
     @property
     def classes(self):
@@ -119,25 +114,29 @@ class MLDataset(object):
         else:
             raise ValueError('classes input must be a dictionary!')
 
-
     @property
     def class_sizes(self):
         """Returns the sizes of different objects in a Counter object."""
         return Counter(self.classes.values())
 
-    @property
-    def __label_set(self):
-        return set(self.target)
-
-    def __take(self, nitems, iterable):
-        "Return first n items of the iterable as a list"
+    @staticmethod
+    def __take(nitems, iterable):
+        """Return first n items of the iterable as a list"""
         return dict(islice(iterable, nitems))
 
     def glance(self, nitems=5):
         """Quick and partial glance of the data matrix."""
-        nitems = max([1, min([nitems, self.num_samples]) ])
+        nitems = max([1, min([nitems, self.num_samples])])
         return self.__take(nitems, self.__data.iteritems())
 
+    def summarize_classes(self):
+        "Summary of classes: names, numeric labels and sizes"
+
+        class_sizes = np.zeros(len(self.class_set))
+        for idx, cls in enumerate(self.class_set):
+            class_sizes[idx] = self.class_sizes[cls]
+
+        return self.class_set, self.label_set, class_sizes
 
     # TODO try implementing based on pandas
     def add_sample(self, sample_id, features, label, class_id=None):
@@ -153,8 +152,9 @@ class MLDataset(object):
             else:
                 assert self.__num_features == len(features), \
                     ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
-                    len(features),self.__num_features))
-                assert isinstance(features,self.__dtype), TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
+                        len(features), self.__num_features))
+                assert isinstance(features, self.__dtype), TypeError(
+                    "Mismatched dtype. Provide {}".format(self.__dtype))
 
                 self.__data[sample_id] = features
                 self.__labels[sample_id] = label
@@ -176,20 +176,19 @@ class MLDataset(object):
         """Returns the subset of features indexed numerically. """
 
         subset_idx = np.asarray(subset_idx)
-        assert ( max(subset_idx) < self.__num_features) and (min(subset_idx)>=0), \
+        assert (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0), \
             UnboundLocalError('indices out of range for the dataset. Max index: {}'.format(self.__num_features))
 
-        sub_data = {sample : features[subset_idx] for sample, features in self.__data.items()}
+        sub_data = {sample: features[subset_idx] for sample, features in self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
         subdataset = MLDataset(data=sub_data, labels=self.__labels, classes=self.__classes, description=new_descr)
 
         return subdataset
 
-
     def get_class(self, class_id):
         """Returns a smaller dataset belonging to the requested classes. """
         assert class_id not in [None, ''], "class id can not be empty or None."
-        if isinstance(class_id,basestring):
+        if isinstance(class_id, basestring):
             class_ids = [class_id, ]
         else:
             class_ids = class_id
@@ -209,7 +208,7 @@ class MLDataset(object):
             return self.get_subset(subsets)
 
     # TODO sampling of cross-validation splits?
-    def random_subset(self, perc_per_class = 0.5, random_seed = 143):
+    def random_subset(self, perc_per_class=0.5, random_seed=143):
         """Returns a random subset of samples (of specified size by percentage) within each class."""
 
         class_sizes = self.class_sizes
@@ -218,7 +217,7 @@ class MLDataset(object):
         if perc_per_class <= 0:
             warnings.warn('Zero percentage requested - returning an empty dataset!')
             return MLDataset()
-        elif perc_per_class >=1:
+        elif perc_per_class >= 1:
             warnings.warn('Full or a larger dataset requested - returning a copy!')
             return MLDataset(in_dataset=self)
 
@@ -246,6 +245,12 @@ class MLDataset(object):
         else:
             warnings.warn('Zero samples were selected. Returning an empty dataset!')
             return MLDataset()
+
+    def sample_ids_in_class(self, class_id):
+        "Returns a list of sample ids belonging to a given class."
+
+        subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
+        return subset_ids
 
     def get_subset(self, subset_ids):
         """Returns a smaller dataset identified by their keys/sample IDs."""
@@ -318,7 +323,7 @@ class MLDataset(object):
 
     @dtype.setter
     def dtype(self, type_val):
-        #TODO assert isinstance(type_val,type), TypeError('Invalid data type.')
+        # TODO assert isinstance(type_val,type), TypeError('Invalid data type.')
         self.__dtype = type_val
 
     @property
@@ -332,18 +337,29 @@ class MLDataset(object):
     @property
     def num_classes(self):
         """Total numver of classes in the dataset."""
-        return len(self.__label_set)
+        return len(self.class_set)
 
     @property
     def class_set(self):
         """Set of unique classes in the dataset."""
+
         return set(self.__classes.values())
+
+    @property
+    def label_set(self):
+        """Set of labels in the dataset corresponding to class_set."""
+        label_set = list()
+        for class_ in self.class_set:
+            samples_in_class = self.sample_ids_in_class(class_)
+            label_set.append(self.labels[samples_in_class[0]])
+
+        return label_set
 
     def add_classes(self, classes):
         """Helper to rename the classes, if provided by a dict keyed in by the orignal keys"""
-        assert isinstance(classes,dict), TypeError('Input classes is not a dict!')
+        assert isinstance(classes, dict), TypeError('Input classes is not a dict!')
         assert len(classes) == self.num_samples, ValueError('Too few items - need {} keys'.format(self.num_samples))
-        assert all([ key in self.keys for key in classes ]), ValueError('One or more unrecognized keys!')
+        assert all([key in self.keys for key in classes]), ValueError('One or more unrecognized keys!')
         self.__classes = classes
 
     def __len__(self):
@@ -380,7 +396,8 @@ class MLDataset(object):
     def __repr__(self):
         return self.__str__()
 
-    def __dir__(self):
+    @staticmethod
+    def __dir__():
         """Returns the preferred list of attributes to be used with the dataset."""
         return ['add_sample',
                 'glance',
@@ -388,7 +405,7 @@ class MLDataset(object):
                 'class_sizes',
                 'classes',
                 'data',
-                'data_matrix',
+                'data_and_labels',
                 'del_sample',
                 'description',
                 'extend',
@@ -397,21 +414,20 @@ class MLDataset(object):
                 'random_subset',
                 'get_feature_subset',
                 'keys',
-                'target',
                 'num_classes',
                 'num_features',
                 'num_samples',
                 'sample_ids',
                 'save',
-                'add_classes' ]
+                'add_classes']
 
     def __copy(self, other):
         """Copy constructor."""
-        self.__data         = copy.deepcopy(other.data)
-        self.__classes      = copy.deepcopy(other.classes)
-        self.__labels       = copy.deepcopy(other.labels)
-        self.__dtype        = copy.deepcopy(other.dtype)
-        self.__description  = copy.deepcopy(other.description)
+        self.__data = copy.deepcopy(other.data)
+        self.__classes = copy.deepcopy(other.classes)
+        self.__labels = copy.deepcopy(other.labels)
+        self.__dtype = copy.deepcopy(other.dtype)
+        self.__description = copy.deepcopy(other.description)
         self.__num_features = copy.deepcopy(other.num_features)
 
         return self
@@ -423,9 +439,13 @@ class MLDataset(object):
             with open(path, 'rb') as df:
                 # loaded_dataset = pickle.load(df)
                 self.__data, self.__classes, self.__labels, \
-                    self.__dtype, self.__description, self.__num_features = pickle.load(df)
+                self.__dtype, self.__description, self.__num_features = pickle.load(df)
+
+            # ensure the loaded dataset is valid
+            self.__validate(self.__data, self.__classes, self.__labels)
+
         except IOError as ioe:
-            raise IOError('Unable to read the dataset from file: {}',format(ioe))
+            raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
             raise
 
@@ -440,9 +460,26 @@ class MLDataset(object):
                             df)
             return
         except IOError as ioe:
-            raise IOError('Unable to read the dataset from file: {}',format(ioe))
+            raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
             raise
+
+    @staticmethod
+    def __validate(data, classes, labels):
+        "Validator of inputs."
+
+        assert isinstance(data, dict), 'data must be a dict! keys: sample ID or any unique identifier'
+        assert isinstance(labels, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
+        if classes is not None:
+            assert isinstance(classes, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
+
+        assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
+        assert set(data.keys()) == set(labels.keys()) == set(classes.keys()), 'data, classes and labels ' \
+                                                                              'dictionaries must have the same keys!'
+        num_features_in_elements = np.unique([len(sample) for sample in data.values()])
+        assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
+
+        return True
 
     def extend(self, other):
         """Method to extend the dataset vertically (add samples from  anotehr dataset)."""
@@ -452,12 +489,12 @@ class MLDataset(object):
             self.add_sample(sample, other.data[sample], other.labels[sample], other.classes[sample])
 
     def __add__(self, other):
-        assert isinstance(other,MLDataset), TypeError('Incorrect type of dataset provided!')
+        assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
             print 'Identical keys found. Trying to horizontally concatenate features for each sample.'
             assert self.__classes == other.classes, ValueError('Class identifiers per sample differ in the two '
-                                                                 'datasets!')
+                                                               'datasets!')
             assert other.num_features > 0, ValueError('No features to concatenate.')
             # making an empty dataset
             combined = MLDataset()
@@ -476,7 +513,6 @@ class MLDataset(object):
             return combined
         else:
             raise ArithmeticError('Two datasets could not be combined.')
-
 
     def __sub__(self, other):
         """Removing one dataset from another."""
