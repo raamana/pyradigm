@@ -61,7 +61,7 @@ class MLDataset(object):
 
         """
 
-        sample_ids = self.keys
+        sample_ids = np.array(self.keys)
         label_dict = self.labels
         matrix = np.full([self.num_samples, self.num_features], np.nan)
         labels = np.full([self.num_samples, 1], np.nan)
@@ -213,26 +213,25 @@ class MLDataset(object):
             return self.get_subset(subsets)
 
     # TODO test
-    def train_test_split_ids(self, train_perc = None, count_per_class = None, random_seed=409):
+    def train_test_split_ids(self, train_perc = None, count_per_class = None):
         "returns two separate datasets for use in repeated-hold out CV."
 
         if count_per_class is None and (train_perc>0.001 and train_perc<1):
-            train_set = self.random_subset_ids(perc_per_class=train_perc, random_seed=random_seed)
+            train_set = self.random_subset_ids(perc_per_class=train_perc)
         elif train_perc is None and (count_per_class>0 and count_per_class < self.num_samples):
-            train_set = self.random_subset_ids_by_count(count_per_class=count_per_class, random_seed=random_seed)
+            train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
         else:
-            raise ValueError('Invalid or out of range selection: only one of count or percentage can be used to select '
-                             'subset.')
+            raise ValueError('Invalid or out of range selection: '
+                             'only one of count or percentage can be used to select subset.')
 
-        test_set  = set(self.keys) - set(train_set)
+        test_set  = list(set(self.keys) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
             raise ValueError('Selection resulted in empty training or test set - check your dataset!')
 
         return train_set, test_set
 
-    # TODO test
-    def random_subset_ids_by_count(self, count_per_class=1, random_seed=374):
+    def random_subset_ids_by_count(self, count_per_class=1):
         """Returns a random subset of sample ids (of specified size by percentage) within each class."""
 
         class_sizes = self.class_sizes
@@ -246,7 +245,7 @@ class MLDataset(object):
             return self.keys
 
         # seeding the random number generator
-        random.seed(random_seed)
+        # random.seed(random_seed)
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
@@ -269,7 +268,7 @@ class MLDataset(object):
             warnings.warn('Zero samples were selected. Returning an empty list!')
             return list()
 
-    def random_subset_ids(self, perc_per_class=0.5, random_seed=143):
+    def random_subset_ids(self, perc_per_class=0.5):
         """Returns a random subset of sample ids (of specified size by percentage) within each class."""
 
         class_sizes = self.class_sizes
@@ -283,7 +282,7 @@ class MLDataset(object):
             return self.keys
 
         # seeding the random number generator
-        random.seed(random_seed)
+        # random.seed(random_seed)
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
@@ -291,7 +290,7 @@ class MLDataset(object):
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
             # calculating the requested number of samples
-            subset_size_this_class = int(round(class_size * perc_per_class))
+            subset_size_this_class = np.int64(np.floor(class_size * perc_per_class))
             # clipping the range to [0, n]
             subset_size_this_class = max(0, min(class_size, subset_size_this_class))
             if subset_size_this_class < 1 or this_class is None:
@@ -414,7 +413,7 @@ class MLDataset(object):
     def class_set(self):
         """Set of unique classes in the dataset."""
 
-        return set(self.__classes.values())
+        return list(set(self.__classes.values()))
 
     @property
     def label_set(self):
@@ -472,11 +471,16 @@ class MLDataset(object):
         """Returns the preferred list of attributes to be used with the dataset."""
         return ['add_sample',
                 'glance',
+                'summarize_classes',
+                'sample_ids_in_class',
+                'train_test_split_ids',
+                'random_subset_ids',
+                'random_subset_ids_by_count',
+                'classes',
                 'class_set',
                 'class_sizes',
-                'classes',
-                'data',
                 'data_and_labels',
+                'data',
                 'del_sample',
                 'description',
                 'extend',
@@ -531,7 +535,7 @@ class MLDataset(object):
                             df)
             return
         except IOError as ioe:
-            raise IOError('Unable to read the dataset from file: {}', format(ioe))
+            raise IOError('Unable to save the dataset to file: {}', format(ioe))
         except:
             raise
 
