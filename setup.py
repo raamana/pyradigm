@@ -12,9 +12,9 @@ def read(fname):
 
 setup(name='pyradigm',
       version='0.1',
-      description='Data structure to improve handling of datasets in machine learning workflows',
-      long_description=read('README'),
-      keywords='machine learning, test_dataset, python, workflow, provenance, data structure',
+      description='Python-based data structure to improve handling of datasets in machine learning workflows',
+      long_description=read('README.md'),
+      keywords='machine learning, test dataset, python, workflow, provenance, data structure',
       author='Pradeep Reddy Raamana',
       author_email='raamana@gmail.com',
       url='https://github.com/raamana/pyradigm',
