@@ -106,6 +106,7 @@ def test_train_test_split_ids_count():
         subset_train, subset_test = test_dataset.train_test_split_ids(count_per_class=count)
         assert len(subset_train) == num_classes*count
         assert len(subset_test) == test_dataset.num_samples-num_classes*count
+        assert len(set(subset_train).intersection(subset_test))==0
 
 def test_train_test_split_ids_perc():
 
@@ -114,4 +115,6 @@ def test_train_test_split_ids_perc():
         expected_train_size = sum(np.floor(class_sizes*perc))
         assert len(subset_train) == expected_train_size
         assert len(subset_test) == test_dataset.num_samples-expected_train_size
+        assert len(set(subset_train).intersection(subset_test))==0
+
 
