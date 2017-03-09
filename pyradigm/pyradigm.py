@@ -17,7 +17,7 @@ class MLDataset(object):
 
         if filepath is not None:
             if os.path.isfile(filepath):
-                print 'Loading the dataset from: {}'.format(filepath)
+                # print 'Loading the dataset from: {}'.format(filepath)
                 self.__load(filepath)
             else:
                 raise IOError('Specified file could not be read.')
