@@ -1,5 +1,5 @@
 import numpy as np
-from collections import Counter, OrderedDict
+from collections import Counter, OrderedDict, Sequence
 from itertools import ifilter, takewhile, islice
 import random
 import warnings
@@ -12,7 +12,9 @@ import copy
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
 
-    def __init__(self, filepath=None, in_dataset=None, data=None, labels=None, classes=None, description=''):
+    def __init__(self, filepath=None, in_dataset=None,
+                 data=None, labels=None, classes=None,
+                 description='', feature_names = None):
         """Default constructor. Suggested way to construct the dataset is via add_sample method."""
 
         if filepath is not None:
@@ -31,8 +33,10 @@ class MLDataset(object):
             self.__classes = OrderedDict()
             self.__num_features = 0
             self.__description = description
+            self.__feature_names = feature_names
         elif data is not None and labels is not None and classes is not None:
             # ensuring the inputs really correspond to each other
+            # but only in data, labels and classes, not feature names
             self.__validate(data, labels, classes)
 
             # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
@@ -41,6 +45,7 @@ class MLDataset(object):
             self.__classes = OrderedDict(classes)
             self.__dtype = type(data)
             self.__description = description
+            self.__feature_names = feature_names
 
             sample_ids = data.keys()
             self.__num_features = len(data[sample_ids[0]])
@@ -119,6 +124,21 @@ class MLDataset(object):
         else:
             raise ValueError('classes input must be a dictionary!')
 
+    # TODO test new functionality
+    @property
+    def feature_names(self):
+        "Returns the feature names as an numpy array of strings."
+
+        return self.__feature_names
+
+    @feature_names.setter
+    def feature_names(self, names):
+        "Stores the text labels for features"
+
+        assert len(names) == self.num_features, "Number of names do not match the number of features!"
+        assert isinstance(names, Sequence), "Input is not a sequence. Ensure names are in the same order and length as features."
+        self.__feature_names = np.array(names)
+
     @property
     def class_sizes(self):
         """Returns the sizes of different objects in a Counter object."""
@@ -186,7 +206,10 @@ class MLDataset(object):
 
         sub_data = {sample: features[subset_idx] for sample, features in self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
-        subdataset = MLDataset(data=sub_data, labels=self.__labels, classes=self.__classes, description=new_descr)
+        subdataset = MLDataset(data=sub_data,
+                               labels=self.__labels, classes=self.__classes,
+                               description=new_descr,
+                               feature_names= self.__feature_names[subset_idx])
 
         return subdataset
 
@@ -339,6 +362,7 @@ class MLDataset(object):
             subdataset = MLDataset(data=data, labels=labels, classes=classes)
             # Appending the history
             subdataset.description += '\n Subset derived from: ' + self.description
+            subdataset.feature_names = self.__feature_names
             return subdataset
         else:
             warnings.warn('subset of IDs requested do not exist in the dataset!')
@@ -484,6 +508,7 @@ class MLDataset(object):
                 'del_sample',
                 'description',
                 'extend',
+                'feature_names',
                 'get_class',
                 'get_subset',
                 'random_subset',
@@ -564,6 +589,8 @@ class MLDataset(object):
             self.add_sample(sample, other.data[sample], other.labels[sample], other.classes[sample])
 
     def __add__(self, other):
+        "Method to combine to MLDatasets, sample-wise or feature-wise."
+
         assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
