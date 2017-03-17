@@ -104,6 +104,8 @@ class MLDataset(object):
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError('number of samples do not match the previously assigned data')
+            elif set(self.keys) != set(values.keys()):
+                raise ValueError('sample ids do not match the previously assigned ids.')
             else:
                 self.__labels = values
         else:
@@ -195,8 +197,14 @@ class MLDataset(object):
                 self.__labels[sample_id] = label
                 self.__classes[sample_id] = class_id
                 if feature_names is not None:
-                    assert self.__feature_names == np.array(feature_names), \
-                        "supplied feature names do not match the existing names!"
+                    # if it was never set, allow it
+                    # class gets here when adding the first sample, after dataset was initialized with empty constructor
+                    if self.__feature_names is None:
+                        self.__feature_names = np.array(feature_names)
+                    else: # if set already, ensure a match
+                        print ''
+                        assert np.array_equal(self.feature_names, np.array(feature_names)), \
+                            "supplied feature names do not match the existing names!"
         else:
             raise ValueError('{} already exists in this dataset!'.format(sample_id))
 
@@ -248,7 +256,6 @@ class MLDataset(object):
         else:
             return self.get_subset(subsets)
 
-    # TODO test
     def train_test_split_ids(self, train_perc = None, count_per_class = None):
         "Returns two disjoint sets of sample ids for use in cross-validation."
 
@@ -315,10 +322,10 @@ class MLDataset(object):
         class_sizes = self.class_sizes
         subsets = list()
 
-        if perc_per_class <= 0:
+        if perc_per_class <= 0.0:
             warnings.warn('Zero percentage requested - returning an empty dataset!')
             return list()
-        elif perc_per_class >= 1:
+        elif perc_per_class >= 1.0:
             warnings.warn('Full or a larger dataset requested - returning a copy!')
             return self.keys
 
