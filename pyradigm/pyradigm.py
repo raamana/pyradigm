@@ -32,8 +32,8 @@ class MLDataset(object):
             self.__labels = OrderedDict()
             self.__classes = OrderedDict()
             self.__num_features = 0
-            self.__description = description
-            self.__feature_names = feature_names
+            self.__description = ''
+            self.__feature_names = None
         elif data is not None and labels is not None and classes is not None:
             # ensuring the inputs really correspond to each other
             # but only in data, labels and classes, not feature names
@@ -45,10 +45,13 @@ class MLDataset(object):
             self.__classes = OrderedDict(classes)
             self.__dtype = type(data)
             self.__description = description
-            self.__feature_names = feature_names
-
             sample_ids = data.keys()
             self.__num_features = len(data[sample_ids[0]])
+            # assigning default names for each feature
+            if feature_names is None:
+                self.__feature_names = self.__str_names(self.num_features)
+            else:
+                self.__feature_names = feature_names
 
         else:
             raise ValueError('Incorrect way to construct the dataset.')
@@ -136,7 +139,7 @@ class MLDataset(object):
         "Stores the text labels for features"
 
         assert len(names) == self.num_features, "Number of names do not match the number of features!"
-        assert isinstance(names, Sequence), "Input is not a sequence. Ensure names are in the same order and length as features."
+        assert isinstance(names, (Sequence, np.ndarray, np.generic)), "Input is not a sequence. Ensure names are in the same order and length as features."
         self.__feature_names = np.array(names)
 
     @property
@@ -148,6 +151,11 @@ class MLDataset(object):
     def __take(nitems, iterable):
         """Return first n items of the iterable as a list"""
         return dict(islice(iterable, nitems))
+
+    @staticmethod
+    def __str_names(num):
+
+        return np.array(['f{}'.format(x) for x in range(num)])
 
     def glance(self, nitems=5):
         """Quick and partial glance of the data matrix."""
@@ -164,7 +172,7 @@ class MLDataset(object):
         return self.class_set, self.label_set, class_sizes
 
     # TODO try implementing based on pandas
-    def add_sample(self, sample_id, features, label, class_id=None):
+    def add_sample(self, sample_id, features, label, class_id=None, feature_names=None):
         """Adds a new sample to the dataset with its features, label and class ID.
         This is the preferred way to construct the dataset."""
         if sample_id not in self.__data:
@@ -174,6 +182,8 @@ class MLDataset(object):
                 self.__classes[sample_id] = class_id
                 self.__dtype = type(features)
                 self.__num_features = len(features)
+                if feature_names is None:
+                    self.__feature_names = self.__str_names(self.num_features)
             else:
                 assert self.__num_features == len(features), \
                     ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
@@ -184,6 +194,9 @@ class MLDataset(object):
                 self.__data[sample_id] = features
                 self.__labels[sample_id] = label
                 self.__classes[sample_id] = class_id
+                if feature_names is not None:
+                    assert self.__feature_names == np.array(feature_names), \
+                        "supplied feature names do not match the existing names!"
         else:
             raise ValueError('{} already exists in this dataset!'.format(sample_id))
 
@@ -237,7 +250,12 @@ class MLDataset(object):
 
     # TODO test
     def train_test_split_ids(self, train_perc = None, count_per_class = None):
-        "returns two separate datasets for use in repeated-hold out CV."
+        "Returns two disjoint sets of sample ids for use in cross-validation."
+
+        _, _, class_sizes = self.summarize_classes()
+        smallest_class_size = np.min(class_sizes)
+        if train_perc <= 1.0 / smallest_class_size:
+            warnings.warn('Training percentage selected too low to return even one sample from the smallest class!')
 
         if count_per_class is None and (train_perc>0.001 and train_perc<1):
             train_set = self.random_subset_ids(perc_per_class=train_perc)
@@ -250,7 +268,7 @@ class MLDataset(object):
         test_set  = list(set(self.keys) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
-            raise ValueError('Selection resulted in empty training or test set - check your dataset!')
+            raise ValueError('Selection resulted in empty training or test set - check your selections or dataset!')
 
         return train_set, test_set
 
@@ -539,7 +557,8 @@ class MLDataset(object):
             with open(path, 'rb') as df:
                 # loaded_dataset = pickle.load(df)
                 self.__data, self.__classes, self.__labels, \
-                self.__dtype, self.__description, self.__num_features = pickle.load(df)
+                self.__dtype, self.__description, \
+                self.__num_features, self.__feature_names = pickle.load(df)
 
             # ensure the loaded dataset is valid
             self.__validate(self.__data, self.__classes, self.__labels)
@@ -556,7 +575,8 @@ class MLDataset(object):
             with open(path, 'wb') as df:
                 # pickle.dump(self, df)
                 pickle.dump((self.__data, self.__classes, self.__labels,
-                             self.__dtype, self.__description, self.__num_features),
+                             self.__dtype, self.__description, self.__num_features,
+                             self.__feature_names),
                             df)
             return
         except IOError as ioe:
