@@ -7,7 +7,6 @@ import os
 import cPickle as pickle
 import copy
 
-
 # TODO profile the class for different scales of samples and features
 class MLDataset(object):
     """Class defining a ML dataset that helps maintain integrity and ease of access."""
@@ -23,8 +22,11 @@ class MLDataset(object):
                 self.__load(filepath)
             else:
                 raise IOError('Specified file could not be read.')
-        elif in_dataset is not None and isinstance(in_dataset, MLDataset):
-            assert in_dataset.num_samples > 0, ValueError('Dataset to copy is empty.')
+        elif in_dataset is not None:
+            if not isinstance(in_dataset, MLDataset):
+                raise ValueError('Invalid class input: MLDataset expected!')
+            if in_dataset.num_samples <= 0:
+                raise ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
             # TODO refactor the code to use only basic dict, as it allows for better equality comparisons
@@ -187,11 +189,11 @@ class MLDataset(object):
                 if feature_names is None:
                     self.__feature_names = self.__str_names(self.num_features)
             else:
-                assert self.__num_features == len(features), \
-                    ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
+                if self.__num_features != len(features):
+                    raise ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
                         len(features), self.__num_features))
-                assert isinstance(features, self.__dtype), TypeError(
-                    "Mismatched dtype. Provide {}".format(self.__dtype))
+                if not isinstance(features, self.__dtype):
+                    raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
                 self.__data[sample_id] = features
                 self.__labels[sample_id] = label
@@ -339,11 +341,11 @@ class MLDataset(object):
             random.shuffle(this_class)
             # calculating the requested number of samples
             subset_size_this_class = np.int64(np.floor(class_size * perc_per_class))
-            # clipping the range to [0, n]
-            subset_size_this_class = max(0, min(class_size, subset_size_this_class))
-            if subset_size_this_class < 1 or this_class is None:
+            # clipping the range to [1, n]
+            subset_size_this_class = max(1, min(class_size, subset_size_this_class))
+            if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
                 # warning if none were selected
-                warnings.warn('No subjects from class {} were selected.'.format(class_id))
+                raise ValueError('No subjects from class {} were selected.'.format(class_id))
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -428,7 +430,7 @@ class MLDataset(object):
     @property
     def num_features(self):
         """number of features in each sample."""
-        return self.__num_features
+        return np.int64(self.__num_features)
 
     @num_features.setter
     def num_features(self, int_val):
@@ -553,6 +555,7 @@ class MLDataset(object):
         self.__labels = copy.deepcopy(other.labels)
         self.__dtype = copy.deepcopy(other.dtype)
         self.__description = copy.deepcopy(other.description)
+        self.__feature_names = copy.deepcopy(other.feature_names)
         self.__num_features = copy.deepcopy(other.num_features)
 
         return self
