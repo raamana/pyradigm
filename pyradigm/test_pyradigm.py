@@ -4,7 +4,7 @@ import numpy as np
 
 from pyradigm import MLDataset
 
-out_dir  = '/Users/Reddy/opensource/neuropredict/test_MLdatasets'
+out_dir  = '.' # '/Users/Reddy/rotman/neuropredict/test_MLdatasets'
 for ii in range(1):
     num_classes = np.random.randint(2, 150, 1)
     class_set = [ chr(x+65)+str(x) for x in range(num_classes)]
@@ -18,7 +18,7 @@ for ii in range(1):
             feat = np.random.random(num_features)
             test_dataset.add_sample(subj_id, feat, class_index, class_id)
 
-    out_file = os.path.join(out_dir,'random_example_dataset{}.pkl'.format(ii))
+    out_file = os.path.join(out_dir,'random_dataset{}.pkl'.format(ii))
     test_dataset.save(out_file)
 
 class_set, label_set, class_sizes = test_dataset.summarize_classes()
@@ -27,10 +27,9 @@ reloaded_dataset = MLDataset(filepath=out_file, description='reloaded test_datas
 
 copy_dataset = MLDataset(in_dataset=test_dataset)
 
-rand_index = np.random.randint(0,len(class_set),1)[0]
-random_class_name = class_set[rand_index]
-random_class = test_dataset.get_class(random_class_name)
-other_classes = test_dataset - random_class
+class1_name = class_set[1]
+class1 = test_dataset.get_class(class1_name)
+other_classes = test_dataset - class1
 
 empty_dataset = MLDataset()
 
@@ -62,23 +61,23 @@ def test_num_features():
 
 
 def test_substract():
-    assert other_classes.num_samples == sum(class_sizes) - class_sizes[rand_index]
+    assert other_classes.num_samples == sum(class_sizes) - class_sizes[1]
 
 
 def test_add():
-    a = other_classes + random_class
+    a = other_classes + class1
     n = a.num_samples
     n1 = other_classes.num_samples
-    n2 = random_class.num_samples
+    n2 = class1.num_samples
     assert n1 + n2 == n
 
 
 def test_subset_class():
-    assert random_class.num_samples == class_sizes[rand_index]
+    assert class1.num_samples == class_sizes[1]
 
 
 def test_get_subset():
-    assert random_class == reloaded_dataset.get_class(random_class_name)
+    assert class1 == reloaded_dataset.get_class(class1_name)
 
 
 def test_glance():
@@ -117,4 +116,5 @@ def test_train_test_split_ids_perc():
         assert len(subset_train) == expected_train_size
         assert len(subset_test) == test_dataset.num_samples-expected_train_size
         assert len(set(subset_train).intersection(subset_test))==0
+
 
