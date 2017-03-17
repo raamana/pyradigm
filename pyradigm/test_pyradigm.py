@@ -4,7 +4,7 @@ import numpy as np
 
 from pyradigm import MLDataset
 
-out_dir  = '/Users/Reddy/rotman/neuropredict/test_MLdatasets'
+out_dir  = '.' # '/Users/Reddy/rotman/neuropredict/test_MLdatasets'
 for ii in range(1):
     num_classes = np.random.randint(2, 150, 1)
     class_set = [ chr(x+65)+str(x) for x in range(num_classes)]
