@@ -250,11 +250,10 @@ class MLDataset(object):
                 subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] in class_id]
                 subsets.extend(subsets_this_class)
             else:
-                warnings.warn('Requested class: {} does not exist in this dataset.'.format(class_id))
+                raise ValueError('Requested class: {} does not exist in this dataset.'.format(class_id))
 
         if len(subsets) < 1:
-            warnings.warn("Given class[es] do not belong the dataset")
-            return None
+            raise ValueError("Given class[es] do not belong the dataset")
         else:
             return self.get_subset(subsets)
 
@@ -263,8 +262,8 @@ class MLDataset(object):
 
         _, _, class_sizes = self.summarize_classes()
         smallest_class_size = np.min(class_sizes)
-        if train_perc <= 1.0 / smallest_class_size:
-            warnings.warn('Training percentage selected too low to return even one sample from the smallest class!')
+        if train_perc < 1.0 / smallest_class_size:
+            raise ValueError('Training percentage selected too low to return even one sample from the smallest class!')
 
         if count_per_class is None and (train_perc>0.001 and train_perc<1):
             train_set = self.random_subset_ids(perc_per_class=train_perc)
@@ -497,7 +496,8 @@ class MLDataset(object):
         full_descr = list()
         full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samples and {} features.'.format(self.num_samples, self.num_features))
+            full_descr.append('{} samples, {} classes, {} features.'.format(
+                self.num_samples, self.num_classes, self.num_features))
             class_ids = self.class_sizes.keys()
             max_width = max([len(cls) for cls in class_ids])
             for cls in class_ids:
@@ -652,7 +652,7 @@ class MLDataset(object):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn('None of the keys in the dataset to be removed found in this dataset - nothing to do.')
+            warnings.warn('None of the sample ids to be removed found in this dataset - nothing to do.')
         if len(self.keys) == num_existing_keys:
             warnings.warn('Requested removal of all the samples - output dataset would be empty.')
 
