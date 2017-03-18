@@ -142,8 +142,11 @@ class MLDataset(object):
     def feature_names(self, names):
         "Stores the text labels for features"
 
-        assert len(names) == self.num_features, "Number of names do not match the number of features!"
-        assert isinstance(names, (Sequence, np.ndarray, np.generic)), "Input is not a sequence. Ensure names are in the same order and length as features."
+        if len(names) != self.num_features:
+            raise ValueError("Number of names do not match the number of features!")
+        if not isinstance(names, (Sequence, np.ndarray, np.generic)):
+            raise ValueError("Input is not a sequence. Ensure names are in the same order and length as features.")
+
         self.__feature_names = np.array(names)
 
     @property
@@ -244,30 +247,32 @@ class MLDataset(object):
         else:
             class_ids = class_id
 
+        non_existent = set(self.class_set).intersection(set(class_ids))
+        if len(non_existent)<1:
+            raise ValueError('These classes {} do not exist in this dataset.'.format(non_existent))
+
         subsets = list()
         for class_id in class_ids:
-            if class_id in self.class_set:
-                subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] in class_id]
-                subsets.extend(subsets_this_class)
-            else:
-                raise ValueError('Requested class: {} does not exist in this dataset.'.format(class_id))
+            subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] in class_id]
+            subsets.extend(subsets_this_class)
 
-        if len(subsets) < 1:
-            raise ValueError("Given class[es] do not belong the dataset")
-        else:
-            return self.get_subset(subsets)
+        return self.get_subset(subsets)
 
     def train_test_split_ids(self, train_perc = None, count_per_class = None):
         "Returns two disjoint sets of sample ids for use in cross-validation."
 
         _, _, class_sizes = self.summarize_classes()
         smallest_class_size = np.min(class_sizes)
-        if train_perc < 1.0 / smallest_class_size:
-            raise ValueError('Training percentage selected too low to return even one sample from the smallest class!')
 
-        if count_per_class is None and (train_perc>0.001 and train_perc<1):
+        if count_per_class is None and (train_perc>0.0 and train_perc<1.0):
+            if train_perc < 1.0 / smallest_class_size:
+                raise ValueError('Training percentage selected too low '
+                                 'to return even one sample from the smallest class!')
             train_set = self.random_subset_ids(perc_per_class=train_perc)
-        elif train_perc is None and (count_per_class>0 and count_per_class < self.num_samples):
+        elif train_perc is None and count_per_class>0:
+            if count_per_class >= smallest_class_size:
+                raise ValueError('Selections would exclude the smallest class from test set. '
+                                 'Reduce sample count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
         else:
             raise ValueError('Invalid or out of range selection: '
@@ -433,8 +438,10 @@ class MLDataset(object):
 
     @num_features.setter
     def num_features(self, int_val):
-        assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
-        self.__num_features = int_val
+        "Method that should nor exist!"
+        raise AttributeError("num_features property can't be set, only retrieved!")
+        # assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
+        # self.__num_features = int_val
 
     @property
     def dtype(self):

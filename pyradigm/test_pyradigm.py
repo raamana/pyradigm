@@ -58,11 +58,12 @@ def test_num_classes():
 def test_num_features():
     assert test_dataset.num_features == num_features
 
+def test_num_features_setter():
+    with raises(AttributeError):
+        test_dataset.num_features == 0
+
 def test_num_samples():
     assert test_dataset.num_samples == sum(class_sizes)
-
-def test_num_features():
-    assert test_dataset.num_features == num_features
 
 def test_substract():
     assert other_classes_ds.num_samples == sum(class_sizes) - class_sizes[rand_index]
@@ -119,6 +120,10 @@ def test_labels_setter():
     with raises(ValueError):
         test_dataset.labels = same_len_diff_key
 
+    # must be dict
+    with raises(ValueError):
+        test_dataset.labels = None
+
 def test_classes_setter():
     fewer_classes = test_dataset.classes
     fewer_classes.pop(fewer_classes.keys()[0])
@@ -130,6 +135,16 @@ def test_classes_setter():
     same_len_diff_key['sldiursvdkvjs'] = 'lfjd'
     with raises(ValueError):
         test_dataset.classes = same_len_diff_key
+
+def test_feat_names_setter():
+
+    # fewer
+    with raises(ValueError):
+        test_dataset.feature_names = feat_names[0:test_dataset.num_features-2]
+
+    # too many
+    with raises(ValueError):
+        test_dataset.feature_names = np.append(feat_names, 'blahblah')
 
 def test_add_existing_id():
     sid = test_dataset.sample_ids[0]
@@ -163,7 +178,6 @@ def test_rand_feat_subset():
 def test_eq_self():
     assert test_dataset == test_dataset
 
-
 def test_eq_copy():
     new_copy = MLDataset(in_dataset=copy_dataset)
     assert new_copy == copy_dataset
@@ -186,19 +200,23 @@ def test_get_subset():
         test_dataset.get_subset(nonexisting_id)
 
 def test_membership():
-    member = test_dataset.sample_ids[0]
+    rand_idx = np.random.randint(0, test_dataset.num_samples)
+    member = test_dataset.sample_ids[rand_idx]
     not_member = u'sdfdkshfdsk34823058wdkfhd83hifnalwe8fh8t'
     assert member in test_dataset
     assert not_member not in test_dataset
 
+def rand_ints_range(n, k):
+    return np.random.random_integers(1, n, min(n, k))
+
 def test_glance():
-    for k in range(1, test_dataset.num_samples, 2):
+    for k in np.random.randint(1, test_dataset.num_samples, 10):
         glanced_subset = test_dataset.glance(k)
         assert len(glanced_subset) == k
 
 
 def test_random_subset():
-    for perc in np.arange(0.1, 1, 0.1):
+    for perc in np.arange(0.1, 1, 0.2):
         subset = copy_dataset.random_subset(perc_in_class=perc)
         # separating the calculation by class to mimic the implementation in the class
         expected_size = sum([np.int64(np.floor(n_in_class*perc)) for n_in_class in class_sizes])
@@ -207,31 +225,31 @@ def test_random_subset():
 def test_random_subset_by_count():
 
     smallest_size = min(class_sizes)
-    for count in range(1,int(smallest_size)):
+    for count in np.random.randint(1, smallest_size, 10):
         subset = copy_dataset.random_subset_ids_by_count(count_per_class=count)
         assert len(subset) == num_classes*count
 
 def test_train_test_split_ids_count():
     smallest_size = min(class_sizes)
-    for count in range(1, int(smallest_size)):
+    for count in np.random.randint(1, smallest_size, 10):
         subset_train, subset_test = copy_dataset.train_test_split_ids(count_per_class=count)
         assert len(subset_train) == num_classes*count
         assert len(subset_test ) == copy_dataset.num_samples-num_classes*count
         assert len(set(subset_train).intersection(subset_test))==0
 
-    with warns(UserWarning):
+    with raises(ValueError):
         copy_dataset.train_test_split_ids(count_per_class=-1)
 
-    with warns(UserWarning):
+    with raises(ValueError):
         copy_dataset.train_test_split_ids(count_per_class=copy_dataset.num_samples+1.0)
 
-    with warns(UserWarning):
+    with raises(ValueError):
         # both cant be specified at the same time
         copy_dataset.train_test_split_ids(count_per_class=2, train_perc=0.5)
 
 def test_train_test_split_ids_perc():
 
-    for perc in np.arange(0.2, 0.9, 0.1):
+    for perc in np.arange(0.25, 1.0, 0.1):
         subset_train, subset_test = copy_dataset.train_test_split_ids(train_perc=perc)
         expected_train_size = sum(np.floor(class_sizes*perc))
         assert len(subset_train) == expected_train_size
@@ -239,9 +257,10 @@ def test_train_test_split_ids_perc():
         assert len(set(subset_train).intersection(subset_test))==0
 
     with raises(ValueError):
+        subset_train, subset_test = copy_dataset.train_test_split_ids(train_perc=0.00001)
+
+    with raises(ValueError):
         copy_dataset.train_test_split_ids(train_perc=1.1)
 
     with raises(ValueError):
         copy_dataset.train_test_split_ids(train_perc=-1)
-
-test_substract()
