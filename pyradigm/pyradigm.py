@@ -34,6 +34,7 @@ class MLDataset(object):
             self.__labels = OrderedDict()
             self.__classes = OrderedDict()
             self.__num_features = 0
+            self.__dtype = None
             self.__description = ''
             self.__feature_names = None
         elif data is not None and labels is not None and classes is not None:
@@ -45,10 +46,12 @@ class MLDataset(object):
             self.__data = OrderedDict(data)
             self.__labels = OrderedDict(labels)
             self.__classes = OrderedDict(classes)
-            self.__dtype = type(data)
             self.__description = description
+
             sample_ids = data.keys()
             self.__num_features = len(data[sample_ids[0]])
+            self.__dtype = type(data[sample_ids[0]])
+
             # assigning default names for each feature
             if feature_names is None:
                 self.__feature_names = self.__str_names(self.num_features)
@@ -394,6 +397,7 @@ class MLDataset(object):
             # Appending the history
             subdataset.description += '\n Subset derived from: ' + self.description
             subdataset.feature_names = self.__feature_names
+            subdataset.__dtype = self.dtype
             return subdataset
         else:
             warnings.warn('subset of IDs requested do not exist in the dataset!')
@@ -450,8 +454,11 @@ class MLDataset(object):
 
     @dtype.setter
     def dtype(self, type_val):
-        # TODO assert isinstance(type_val,type), TypeError('Invalid data type.')
-        self.__dtype = type_val
+        if self.__dtype is None:
+            assert isinstance(type_val,type), TypeError('Invalid data type.')
+            self.__dtype = type_val
+        else:
+            warnings.warn('Data type is already inferred. Can not be set!')
 
     @property
     def num_samples(self):
