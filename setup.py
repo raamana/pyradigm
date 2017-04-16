@@ -8,7 +8,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='pyradigm',
-      version='0.3',
+      version='0.3.0.2',
       description='Python-based data structure to improve handling of datasets in machine learning workflows',
       long_description=read('README.md'),
       keywords='machine learning, test dataset, python, workflow, provenance, data structure',

@@ -242,6 +242,14 @@ class MLDataset(object):
 
         return subdataset
 
+    @staticmethod
+    def keys_with_value(dictionary, value):
+        "Returns a subset of keys from the dict with the value supplied."
+
+        subset = [key for key in dictionary if dictionary[key] == value]
+
+        return subset
+
     def get_class(self, class_id):
         """Returns a smaller dataset belonging to the requested classes. """
         assert class_id not in [None, ''], "class id can not be empty or None."
@@ -256,7 +264,8 @@ class MLDataset(object):
 
         subsets = list()
         for class_id in class_ids:
-            subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] in class_id]
+            # subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] == class_id]
+            subsets_this_class = self.keys_with_value(self.__classes, class_id)
             subsets.extend(subsets_this_class)
 
         return self.get_subset(subsets)
@@ -306,7 +315,8 @@ class MLDataset(object):
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
-            this_class = [sample for sample in self.classes if self.classes[sample] in class_id]
+            # this_class = [sample for sample in self.classes if self.classes[sample] == class_id]
+            this_class = self.keys_with_value(self.classes, class_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
 
@@ -343,7 +353,8 @@ class MLDataset(object):
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
-            this_class = [sample for sample in self.classes if self.classes[sample] in class_id]
+            # this_class = [sample for sample in self.classes if self.classes[sample] == class_id]
+            this_class = self.keys_with_value(self.classes, class_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
             # calculating the requested number of samples
@@ -376,7 +387,8 @@ class MLDataset(object):
     def sample_ids_in_class(self, class_id):
         "Returns a list of sample ids belonging to a given class."
 
-        subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
+        # subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
+        subset_ids = self.keys_with_value(self.classes, class_id)
         return subset_ids
 
     def get_subset(self, subset_ids):
