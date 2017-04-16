@@ -60,7 +60,7 @@ def test_num_features():
 
 def test_num_features_setter():
     with raises(AttributeError):
-        test_dataset.num_features == 0
+        test_dataset.num_features = 0
 
 def test_num_samples():
     assert test_dataset.num_samples == sum(class_sizes)
@@ -225,13 +225,13 @@ def test_random_subset():
 def test_random_subset_by_count():
 
     smallest_size = min(class_sizes)
-    for count in np.random.randint(1, smallest_size, 10):
+    for count in np.random.randint(1, smallest_size, 7):
         subset = copy_dataset.random_subset_ids_by_count(count_per_class=count)
         assert len(subset) == num_classes*count
 
 def test_train_test_split_ids_count():
     smallest_size = min(class_sizes)
-    for count in np.random.randint(1, smallest_size, 10):
+    for count in np.random.randint(1, smallest_size, 7):
         subset_train, subset_test = copy_dataset.train_test_split_ids(count_per_class=count)
         assert len(subset_train) == num_classes*count
         assert len(subset_test ) == copy_dataset.num_samples-num_classes*count
