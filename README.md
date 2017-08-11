@@ -17,3 +17,8 @@ Thanks for checking out. Your feedback will be appreciated.
 
 This [Pyradigm Example](PyradigmExample.ipynb) notebook illustrates the usage.
 
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/raamana/pyradigm/badge.svg?style=beer-square)](https://beerpay.io/raamana/pyradigm)  [![Beerpay](https://beerpay.io/raamana/pyradigm/make-wish.svg?style=flat-square)](https://beerpay.io/raamana/pyradigm?focus=wish)
