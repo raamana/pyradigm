@@ -134,7 +134,6 @@ class MLDataset(object):
         else:
             raise ValueError('classes input must be a dictionary!')
 
-    # TODO test new functionality
     @property
     def feature_names(self):
         "Returns the feature names as an numpy array of strings."
