@@ -415,11 +415,8 @@ class MLDataset(object):
             return MLDataset()
 
     def __contains__(self, item):
-        "Boolean test of membership of a sample in the dataset."
-        if item in self.keys:
-            return True
-        else:
-            return False
+        """Boolean test of membership of a sample in the dataset."""
+        return item in self.keys
 
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
