@@ -18,6 +18,10 @@ Thanks for checking out. Your feedback will be appreciated.
 
 This [Pyradigm Example](PyradigmExample.ipynb) notebook illustrates the usage.
 
+## Requirements
+
+ * Packages: `numpy`
+ * Python versions: I plan to support all the popular versions soon. Only 2.7 is tested for support at the moment.
 
 ## Support on Beerpay
 Hey dude! Help me out for a couple of :beers:!
