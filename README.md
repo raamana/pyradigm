@@ -1,5 +1,6 @@
 # Pyradigm: PYthon based data structure to improve Dataset's InteGrity in Machine learning workflows
 
+[![status](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2/status.svg)](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2)
 [![travis](https://travis-ci.org/raamana/pyradigm.svg?branch=master)](https://travis-ci.org/raamana/pyradigm.svg?branch=master)
 [![Code Health](https://landscape.io/github/raamana/pyradigm/master/landscape.svg?style=flat)](https://landscape.io/github/raamana/pyradigm/master)
 [![PyPI version](https://badge.fury.io/py/pyradigm.svg)](https://badge.fury.io/py/pyradigm)
