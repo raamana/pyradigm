@@ -1,10 +1,10 @@
 import numpy as np
 from collections import Counter, OrderedDict, Sequence
-from itertools import ifilter, takewhile, islice
+from itertools import takewhile, islice
 import random
 import warnings
 import os
-import cPickle as pickle
+import pickle
 import copy
 
 # TODO profile the class for different scales of samples and features
@@ -18,7 +18,7 @@ class MLDataset(object):
 
         if filepath is not None:
             if os.path.isfile(filepath):
-                # print 'Loading the dataset from: {}'.format(filepath)
+                # print('Loading the dataset from: {}'.format(filepath))
                 self.__load(filepath)
             else:
                 raise IOError('Specified file could not be read.')
@@ -209,7 +209,7 @@ class MLDataset(object):
                     if self.__feature_names is None:
                         self.__feature_names = np.array(feature_names)
                     else: # if set already, ensure a match
-                        print ''
+                        print('')
                         assert np.array_equal(self.feature_names, np.array(feature_names)), \
                             "supplied feature names do not match the existing names!"
         else:
@@ -223,7 +223,7 @@ class MLDataset(object):
             self.__data.pop(sample_id)
             self.__classes.pop(sample_id)
             self.__labels.pop(sample_id)
-            print '{} removed.'.format(sample_id)
+            print('{} removed.'.format(sample_id))
 
     def get_feature_subset(self, subset_idx):
         """Returns the subset of features indexed numerically. """
@@ -649,7 +649,7 @@ class MLDataset(object):
         assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
-            print 'Identical keys found. Trying to horizontally concatenate features for each sample.'
+            print('Identical keys found. Trying to horizontally concatenate features for each sample.')
             assert self.__classes == other.classes, ValueError('Class identifiers per sample differ in the two '
                                                                'datasets!')
             assert other.num_features > 0, ValueError('No features to concatenate.')
@@ -698,15 +698,15 @@ class MLDataset(object):
     def __eq__(self, other):
         """Equality of two datasets in samples and their values."""
         if set(self.keys) != set(other.keys):
-            print 'differing sample ids.'
+            print('differing sample ids.')
             return False
         elif dict(self.__classes) != dict(other.classes):
-            print 'differing classes for the sample ids.'
+            print('differing classes for the sample ids.')
             return False
         elif id(self.__data) != id(other.data):
             for key in self.keys:
                 if not np.all(self.data[key] == other.data[key]):
-                    print 'differing data for the sample ids.'
+                    print('differing data for the sample ids.')
                     return False
             return True
         else:

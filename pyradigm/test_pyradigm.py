@@ -1,12 +1,18 @@
-import tempfile
 import os, sys
 import numpy as np
 
 sys.dont_write_bytecode = True
 
-from pytest import raises, warns, set_trace
+from pytest import raises, warns
 
-from pyradigm import MLDataset
+from sys import version_info
+
+if version_info.major==2 and version_info.minor==7 and version_info.micro==13:
+    from pyradigm import MLDataset
+elif version_info.major > 2:
+    from pyradigm.pyradigm import MLDataset
+else:
+    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
 
 out_dir  = '.'
 
