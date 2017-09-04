@@ -585,7 +585,7 @@ class MLDataset(object):
 
         return self
 
-    def __load(self, path):
+    def __load(self, path, **kwargs):
         """Method to load the serialized dataset from disk."""
         try:
             path = os.path.abspath(path)
@@ -593,7 +593,7 @@ class MLDataset(object):
                 # loaded_dataset = pickle.load(df)
                 self.__data, self.__classes, self.__labels, \
                 self.__dtype, self.__description, \
-                self.__num_features, self.__feature_names = pickle.load(df)
+                self.__num_features, self.__feature_names = pickle.load(df, **kwargs)
 
             # ensure the loaded dataset is valid
             self.__validate(self.__data, self.__classes, self.__labels)
