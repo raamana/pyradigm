@@ -9,9 +9,14 @@ authors:
  - name: Pradeep Reddy Raamana
    orcid: 0000-0003-4662-0558
    affiliation: 1
+ - name: Stephen C. Strother
+   orcid: 0000-0002-3198-217X
+   affiliation: 1, 2
 affiliations:
  - name: Rotman Research Institute, Baycrest Health Sciences, Toronto, ON, Canada
    index: 1
+ - name: Department of Medical Biophysics, University of Toronto, Toronto, ON, Canada
+   index: 2
 date: 24 August 2017
 bibliography: paper.bib
 ---
