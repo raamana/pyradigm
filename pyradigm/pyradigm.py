@@ -72,6 +72,15 @@ class MLDataset(object):
 
         Also returns sample_ids in the same order.
 
+        Returns
+        -------
+        data_matrix : ndarray
+            2D array of shape [num_samples, num_features] with features  corresponding row-wise to sample_ids
+        labels : ndarray
+            Array of numeric labels for each sample corresponding row-wise to sample_ids
+        sample_ids : list
+            List of sample ids
+
         """
 
         sample_ids = np.array(self.keys)
@@ -167,12 +176,38 @@ class MLDataset(object):
         return np.array(['f{}'.format(x) for x in range(num)])
 
     def glance(self, nitems=5):
-        """Quick and partial glance of the data matrix."""
+        """Quick and partial glance of the data matrix.
+
+        Parameters
+        ----------
+        nitems : int
+            Number of items to glance from the dataset.
+            Default : 5
+
+        Returns
+        -------
+        dict
+
+        """
         nitems = max([1, min([nitems, self.num_samples-1])])
         return self.__take(nitems, iter(self.__data.items()))
 
     def summarize_classes(self):
-        "Summary of classes: names, numeric labels and sizes"
+        """
+        Summary of classes: names, numeric labels and sizes
+
+        Returns
+        -------
+        tuple : class_set, label_set, class_sizes
+
+        class_set : list
+            List of names of all the classes
+        label_set : list
+            Label for each class in class_set
+        class_sizes : list
+            Size of each class (number of samples)
+
+        """
 
         class_sizes = np.zeros(len(self.class_set))
         for idx, cls in enumerate(self.class_set):
@@ -182,8 +217,35 @@ class MLDataset(object):
 
     # TODO try implementing based on pandas
     def add_sample(self, sample_id, features, label, class_id=None, feature_names=None):
-        """Adds a new sample to the dataset with its features, label and class ID.
-        This is the preferred way to construct the dataset."""
+        """
+        Adds a new sample to the dataset with its features, label and class ID.
+
+        This is the preferred way to construct the dataset.
+
+        Parameters
+        ----------
+        sample_id : str, int
+            The identifier that uniquely identifies this sample.
+        features : list, ndarray
+            The features for this sample
+        label : int, str
+            The label for this sample
+        class_id : int, str
+            The class for this sample
+        feature_names : list
+            The names for each feature. Assumed to be in the same order as `features`
+
+        Raises
+        ------
+        ValueError
+            If `sample_id` is already in the MLDataset, or
+            If dimensionality of the current sample does not match the current, or
+            If `feature_names` do not match existing names
+        TypeError
+            If sample to be added is of different data type compared to existing samples.
+
+        """
+
         if sample_id not in self.__data:
             if self.num_samples <= 0:
                 self.__data[sample_id] = features
@@ -210,13 +272,26 @@ class MLDataset(object):
                         self.__feature_names = np.array(feature_names)
                     else: # if set already, ensure a match
                         print('')
-                        assert np.array_equal(self.feature_names, np.array(feature_names)), \
-                            "supplied feature names do not match the existing names!"
+                        if not np.array_equal(self.feature_names, np.array(feature_names)):
+                            raise ValueError("supplied feature names do not match the existing names!")
         else:
             raise ValueError('{} already exists in this dataset!'.format(sample_id))
 
     def del_sample(self, sample_id):
-        """Method remove a sample from the dataset."""
+        """
+        Method remove a sample from the dataset.
+
+        Parameters
+        ----------
+        sample_id : str
+            sample id to be removed.
+
+        Raises
+        ------
+        UserWarning
+            If sample id to delete was not found in the dataset.
+
+        """
         if sample_id not in self.__data:
             warnings.warn('Sample to delete not found in the dataset - nothing to do.')
         else:
@@ -226,11 +301,30 @@ class MLDataset(object):
             print('{} removed.'.format(sample_id))
 
     def get_feature_subset(self, subset_idx):
-        """Returns the subset of features indexed numerically. """
+        """
+        Returns the subset of features indexed numerically.
+
+        Parameters
+        ----------
+        subset_idx : list, ndarray
+            List of indices to features to be returned
+
+        Returns
+        -------
+        MLDataset : MLDataset
+            with subset of features requested.
+
+        Raises
+        ------
+        UnboundLocalError
+            If input indices are out of bounds for the dataset.
+
+        """
 
         subset_idx = np.asarray(subset_idx)
-        assert (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0), \
-            UnboundLocalError('indices out of range for the dataset. Max index: {}'.format(self.__num_features))
+        if not (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0):
+            raise UnboundLocalError('indices out of range for the dataset. '
+                              'Max index: {} Min index : 0'.format(self.__num_features))
 
         sub_data = {sample: features[subset_idx] for sample, features in self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
@@ -250,7 +344,25 @@ class MLDataset(object):
         return subset
 
     def get_class(self, class_id):
-        """Returns a smaller dataset belonging to the requested classes. """
+        """
+        Returns a smaller dataset belonging to the requested classes.
+
+        Parameters
+        ----------
+        class_id : str
+            identifier of the class to be returned.
+
+        Returns
+        -------
+        MLDataset
+            With subset of samples belonging to the given class.
+
+        Raises
+        ------
+        ValueError
+            If one or more of the requested classes do not exist in this dataset.
+
+        """
         assert class_id not in [None, ''], "class id can not be empty or None."
         if isinstance(class_id, str):
             class_ids = [class_id, ]
@@ -270,7 +382,36 @@ class MLDataset(object):
         return self.get_subset(subsets)
 
     def train_test_split_ids(self, train_perc = None, count_per_class = None):
-        "Returns two disjoint sets of sample ids for use in cross-validation."
+        """
+        Returns two disjoint sets of sample ids for use in cross-validation.
+
+        Offers two ways to specify the sizes: fraction or count.
+        Only one access method can be used at a time.
+
+        Parameters
+        ----------
+        train_perc : float
+            fraction of samples from each class to build the training subset.
+
+        count_per_class : int
+            exact count of samples from each class to build the training subset.
+
+        Returns
+        -------
+        train_set : list
+            List of ids in the training set.
+        test_set : list
+            List of ids in the test set.
+
+        Raises
+        ------
+        ValueError
+            If the fraction is outside open interval (0, 1), or
+            If counts are outside larger than the smallest class, or
+            If unrecongized format is provided for input args, or
+            If the selection results in empty subsets for either train or test sets.
+
+        """
 
         _, _, class_sizes = self.summarize_classes()
         smallest_class_size = np.min(class_sizes)
@@ -297,7 +438,21 @@ class MLDataset(object):
         return train_set, test_set
 
     def random_subset_ids_by_count(self, count_per_class=1):
-        """Returns a random subset of sample ids (of specified size by percentage) within each class."""
+        """
+        Returns a random subset of sample ids of specified size by count,
+            within each class.
+
+        Parameters
+        ----------
+        count_per_class : int
+            Exact number of samples per each class.
+
+        Returns
+        -------
+        subset : list
+            Combined list of sample ids from all classes.
+
+        """
 
         class_sizes = self.class_sizes
         subsets = list()
@@ -335,7 +490,27 @@ class MLDataset(object):
             return list()
 
     def random_subset_ids(self, perc_per_class=0.5):
-        """Returns a random subset of sample ids (of specified size by percentage) within each class."""
+        """
+        Returns a random subset of sample ids (of specified size by percentage) within each class.
+
+        Parameters
+        ----------
+        perc_per_class : float
+            Fraction of samples per class
+
+        Returns
+        -------
+        subset : list
+            Combined list of sample ids from all classes.
+
+        Raises
+        ------
+        ValueError
+            If no subjects from one or more classes were selected.
+        UserWarning
+            If an empty or full dataset is requested.
+
+        """
 
         class_sizes = self.class_sizes
         subsets = list()
@@ -374,7 +549,20 @@ class MLDataset(object):
             return list()
 
     def random_subset(self, perc_in_class=0.5):
-        """Returns a random subset of dataset (of specified size by percentage) within each class."""
+        """
+        Returns a random sub-dataset (of specified size by percentage) within each class.
+
+        Parameters
+        ----------
+        perc_in_class : float
+            Fraction of samples to be taken from each class.
+
+        Returns
+        -------
+        subdataset : MLDataset
+            random sub-dataset of specified size.
+
+        """
 
         subsets = self.random_subset_ids(perc_in_class)
         if len(subsets) > 0:
@@ -384,14 +572,41 @@ class MLDataset(object):
             return MLDataset()
 
     def sample_ids_in_class(self, class_id):
-        "Returns a list of sample ids belonging to a given class."
+        """
+        Returns a list of sample ids belonging to a given class.
+
+        Parameters
+        ----------
+        class_id : str
+            class id to query.
+
+        Returns
+        -------
+        subset_ids : list
+            List of sample ids belonging to a given class.
+
+        """
 
         # subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
         subset_ids = self.keys_with_value(self.classes, class_id)
         return subset_ids
 
     def get_subset(self, subset_ids):
-        """Returns a smaller dataset identified by their keys/sample IDs."""
+        """
+        Returns a smaller dataset identified by their keys/sample IDs.
+
+        Parameters
+        ----------
+        subset_ids : list
+            List od sample IDs to extracted from the dataset.
+
+        Returns
+        -------
+        sub-dataset : MLDataset
+            sub-dataset containing only requested sample IDs.
+
+        """
+
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
             # need to ensure data are added to data, labels etc in the same order of sample IDs
@@ -501,7 +716,23 @@ class MLDataset(object):
         return label_set
 
     def add_classes(self, classes):
-        """Helper to rename the classes, if provided by a dict keyed in by the orignal keys"""
+        """
+        Helper to rename the classes, if provided by a dict keyed in by the orignal keys
+
+        Parameters
+        ----------
+        classes : dict
+            Dict of class named keyed in by sample IDs.
+
+        Raises
+        ------
+        TypeError
+            If classes is not a dict.
+        ValueError
+            If all samples in dataset are not present in input dict,
+            or one of they samples in input is not recognized.
+
+        """
         assert isinstance(classes, dict), TypeError('Input classes is not a dict!')
         assert len(classes) == self.num_samples, ValueError('Too few items - need {} keys'.format(self.num_samples))
         assert all([key in self.keys for key in classes]), ValueError('One or more unrecognized keys!')
@@ -603,11 +834,24 @@ class MLDataset(object):
         except:
             raise
 
-    def save(self, path):
-        """Method to serialize the dataset to disk."""
+    def save(self, file_path):
+        """
+        Method to save the dataset to disk.
+
+        Parameters
+        ----------
+        file_path : str
+            File path to save the current dataset to
+
+        Raises
+        ------
+        IOError
+            If it could not finish successfully.
+
+        """
         try:
-            path = os.path.abspath(path)
-            with open(path, 'wb') as df:
+            file_path = os.path.abspath(file_path)
+            with open(file_path, 'wb') as df:
                 # pickle.dump(self, df)
                 pickle.dump((self.__data, self.__classes, self.__labels,
                              self.__dtype, self.__description, self.__num_features,
@@ -637,7 +881,20 @@ class MLDataset(object):
         return True
 
     def extend(self, other):
-        """Method to extend the dataset vertically (add samples from  anotehr dataset)."""
+        """
+        Method to extend the dataset vertically (add samples from  anotehr dataset).
+
+        Parameters
+        ----------
+        other : MLDataset
+            second dataset to be combined with the current (different samples, but same dimensionality)
+
+        Raises
+        ------
+        TypeError
+            if input is not an MLDataset.
+        """
+
         assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for sample in other.keys:
