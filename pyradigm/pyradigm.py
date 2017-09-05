@@ -716,9 +716,9 @@ class MLDataset(object):
         """number of features in each sample."""
         return np.int64(self.__num_features)
 
-    @num_features.setter
-    def num_features(self, int_val):
-        "Method that should nor exist!"
+    @staticmethod
+    def num_features(int_val):
+        "Method that should not exist!"
         raise AttributeError("num_features property can't be set, only retrieved!")
         # assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
         # self.__num_features = int_val
