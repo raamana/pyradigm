@@ -10,7 +10,12 @@ from sys import version_info
 if version_info.major==2 and version_info.minor==7 and version_info.micro==13:
     from pyradigm import MLDataset
 elif version_info.major > 2:
-    from pyradigm.pyradigm import MLDataset
+    try:
+        from pyradigm.pyradigm import MLDataset
+    except ImportError:
+        from pyradigm import MLDataset
+    except:
+        raise ImportError('could not import pyradigm')
 else:
     raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
 
@@ -116,7 +121,8 @@ def test_init_with_dict():
 
 def test_labels_setter():
     fewer_labels = test_dataset.labels
-    fewer_labels.pop(fewer_labels.keys()[0])
+    label_keys = list(fewer_labels.keys())
+    fewer_labels.pop(label_keys[0])
 
     with raises(ValueError):
         test_dataset.labels = fewer_labels
@@ -132,7 +138,8 @@ def test_labels_setter():
 
 def test_classes_setter():
     fewer_classes = test_dataset.classes
-    fewer_classes.pop(fewer_classes.keys()[0])
+    classes_keys = list(fewer_classes.keys())
+    fewer_classes.pop(classes_keys[0])
 
     with raises(ValueError):
         test_dataset.classes = fewer_classes
@@ -216,7 +223,7 @@ def rand_ints_range(n, k):
     return np.random.random_integers(1, n, min(n, k))
 
 def test_glance():
-    for k in np.random.randint(1, test_dataset.num_samples, 10):
+    for k in np.random.randint(1, test_dataset.num_samples-1, 10):
         glanced_subset = test_dataset.glance(k)
         assert len(glanced_subset) == k
 

@@ -48,7 +48,7 @@ class MLDataset(object):
             self.__classes = OrderedDict(classes)
             self.__description = description
 
-            sample_ids = data.keys()
+            sample_ids = list(data)
             self.__num_features = len(data[sample_ids[0]])
             self.__dtype = type(data[sample_ids[0]])
 
@@ -109,7 +109,7 @@ class MLDataset(object):
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError('number of samples do not match the previously assigned data')
-            elif set(self.keys) != set(values.keys()):
+            elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
                 self.__labels = values
@@ -127,7 +127,7 @@ class MLDataset(object):
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError('number of samples do not match the previously assigned data')
-            elif set(self.keys) != set(values.keys()):
+            elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
                 self.__classes = values
@@ -159,7 +159,7 @@ class MLDataset(object):
     @staticmethod
     def __take(nitems, iterable):
         """Return first n items of the iterable as a list"""
-        return dict(islice(iterable, nitems))
+        return dict(islice(iterable, int(nitems)))
 
     @staticmethod
     def __str_names(num):
@@ -168,8 +168,8 @@ class MLDataset(object):
 
     def glance(self, nitems=5):
         """Quick and partial glance of the data matrix."""
-        nitems = max([1, min([nitems, self.num_samples])])
-        return self.__take(nitems, self.__data.iteritems())
+        nitems = max([1, min([nitems, self.num_samples-1])])
+        return self.__take(nitems, iter(self.__data.items()))
 
     def summarize_classes(self):
         "Summary of classes: names, numeric labels and sizes"
@@ -252,7 +252,7 @@ class MLDataset(object):
     def get_class(self, class_id):
         """Returns a smaller dataset belonging to the requested classes. """
         assert class_id not in [None, ''], "class id can not be empty or None."
-        if isinstance(class_id, basestring):
+        if isinstance(class_id, str):
             class_ids = [class_id, ]
         else:
             class_ids = class_id
@@ -429,7 +429,7 @@ class MLDataset(object):
     @property
     def keys(self):
         """Identifiers (sample IDs, or sample names etc) forming the basis of dict-type MLDataset."""
-        return self.__data.keys()
+        return list(self.__data)
 
     @property
     def sample_ids(self):
@@ -523,7 +523,7 @@ class MLDataset(object):
         if bool(self):
             full_descr.append('{} samples, {} classes, {} features.'.format(
                 self.num_samples, self.num_classes, self.num_features))
-            class_ids = self.class_sizes.keys()
+            class_ids = list(self.class_sizes)
             max_width = max([len(cls) for cls in class_ids])
             for cls in class_ids:
                 full_descr.append('Class {:>{}} : {} samples.'.format(cls, max_width, self.class_sizes.get(cls)))
@@ -533,7 +533,7 @@ class MLDataset(object):
         return '\n'.join(full_descr)
 
     def __format__(self, fmt_str='s'):
-        if isinstance(fmt_str, basestring):
+        if isinstance(fmt_str, str):
             return '{} samples x {} features with {} classes'.format(
                 self.num_samples, self.num_features, self.num_classes)
         else:
@@ -629,7 +629,7 @@ class MLDataset(object):
             assert isinstance(classes, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
 
         assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
-        assert set(data.keys()) == set(labels.keys()) == set(classes.keys()), 'data, classes and labels ' \
+        assert set(list(data)) == set(list(labels)) == set(list(classes)), 'data, classes and labels ' \
                                                                               'dictionaries must have the same keys!'
         num_features_in_elements = np.unique([len(sample) for sample in data.values()])
         assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
