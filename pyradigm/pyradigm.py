@@ -1,11 +1,13 @@
-import numpy as np
-from collections import Counter, OrderedDict, Sequence
-from itertools import takewhile, islice
-import random
-import warnings
+import copy
 import os
 import pickle
-import copy
+import random
+import warnings
+from collections import Counter, OrderedDict, Sequence
+from itertools import islice
+
+import numpy as np
+
 
 # TODO profile the class for different scales of samples and features
 class MLDataset(object):
@@ -13,7 +15,7 @@ class MLDataset(object):
 
     def __init__(self, filepath=None, in_dataset=None,
                  data=None, labels=None, classes=None,
-                 description='', feature_names = None):
+                 description='', feature_names=None):
         """
         Default constructor.
         Suggested way to construct the dataset is via add_sample method, one sample at a time.
@@ -239,7 +241,7 @@ class MLDataset(object):
         dict
 
         """
-        nitems = max([1, min([nitems, self.num_samples-1])])
+        nitems = max([1, min([nitems, self.num_samples - 1])])
         return self.__take(nitems, iter(self.__data.items()))
 
     def summarize_classes(self):
@@ -320,7 +322,7 @@ class MLDataset(object):
                     # class gets here when adding the first sample, after dataset was initialized with empty constructor
                     if self.__feature_names is None:
                         self.__feature_names = np.array(feature_names)
-                    else: # if set already, ensure a match
+                    else:  # if set already, ensure a match
                         print('')
                         if not np.array_equal(self.feature_names, np.array(feature_names)):
                             raise ValueError("supplied feature names do not match the existing names!")
@@ -374,14 +376,14 @@ class MLDataset(object):
         subset_idx = np.asarray(subset_idx)
         if not (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0):
             raise UnboundLocalError('indices out of range for the dataset. '
-                              'Max index: {} Min index : 0'.format(self.__num_features))
+                                    'Max index: {} Min index : 0'.format(self.__num_features))
 
         sub_data = {sample: features[subset_idx] for sample, features in self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
         subdataset = MLDataset(data=sub_data,
                                labels=self.__labels, classes=self.__classes,
                                description=new_descr,
-                               feature_names= self.__feature_names[subset_idx])
+                               feature_names=self.__feature_names[subset_idx])
 
         return subdataset
 
@@ -420,7 +422,7 @@ class MLDataset(object):
             class_ids = class_id
 
         non_existent = set(self.class_set).intersection(set(class_ids))
-        if len(non_existent)<1:
+        if len(non_existent) < 1:
             raise ValueError('These classes {} do not exist in this dataset.'.format(non_existent))
 
         subsets = list()
@@ -431,7 +433,7 @@ class MLDataset(object):
 
         return self.get_subset(subsets)
 
-    def train_test_split_ids(self, train_perc = None, count_per_class = None):
+    def train_test_split_ids(self, train_perc=None, count_per_class=None):
         """
         Returns two disjoint sets of sample ids for use in cross-validation.
 
@@ -463,15 +465,15 @@ class MLDataset(object):
 
         """
 
-        _, _, class_sizes = self.summarize_classes()
+        _ignore1, _ignore2, class_sizes = self.summarize_classes()
         smallest_class_size = np.min(class_sizes)
 
-        if count_per_class is None and (train_perc>0.0 and train_perc<1.0):
+        if count_per_class is None and (0.0 < train_perc < 1.0):
             if train_perc < 1.0 / smallest_class_size:
                 raise ValueError('Training percentage selected too low '
                                  'to return even one sample from the smallest class!')
             train_set = self.random_subset_ids(perc_per_class=train_perc)
-        elif train_perc is None and count_per_class>0:
+        elif train_perc is None and count_per_class > 0:
             if count_per_class >= smallest_class_size:
                 raise ValueError('Selections would exclude the smallest class from test set. '
                                  'Reduce sample count per class for the training set!')
@@ -480,7 +482,7 @@ class MLDataset(object):
             raise ValueError('Invalid or out of range selection: '
                              'only one of count or percentage can be used to select subset.')
 
-        test_set  = list(set(self.keys) - set(train_set))
+        test_set = list(set(self.keys) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
             raise ValueError('Selection resulted in empty training or test set - check your selections or dataset!')
@@ -716,8 +718,8 @@ class MLDataset(object):
         """number of features in each sample."""
         return np.int64(self.__num_features)
 
-    @staticmethod
-    def num_features(int_val):
+    @num_features.setter
+    def num_features(self, int_val):
         "Method that should not exist!"
         raise AttributeError("num_features property can't be set, only retrieved!")
         # assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
@@ -731,7 +733,7 @@ class MLDataset(object):
     @dtype.setter
     def dtype(self, type_val):
         if self.__dtype is None:
-            assert isinstance(type_val,type), TypeError('Invalid data type.')
+            assert isinstance(type_val, type), TypeError('Invalid data type.')
             self.__dtype = type_val
         else:
             warnings.warn('Data type is already inferred. Can not be set!')
@@ -924,7 +926,7 @@ class MLDataset(object):
 
         assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
         assert set(list(data)) == set(list(labels)) == set(list(classes)), 'data, classes and labels ' \
-                                                                              'dictionaries must have the same keys!'
+                                                                           'dictionaries must have the same keys!'
         num_features_in_elements = np.unique([len(sample) for sample in data.values()])
         assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
 
