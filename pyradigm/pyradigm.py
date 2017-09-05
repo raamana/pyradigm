@@ -413,9 +413,12 @@ class MLDataset(object):
         ------
         ValueError
             If one or more of the requested classes do not exist in this dataset.
+            If the specified id is empty or None
 
         """
-        assert class_id not in [None, ''], "class id can not be empty or None."
+        if class_id in [None, '']:
+            raise ValueError("class id can not be empty or None.")
+
         if isinstance(class_id, str):
             class_ids = [class_id, ]
         else:
@@ -733,7 +736,8 @@ class MLDataset(object):
     @dtype.setter
     def dtype(self, type_val):
         if self.__dtype is None:
-            assert isinstance(type_val, type), TypeError('Invalid data type.')
+            if not isinstance(type_val, type):
+                raise TypeError('Invalid data type.')
             self.__dtype = type_val
         else:
             warnings.warn('Data type is already inferred. Can not be set!')
@@ -785,9 +789,12 @@ class MLDataset(object):
             or one of they samples in input is not recognized.
 
         """
-        assert isinstance(classes, dict), TypeError('Input classes is not a dict!')
-        assert len(classes) == self.num_samples, ValueError('Too few items - need {} keys'.format(self.num_samples))
-        assert all([key in self.keys for key in classes]), ValueError('One or more unrecognized keys!')
+        if not isinstance(classes, dict):
+            raise TypeError('Input classes is not a dict!')
+        if not len(classes) == self.num_samples:
+            raise ValueError('Too few items - need {} keys'.format(self.num_samples))
+        if not all([key in self.keys for key in classes]):
+            raise ValueError('One or more unrecognized keys!')
         self.__classes = classes
 
     def __len__(self):
@@ -919,16 +926,22 @@ class MLDataset(object):
     def __validate(data, classes, labels):
         "Validator of inputs."
 
-        assert isinstance(data, dict), 'data must be a dict! keys: sample ID or any unique identifier'
-        assert isinstance(labels, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
+        if not isinstance(data, dict):
+            raise TypeError('data must be a dict! keys: sample ID or any unique identifier')
+        if not isinstance(labels, dict):
+            raise TypeError('labels must be a dict! keys: sample ID or any unique identifier')
         if classes is not None:
-            assert isinstance(classes, dict), 'labels must be a dict! keys: sample ID or any unique identifier'
+            if not isinstance(classes, dict):
+                raise TypeError('labels must be a dict! keys: sample ID or any unique identifier')
 
-        assert len(data) == len(labels) == len(classes), 'Lengths of data, labels and classes do not match!'
-        assert set(list(data)) == set(list(labels)) == set(list(classes)), 'data, classes and labels ' \
-                                                                           'dictionaries must have the same keys!'
+        if not len(data) == len(labels) == len(classes):
+            raise ValueError('Lengths of data, labels and classes do not match!')
+        if not set(list(data)) == set(list(labels)) == set(list(classes)):
+            raise ValueError('data, classes and labels dictionaries must have the same keys!')
+
         num_features_in_elements = np.unique([len(sample) for sample in data.values()])
-        assert len(num_features_in_elements) == 1, 'different samples have different number of features - invalid!'
+        if len(num_features_in_elements) > 1:
+            raise ValueError('different samples have different number of features - invalid!')
 
         return True
 
@@ -947,7 +960,8 @@ class MLDataset(object):
             if input is not an MLDataset.
         """
 
-        assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
+        if not isinstance(other, MLDataset):
+            raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for sample in other.keys:
             self.add_sample(sample, other.data[sample], other.labels[sample], other.classes[sample])
@@ -955,13 +969,15 @@ class MLDataset(object):
     def __add__(self, other):
         "Method to combine to MLDatasets, sample-wise or feature-wise."
 
-        assert isinstance(other, MLDataset), TypeError('Incorrect type of dataset provided!')
+        if not isinstance(other, MLDataset):
+            raise TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
             print('Identical keys found. Trying to horizontally concatenate features for each sample.')
-            assert self.__classes == other.classes, ValueError('Class identifiers per sample differ in the two '
-                                                               'datasets!')
-            assert other.num_features > 0, ValueError('No features to concatenate.')
+            if not self.__classes == other.classes:
+                raise ValueError('Class identifiers per sample differ in the two datasets!')
+            if other.num_features < 1:
+                raise ValueError('No features to concatenate.')
             # making an empty dataset
             combined = MLDataset()
             # populating it with the concatenated feature set
@@ -982,7 +998,8 @@ class MLDataset(object):
 
     def __sub__(self, other):
         """Removing one dataset from another."""
-        assert isinstance(other, type(self)), TypeError('Incorrect type of dataset provided!')
+        if not isinstance(other, type(self)):
+            raise TypeError('Incorrect type of dataset provided!')
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
