@@ -14,7 +14,42 @@ class MLDataset(object):
     def __init__(self, filepath=None, in_dataset=None,
                  data=None, labels=None, classes=None,
                  description='', feature_names = None):
-        """Default constructor. Suggested way to construct the dataset is via add_sample method."""
+        """
+        Default constructor.
+        Suggested way to construct the dataset is via add_sample method, one sample at a time.
+
+        This constructor can be used in 3 ways:
+            - As a copy constructor to make a copy of the given in_dataset
+            - Or by specifying the tuple of data, labels and classes.
+                In this usage, you can provide additional inputs such as description and feature_names.
+            - Or by specifying a file path which contains previously saved MLDataset.
+
+        Parameters
+        ----------
+        filepath : str
+            path to saved MLDataset on disk, to directly load it.
+        in_dataset : MLDataset
+            MLDataset to be copied to create a new one.
+        data : dict
+            dict of features (keys are treated to be sample ids)
+        labels : dict
+            dict of labels (keys must match with data/classes, are treated to be sample ids)
+        classes : dict
+            dict of class names (keys must match with data/labels, are treated to be sample ids)
+        description : str
+            Arbitray string to describe the current dataset.
+        feature_names : list, ndarray
+            List of names for each feature in the dataset.
+
+        Raises
+        ------
+        ValueError
+            If in_dataset is not of type MLDataset or is empty, or
+            An invalid combination of input args is given.
+        IOError
+            If filepath provided does not exist.
+
+        """
 
         if filepath is not None:
             if os.path.isfile(filepath):
@@ -95,7 +130,22 @@ class MLDataset(object):
 
     @data.setter
     def data(self, values):
-        """Populates this dataset with the provided data."""
+        """
+        Populates this dataset with the provided data.
+        Usage of this method is discourage (unless you know what you are doing).
+
+        Parameters
+        ----------
+        values : dict
+            dict of features keyed in by sample ids.
+
+        Raises
+        ------
+        ValueError
+            If number of samples does not match the size of existing set, or
+            If atleast one sample is not provided.
+
+        """
         if isinstance(values, dict):
             if self.__labels is not None and len(self.__labels) != len(values):
                 raise ValueError('number of samples do not match the previously assigned labels')
