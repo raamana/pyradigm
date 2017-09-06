@@ -20,7 +20,7 @@ Thanks for checking out. Your feedback will be appreciated.
 
 ## Usage
 
-This [Pyradigm Example](PyradigmExample.ipynb) notebook illustrates the usage.
+This [jupyter notebook](docs/usage.ipynb) illustrates the usage.
 
 ## Requirements
 

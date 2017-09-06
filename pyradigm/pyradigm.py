@@ -11,7 +11,7 @@ import numpy as np
 
 # TODO profile the class for different scales of samples and features
 class MLDataset(object):
-    """Class defining a ML dataset that helps maintain integrity and ease of access."""
+    """An ML dataset to ease workflow and maintain integrity."""
 
     def __init__(self, filepath=None, in_dataset=None,
                  data=None, labels=None, classes=None,
@@ -331,7 +331,7 @@ class MLDataset(object):
 
     def del_sample(self, sample_id):
         """
-        Method remove a sample from the dataset.
+        Method to remove a sample from the dataset.
 
         Parameters
         ----------
@@ -698,11 +698,12 @@ class MLDataset(object):
 
     @property
     def keys(self):
-        """Identifiers (sample IDs, or sample names etc) forming the basis of dict-type MLDataset."""
+        """Sample identifiers (strings) forming the basis of MLDataset (same as sample_ids)"""
         return list(self.__data)
 
     @property
     def sample_ids(self):
+        """Sample identifiers (strings) forming the basis of MLDataset (same as keys)."""
         return self.keys
 
     @property
@@ -752,7 +753,7 @@ class MLDataset(object):
 
     @property
     def num_classes(self):
-        """Total numver of classes in the dataset."""
+        """Total number of classes in the dataset."""
         return len(self.class_set)
 
     @property
@@ -905,7 +906,7 @@ class MLDataset(object):
         Raises
         ------
         IOError
-            If it could not finish successfully.
+            If saving to disk is not successful.
 
         """
         try:
