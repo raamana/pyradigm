@@ -283,7 +283,8 @@ class MLDataset(object):
         label : int, str
             The label for this sample
         class_id : int, str
-            The class for this sample
+            The class for this sample.
+            If not provided, label converted to a string becomes its ID.
         feature_names : list
             The names for each feature. Assumed to be in the same order as `features`
 
@@ -299,6 +300,11 @@ class MLDataset(object):
         """
 
         if sample_id not in self.__data:
+            # ensuring there is always a class name, even when not provided by the user.
+            # this is needed, in order for __str__ method to work.
+            if class_id is None:
+                class_id = str(label)
+
             if self.num_samples <= 0:
                 self.__data[sample_id] = features
                 self.__labels[sample_id] = label

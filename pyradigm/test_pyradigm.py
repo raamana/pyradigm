@@ -38,6 +38,8 @@ for class_index, class_id in enumerate(class_set):
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
 
+print(test_dataset)
+
 class_set, label_set, class_sizes = test_dataset.summarize_classes()
 
 reloaded_dataset = MLDataset(filepath=out_file, description='reloaded test_dataset')
