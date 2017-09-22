@@ -1,8 +1,15 @@
+__all__ = [ 'MLDataset', 'cli_run' ]
+
 import copy
 import os
+import sys
 import pickle
 import random
 import warnings
+import argparse
+import traceback
+import logging
+from os.path import join as pjoin, exists as pexists, realpath, basename, dirname
 from collections import Counter, OrderedDict, Sequence
 from itertools import islice
 
@@ -265,6 +272,7 @@ class MLDataset(object):
         for idx, cls in enumerate(self.class_set):
             class_sizes[idx] = self.class_sizes[cls]
 
+        # TODO consider returning numeric label set e.g. for use in scikit-learn
         return self.class_set, self.label_set, class_sizes
 
     # TODO try implementing based on pandas
@@ -302,6 +310,8 @@ class MLDataset(object):
         if sample_id not in self.__data:
             # ensuring there is always a class name, even when not provided by the user.
             # this is needed, in order for __str__ method to work.
+            # TODO consider enforcing label to be numeric and class_id to be string
+            #  so portability with other packages is more uniform e.g. for use in scikit-learn
             if class_id is None:
                 class_id = str(label)
 
@@ -1044,3 +1054,139 @@ class MLDataset(object):
             return True
         else:
             return True
+
+
+def cli_run():
+    """Command line interface
+
+    This is the command line interface
+
+        - to display basic info about datasets without having to code
+        - to perform basic arithmetic (add multiple classes or feature sets)
+
+    """
+
+    path_list, add_path_list, out_path = parse_args()
+
+    # printing info if requested
+    if path_list:
+        for ds_path in path_list:
+            ds = MLDataset(ds_path)
+            print_info(ds, ds_path)
+
+    # combining datasets
+    if add_path_list:
+        combine_and_save(add_path_list, out_path)
+
+    return
+
+
+def print_info(ds, ds_path=None):
+    "Prints basic summary of a given dataset."
+
+    if ds_path is None:
+        bname = ''
+    else:
+        bname = basename(ds_path)
+
+    dashes = '-' * len(bname)
+    print(bname)
+    print(dashes)
+    print(ds)
+    print(dashes)
+
+    return
+
+
+def combine_and_save(add_path_list, out_path):
+    "Combines whatever datasets that can be, and save the bigger dataset to a given location."
+
+    combined = None
+    first_path = None
+    for ds_path in add_path_list:
+        if combined is None:
+            combined = MLDataset(ds_path)
+        else:
+            try:
+                print('Combining <1> with <2>, where \n<1> : {}\n<2> : {}'.format(ds_path, first_path))
+                combined = combined + MLDataset(ds_path)
+                first_path = ds_path
+            except:
+                print('Failed - skipping <1>')
+                traceback.print_exc()
+
+    combined.save(out_path)
+
+    return
+
+
+def get_parser():
+    "Arg constructor"
+
+    parser = argparse.ArgumentParser(prog='pyradigm')
+    parser.add_argument('-i', '--info', nargs='+', action='store', dest='path_list', required=False,
+                        default=None, help='List of paths to display info about.')
+
+    parser.add_argument('-a', '--add', nargs='+', action='store', dest='add_path_list', required=False,
+                        default=None, help='List of paths to MLDatasets to combine into a larger dataset.')
+
+    parser.add_argument('-o', '--out_path', action='store', dest='out_path', required=False,
+                        default=None, help='Output path to save the resulting dataset.')
+
+    return parser
+
+
+def parse_args():
+    "Arg parser."
+
+    parser = get_parser()
+
+    if len(sys.argv) < 2:
+        parser.print_help()
+        logging.warning('Too few arguments!')
+        parser.exit(1)
+
+    # parsing
+    try:
+        params = parser.parse_args()
+    except Exception as exc:
+        print(exc)
+        raise ValueError('Unable to parse command-line arguments.')
+
+    path_list = list()
+    if params.path_list is not None:
+        for dpath in params.path_list:
+            if pexists(dpath):
+                path_list.append(realpath(dpath))
+            else:
+                print('Below dataset does not exist. Ignoring it.\n{}'.format(dpath))
+
+    add_path_list = list()
+    out_path = None
+    if params.add_path_list is not None:
+        for dpath in params.add_path_list:
+            if pexists(dpath):
+                add_path_list.append(realpath(dpath))
+            else:
+                print('Below dataset does not exist. Ignoring it.\n{}'.format(dpath))
+
+        if params.out_path is None:
+            raise ValueError('Output path must be specified to save the combined dataset to')
+
+        out_path = realpath(params.out_path)
+        parent_dir = dirname(out_path)
+        if not pexists(parent_dir):
+            os.mkdir(parent_dir)
+
+        if len(add_path_list) < 2:
+            raise ValueError('Need a minimum of datasets to combine!!')
+
+    # removing duplicates (from regex etc)
+    path_list = set(path_list)
+    add_path_list = set(add_path_list)
+
+    return path_list, add_path_list, out_path
+
+
+if __name__ == '__main__':
+    cli_run()

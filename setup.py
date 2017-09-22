@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='pyradigm',
-      version='0.4.2',
+      version='0.4.5',
       description='Python-based data structure to improve handling of datasets in machine learning workflows',
       long_description='Pyradigm: Python-based data structure to improve handling of datasets in machine learning workflows',
       keywords='machine learning, test dataset, python, workflow, provenance, data structure',
@@ -24,4 +24,9 @@ setup(name='pyradigm',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.6',
       ],
+      entry_points={
+          "console_scripts": [
+              "pyradigm=pyradigm.__main__:main",
+          ]
+      },
       )
