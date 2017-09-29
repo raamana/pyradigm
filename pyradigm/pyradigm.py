@@ -1066,13 +1066,16 @@ def cli_run():
 
     """
 
-    path_list, add_path_list, out_path = parse_args()
+    path_list, meta_requested, summary_requested, add_path_list, out_path = parse_args()
 
     # printing info if requested
     if path_list:
         for ds_path in path_list:
             ds = MLDataset(ds_path)
-            print_info(ds, ds_path)
+            if summary_requested:
+                print_info(ds, ds_path)
+            if meta_requested:
+                print_meta(ds, ds_path)
 
     # combining datasets
     if add_path_list:
@@ -1094,6 +1097,16 @@ def print_info(ds, ds_path=None):
     print(dashes)
     print(ds)
     print(dashes)
+
+    return
+
+
+def print_meta(ds, ds_path=None):
+    "Prints meta data for subjects in given dataset."
+
+    print('#'+ds_path)
+    for sub, cls in ds.classes.items():
+        print('{},{}'.format(sub, cls))
 
     return
 
@@ -1124,13 +1137,21 @@ def get_parser():
     "Arg constructor"
 
     parser = argparse.ArgumentParser(prog='pyradigm')
-    parser.add_argument('-i', '--info', nargs='+', action='store', dest='path_list', required=False,
+
+    parser.add_argument('path_list', nargs='*', action='store',
                         default=None, help='List of paths to display info about.')
 
-    parser.add_argument('-a', '--add', nargs='+', action='store', dest='add_path_list', required=False,
-                        default=None, help='List of paths to MLDatasets to combine into a larger dataset.')
+    parser.add_argument('-m', '--meta', action='store_true', dest='meta_requested', required=False,
+                        default=False, help='Prints the meta data (subject_id,class).')
 
-    parser.add_argument('-o', '--out_path', action='store', dest='out_path', required=False,
+    parser.add_argument('-i', '--info', action='store_true', dest='summary_requested', required=False,
+                        default=False, help='Prints summary info (classes, #samples, #features).')
+
+    arithmetic_group = parser.add_argument_group('Options for multiple datasets')
+    arithmetic_group.add_argument('-a', '--add', nargs='+', action='store', dest='add_path_list', required=False,
+                        default=None, help='List of MLDatasets to combine into a larger dataset.')
+
+    arithmetic_group.add_argument('-o', '--out_path', action='store', dest='out_path', required=False,
                         default=None, help='Output path to save the resulting dataset.')
 
     return parser
@@ -1185,7 +1206,7 @@ def parse_args():
     path_list = set(path_list)
     add_path_list = set(add_path_list)
 
-    return path_list, add_path_list, out_path
+    return path_list, params.meta_requested, params.summary_requested, add_path_list, out_path
 
 
 if __name__ == '__main__':
