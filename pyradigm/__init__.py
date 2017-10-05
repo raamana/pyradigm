@@ -10,3 +10,7 @@ else:
     raise NotImplementedError('pyradigm supports only 2.7 or 3+. Upgrate to Python 3+ is recommended.')
 
 
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
