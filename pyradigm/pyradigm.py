@@ -93,7 +93,8 @@ class MLDataset(object):
             self.__description = description
 
             sample_ids = list(data)
-            self.__num_features = len(data[sample_ids[0]])
+            features0 = data[sample_ids[0]]
+            self.__num_features = features0.size if isinstance(features0,np.ndarray) else len(features0)
             self.__dtype = type(data[sample_ids[0]])
 
             # assigning default names for each feature
@@ -361,13 +362,13 @@ class MLDataset(object):
             self.__labels[sample_id] = label
             self.__classes[sample_id] = class_id
             self.__dtype = type(features)
-            self.__num_features = len(features)
+            self.__num_features = features.size if isinstance(features, np.ndarray) else len(features)
             if feature_names is None:
                 self.__feature_names = self.__str_names(self.num_features)
         else:
-            if self.__num_features != len(features):
+            if self.__num_features != features.size:
                 raise ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
-                    len(features), self.__num_features))
+                    features.size, self.__num_features))
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
@@ -490,6 +491,83 @@ class MLDataset(object):
             subsets.extend(subsets_this_class)
 
         return self.get_subset(subsets)
+
+    def transform(self, func, func_description=None):
+        """
+        Applies a given a function to the features of each subject
+            and returns a new dataset with other info unchanged.
+
+        Parameters
+        ----------
+        func : callable
+            A valid callable that takes in a single ndarray and returns a single ndarray.
+            Ensure the transformed dimensionality must be the same for all subjects.
+
+            If your function requires more than one argument, use `functools.partial` to freeze all the arguments except the features for the subject.
+
+        func_description : str, optional
+            Human readable description of the given function.
+
+        Returns
+        -------
+        xfm_ds : MLDataset
+            with features obtained from subject-wise transform
+
+        Raises
+        ------
+        TypeError
+            If given func is not a callable
+        ValueError
+            If transformation of any of the subjects features raises an exception.
+
+        Examples
+        --------
+        Simple:
+
+        .. code-block:: python
+
+            from pyradigm import MLDataset
+
+            thickness = MLDataset(in_path='ADNI_thickness.csv')
+            pcg_thickness = thickness.apply_xfm(func=get_pcg, description = 'applying ROI mask for PCG')
+            pcg_median = pcg_thickness.apply_xfm(func=np.median, description='median per subject')
+
+
+        Complex example with function taking more than one argument:
+
+        .. code-block:: python
+
+            from pyradigm import MLDataset
+            from functools import partial
+            import hiwenet
+
+            thickness = MLDataset(in_path='ADNI_thickness.csv')
+            roi_membership = read_roi_membership()
+            hw = partial(hiwenet, groups = roi_membership)
+
+            thickness_hiwenet = thickness.transform(func=hw, description = 'histogram weighted networks')
+            median_thk_hiwenet = thickness_hiwenet.transform(func=np.median, description='median per subject')
+
+        """
+
+        if not callable(func):
+            raise TypeError('Given function {} is not a callable'.format(func))
+
+        xfm_ds = MLDataset()
+        for sample, data in self.__data.items():
+            try:
+                xfm_data = func(data)
+            except:
+                print('Unable to transform features for {}. Quitting.'.format(sample))
+                raise
+
+            xfm_ds.add_sample(sample, xfm_data,
+                              label=self.__labels[sample],
+                              class_id=self.__classes[sample])
+
+        xfm_ds.description = "{}\n{}".format(func_description, self.__description)
+
+        return xfm_ds
 
     def train_test_split_ids(self, train_perc=None, count_per_class=None):
         """
@@ -746,6 +824,28 @@ class MLDataset(object):
         else:
             return False
 
+    def get(self, item, not_found_value=None):
+        "Method like dict.get() which can return specified value if key not found"
+
+        if item in self.keys:
+            return self.__data[item]
+        else:
+            return not_found_value
+
+    def __getitem__(self, item):
+        "Method to ease data retrieval i.e. turn dataset.data['id'] into dataset['id'] "
+
+        if item in self.keys:
+            return self.__data[item]
+        else:
+            raise KeyError('{} not found in dataset.'.format(item))
+
+    def __iter__(self):
+        "Iterator over samples"
+
+        for subject, data in self.data.items():
+            yield subject, data
+
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
         # Using OrderedDict helps ensure data are added to data, labels etc in the same order of sample IDs
@@ -865,7 +965,8 @@ class MLDataset(object):
     def __str__(self):
         """Returns a concise and useful text summary of the dataset."""
         full_descr = list()
-        full_descr.append(self.description)
+        if self.description not in [ None, '' ]:
+            full_descr.append(self.description)
         if bool(self):
             full_descr.append('{} samples, {} classes, {} features.'.format(
                 self.num_samples, self.num_classes, self.num_features))
@@ -917,6 +1018,7 @@ class MLDataset(object):
                 'num_samples',
                 'sample_ids',
                 'save',
+                'transform',
                 'add_classes']
 
     def __copy(self, other):
@@ -995,7 +1097,7 @@ class MLDataset(object):
         if not set(list(data)) == set(list(labels)) == set(list(classes)):
             raise ValueError('data, classes and labels dictionaries must have the same keys!')
 
-        num_features_in_elements = np.unique([len(sample) for sample in data.values()])
+        num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
             raise ValueError('different samples have different number of features - invalid!')
 
