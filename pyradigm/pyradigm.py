@@ -603,7 +603,7 @@ class MLDataset(object):
         except:
             raise
 
-    def save(self, path):
+    def save(self, path, **kwargs):
         """Method to serialize the dataset to disk."""
         try:
             path = os.path.abspath(path)
@@ -612,7 +612,7 @@ class MLDataset(object):
                 pickle.dump((self.__data, self.__classes, self.__labels,
                              self.__dtype, self.__description, self.__num_features,
                              self.__feature_names),
-                            df)
+                            df, **kwargs)
             return
         except IOError as ioe:
             raise IOError('Unable to save the dataset to file: {}', format(ioe))
