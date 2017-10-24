@@ -980,11 +980,14 @@ class MLDataset(object):
         return '\n'.join(full_descr)
 
     def __format__(self, fmt_str='s'):
-        if isinstance(fmt_str, str):
-            return '{} samples x {} features with {} classes'.format(
+        if fmt_str.lower() in ['', 's', 'short']:
+            return '{} samples x {} features each in {} classes'.format(
                 self.num_samples, self.num_features, self.num_classes)
+        elif fmt_str.lower() in ['f', 'full']:
+            return self.__str__()
         else:
-            raise NotImplementedError('Requsted type of format not implemented.')
+            raise NotImplementedError("Requsted type of format not implemented.\n"
+                                      "It can only be 'short' (default) or 'full', or a shorthand: 's' or 'f' ")
 
     def __repr__(self):
         return self.__str__()

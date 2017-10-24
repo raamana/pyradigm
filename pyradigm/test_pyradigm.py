@@ -38,7 +38,11 @@ for class_index, class_id in enumerate(class_set):
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
 
+test_dataset.description = 'test dataset'
 print(test_dataset)
+print('default format:\n {}'.format(test_dataset))
+print('full repr     :\n {:full}'.format(test_dataset))
+print('string/short  :\n {:s}'.format(test_dataset))
 
 class_set, label_set, class_sizes = test_dataset.summarize_classes()
 
