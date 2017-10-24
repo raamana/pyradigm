@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+import versioneer 
 
 setup(name='pyradigm',
-      version='0.4.5',
+      version=versioneer.get_version(),
       description='Python-based data structure to improve handling of datasets in machine learning workflows',
       long_description='Pyradigm: Python-based data structure to improve handling of datasets in machine learning workflows',
       keywords='machine learning, test dataset, python, workflow, provenance, data structure',
@@ -29,4 +30,5 @@ setup(name='pyradigm',
               "pyradigm=pyradigm.__main__:main",
           ]
       },
+      cmdclass=versioneer.get_cmdclass()
       )
