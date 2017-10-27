@@ -26,8 +26,8 @@ Pyradigm is a PYthon based data structure to ease and improve Dataset's InteGrit
 
    docs/about
    docs/installation
-   docs/API
    docs/usage
+   docs/API
 
 
 Indices and tables
