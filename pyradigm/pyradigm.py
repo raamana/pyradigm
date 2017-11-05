@@ -992,12 +992,14 @@ class MLDataset(object):
         if self.description not in [ None, '' ]:
             full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samples, {} classes, {} features.'.format(
-                self.num_samples, self.num_classes, self.num_features))
+            full_descr.append('{} samples, {} classes, {} features'.format(
+                    self.num_samples, self.num_classes, self.num_features))
             class_ids = list(self.class_sizes)
             max_width = max([len(cls) for cls in class_ids])
+            num_digit = max([len(str(val)) for val in self.class_sizes.values()])
             for cls in class_ids:
-                full_descr.append('Class {:>{}} : {} samples.'.format(cls, max_width, self.class_sizes.get(cls)))
+                full_descr.append('Class {cls:>{clswidth}} : {size:>{numwidth}} samples'.format(cls=cls,
+                    clswidth=max_width, size=self.class_sizes.get(cls), numwidth=num_digit))
         else:
             full_descr.append('Empty dataset.')
 
