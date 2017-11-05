@@ -9,7 +9,7 @@ import warnings
 import argparse
 import traceback
 import logging
-from os.path import join as pjoin, exists as pexists, realpath, basename, dirname
+from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
 from collections import Counter, OrderedDict, Sequence
 from itertools import islice
 
@@ -20,9 +20,13 @@ import numpy as np
 class MLDataset(object):
     """An ML dataset to ease workflow and maintain integrity."""
 
-    def __init__(self, filepath=None, in_dataset=None,
+    def __init__(self, filepath=None,
+                 in_dataset=None,
+                 arff_path=None,
                  data=None, labels=None, classes=None,
-                 description='', feature_names=None):
+                 description='',
+                 feature_names=None,
+                 encode_nonnumeric=False):
         """
         Default constructor.
         Suggested way to construct the dataset is via add_sample method, one sample at a time.
@@ -37,18 +41,32 @@ class MLDataset(object):
         ----------
         filepath : str
             path to saved MLDataset on disk, to directly load it.
+
         in_dataset : MLDataset
             MLDataset to be copied to create a new one.
+
+        arff_path : str
+            Path to a dataset saved in Weka's ARFF file format.
+
         data : dict
             dict of features (keys are treated to be sample ids)
+
         labels : dict
             dict of labels (keys must match with data/classes, are treated to be sample ids)
+
         classes : dict
             dict of class names (keys must match with data/labels, are treated to be sample ids)
+
         description : str
             Arbitray string to describe the current dataset.
+
         feature_names : list, ndarray
             List of names for each feature in the dataset.
+
+        encode_nonnumeric : bool
+            Flag to specify whether to encode non-numeric (categorical, nominal or string) features to numeric values.
+            Currently used only when importing ARFF files.
+            It is usually better to encode your data at the source, and them import them to Use with caution!
 
         Raises
         ------
@@ -61,11 +79,17 @@ class MLDataset(object):
         """
 
         if filepath is not None:
-            if os.path.isfile(filepath):
+            if isfile(realpath(filepath)):
                 # print('Loading the dataset from: {}'.format(filepath))
                 self.__load(filepath)
             else:
                 raise IOError('Specified file could not be read.')
+        elif arff_path is not None:
+            arff_path = realpath(arff_path)
+            if isfile(arff_path):
+                self.__load_arff(arff_path, encode_nonnumeric)
+            else:
+                raise IOError('Given ARFF can not be found!')
         elif in_dataset is not None:
             if not isinstance(in_dataset, MLDataset):
                 raise ValueError('Invalid class input: MLDataset expected!')
@@ -1053,6 +1077,62 @@ class MLDataset(object):
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
             raise
+
+    def __load_arff(self, arff_path, encode_nonnumeric=False):
+        """Loads a given dataset saved in Weka's ARFF format. """
+        try:
+            from scipy.io.arff import loadarff
+            arff_data, arff_meta = loadarff(arff_path)
+        except:
+            raise ValueError('Error loading the ARFF dataset!')
+
+        attr_names = arff_meta.names()[:-1] # last column is class
+        attr_types = arff_meta.types()[:-1]
+        if not encode_nonnumeric:
+            # ensure all the attributes are numeric
+            uniq_types = set(attr_types)
+            if 'numeric' not in uniq_types:
+                raise ValueError('Currently only numeric attributes in ARFF are supported!')
+
+            non_numeric = uniq_types.difference({'numeric'})
+            if len(non_numeric) > 0:
+                raise ValueError('Non-numeric features provided ({}), '
+                                 'without requesting encoding to numeric. '
+                                 'Try setting encode_nonnumeric=True '
+                                 'or encode features to numeric!'.format(non_numeric))
+        else:
+            raise NotImplementedError('encoding non-numeric features to numeric is not implemented yet! '
+                                      'Encode features beforing to ARFF.')
+
+        self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
+
+        # initializing the key containers, before calling self.add_sample
+        self.__data = OrderedDict()
+        self.__labels = OrderedDict()
+        self.__classes = OrderedDict()
+
+        num_samples = len(arff_data)
+        num_digits = len(str(num_samples))
+        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index,nd=num_digits)
+        sample_classes = [cls.decode('utf-8') for cls in arff_data['class']]
+        class_set = set(sample_classes)
+        label_dict = dict()
+        # encoding class names to labels 1 to n
+        for ix, cls in enumerate(class_set):
+            label_dict[cls] = ix+1
+
+        for index in range(num_samples):
+            sample = arff_data.take([index])[0].tolist()
+            sample_attrs = sample[:-1]
+            sample_class = sample[-1].decode('utf-8')
+            self.add_sample(sample_id=make_id(index), # ARFF rows do not have an ID
+                            features=sample_attrs,
+                            label=label_dict[sample_class],
+                            class_id=sample_class) # not necessary to set feature_names=attr_names for each sample, as we do it globally after loop
+
+        self.__feature_names = attr_names
+
+        return
 
     def save(self, file_path):
         """

@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
 
 sys.dont_write_bytecode = True
 
@@ -285,3 +286,27 @@ def test_train_test_split_ids_perc():
 
     with raises(ValueError):
         copy_dataset.train_test_split_ids(train_perc=-1)
+
+# ------------------------------------------------
+# different file formats
+# ------------------------------------------------
+
+def test_load_arff():
+    arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
+    mld = MLDataset(arff_path=arff_path)
+
+    if mld.num_samples != 150:
+        raise ValueError('number of samples mismatch')
+
+    if mld.num_features != 4:
+        raise ValueError('number of features mismatch')
+
+    if mld.num_classes != 3:
+        raise ValueError('number of classes mismatch')
+
+    if len(mld.feature_names) != 4:
+        raise ValueError('length of feature names do not match number of features')
+
+    # print(mld)
+
+test_load_arff()
