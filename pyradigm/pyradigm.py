@@ -1106,7 +1106,8 @@ class MLDataset(object):
             raise NotImplementedError('encoding non-numeric features to numeric is not implemented yet! '
                                       'Encode features beforing to ARFF.')
 
-        self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
+        # self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
+        self.__description = arff_meta.name # to enable it as a label e.g. in neuropredict
 
         # initializing the key containers, before calling self.add_sample
         self.__data = OrderedDict()
