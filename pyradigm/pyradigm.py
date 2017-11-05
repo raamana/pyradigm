@@ -337,13 +337,13 @@ class MLDataset(object):
                    class_id=None,
                    overwrite=False,
                    feature_names=None):
-        """
-        Adds a new sample to the dataset with its features, label and class ID.
+        """Adds a new sample to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
 
         Parameters
         ----------
+
         sample_id : str, int
             The identifier that uniquely identifies this sample.
         features : list, ndarray
@@ -1283,12 +1283,15 @@ class MLDataset(object):
 
 
 def cli_run():
-    """Command line interface
+    """
+    Command line interface
 
-    This is the command line interface
+    This interface saves you coding effort to:
 
-        - to display basic info about datasets without having to code
-        - to perform basic arithmetic (add multiple classes or feature sets)
+        - display basic info (classes, sizes etc) about datasets
+        - display meta data (class membership) for samples
+        - perform basic arithmetic (add multiple classes or feature sets)
+
 
     """
 
@@ -1360,7 +1363,9 @@ def combine_and_save(add_path_list, out_path):
 
 
 def get_parser():
-    "Arg constructor"
+    """Argument specifier.
+
+    """
 
     parser = argparse.ArgumentParser(prog='pyradigm')
 
@@ -1384,7 +1389,9 @@ def get_parser():
 
 
 def parse_args():
-    "Arg parser."
+    """Arg parser.
+
+    """
 
     parser = get_parser()
 

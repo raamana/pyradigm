@@ -1,5 +1,6 @@
-Usage examples
---------------
+---------------------
+Usage examples (API)
+---------------------
 
 This class is greatly suited for neuroimaging applications (or any other domain), where each sample needs to be uniquely identified with a subject ID (or something similar).
 

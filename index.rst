@@ -8,6 +8,8 @@ Welcome to pyradigm
 
 Pyradigm is a PYthon based data structure to ease and improve Dataset's InteGrity in Machine learning workflows.
 
+.. image:: http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2/status.svg
+    :target: http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2
 .. image:: https://travis-ci.org/raamana/pyradigm.svg?branch=master
     :target: https://travis-ci.org/raamana/pyradigm
 .. image:: https://landscape.io/github/raamana/pyradigm/master/landscape.svg?style=flat
@@ -28,6 +30,7 @@ Pyradigm is a PYthon based data structure to ease and improve Dataset's InteGrit
    docs/installation
    docs/usage
    docs/API
+   docs/usage_cli
 
 
 Indices and tables
