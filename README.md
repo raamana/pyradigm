@@ -9,8 +9,8 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-Documentation : http://pyradigm.readthedocs.io/en/latest/
+Documentation : http://pyradigm.readthedocs.io
 
-Installation : http://pyradigm.readthedocs.io/en/latest/docs/installation.html
+Installation : http://pyradigm.readthedocs.io/docs/installation.html
 
-Usage and examples: http://pyradigm.readthedocs.io/en/latest/docs/usage.html
+Usage and examples: http://pyradigm.readthedocs.io/docs/usage.html
