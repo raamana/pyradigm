@@ -2,7 +2,13 @@
 Usage examples (API)
 ---------------------
 
-This class is greatly suited for neuroimaging applications (or any other domain), where each sample needs to be uniquely identified with a subject ID (or something similar).
+This examples and usage noted here ca be much better seen on a Jupter Notebook Viewer `here <https://nbviewer.jupyter.org/github/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ 
+
+The following is a html/rst version of the Jupyter notebook in the `pyradigm docs <https://github.com/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ . Downloading, interacting and playing with that notebook is highly recommened over passive reading of this html.
+
+---
+
+Pyradigm is greatly suited for neuroimaging applications (or any other domain), where each sample needs to be uniquely identified with a subject ID (or something similar).
 
 Key-level correspondence across data, labels (1 or 2), classnames ('healthy', 'disease') and the related helps maintain data integrity and improve the provenance, in addition to enabling traceback to original sources from where the features have been originally derived.
 
