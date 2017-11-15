@@ -1299,7 +1299,7 @@ class MLDataset(object):
         elif id(self.__data) != id(other.data):
             for key in self.keys:
                 if not np.all(self.data[key] == other.data[key]):
-                    print('differing data for the sample ids.')
+                    print('differing data for atleast one sample id : {}'.format(key))
                     return False
             return True
         else:
