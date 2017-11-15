@@ -9,8 +9,8 @@ import warnings
 import argparse
 import traceback
 import logging
-from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
-from collections import Counter, OrderedDict, Sequence
+from os.path import exists as pexists, realpath, basename, dirname, isfile
+from collections import Counter, Sequence
 from itertools import islice
 
 import numpy as np
@@ -97,10 +97,9 @@ class MLDataset(object):
                 raise ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
-            # TODO refactor the code to use only basic dict, as it allows for better equality comparisons
-            self.__data = OrderedDict()
-            self.__labels = OrderedDict()
-            self.__classes = OrderedDict()
+            self.__data = dict()
+            self.__labels = dict()
+            self.__classes = dict()
             self.__num_features = 0
             self.__dtype = None
             self.__description = ''
@@ -111,9 +110,9 @@ class MLDataset(object):
             self.__validate(data, labels, classes)
 
             # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
-            self.__data = OrderedDict(data)
-            self.__labels = OrderedDict(labels)
-            self.__classes = OrderedDict(classes)
+            self.__data = dict(data)
+            self.__labels = dict(labels)
+            self.__classes = dict(classes)
             self.__description = description
 
             sample_ids = list(data)
@@ -135,11 +134,19 @@ class MLDataset(object):
         """data in its original dict form."""
         return self.__data
 
-    def data_and_labels(self):
+    def data_and_labels(self, sorted_ids=False):
         """
         Dataset features and labels in a matrix form for learning.
 
-        Also returns sample_ids in the same order.
+        The row order in data matrix and target labels is identified by sample_ids,
+            which is not guaranteed upon different calls.
+
+        Parameters
+        ----------
+
+        sorted_ids : bool
+            Flag to request data and sample ids in sorted order.
+            This guarantees the same order upon different calls.
 
         Returns
         -------
@@ -153,6 +160,9 @@ class MLDataset(object):
         """
 
         sample_ids = np.array(self.keys)
+        if sorted_ids:
+            sample_ids.sort()
+
         label_dict = self.labels
         matrix = np.full([self.num_samples, self.num_features], np.nan)
         labels = np.full([self.num_samples, 1], np.nan)
@@ -332,7 +342,6 @@ class MLDataset(object):
 
         return features
 
-    # TODO try implementing based on pandas
     def add_sample(self, sample_id, features, label,
                    class_id=None,
                    overwrite=False,
@@ -481,7 +490,7 @@ class MLDataset(object):
 
         Parameters
         ----------
-        class_id : str
+        class_id : str or list
             identifier of the class to be returned.
 
         Returns
@@ -803,13 +812,13 @@ class MLDataset(object):
         subset_ids = self.keys_with_value(self.classes, class_id)
         return subset_ids
 
-    def get_subset(self, subset_ids):
+    def get_subset(self, subset_ids_in):
         """
         Returns a smaller dataset identified by their keys/sample IDs.
 
         Parameters
         ----------
-        subset_ids : list
+        subset_ids_in : list
             List od sample IDs to extracted from the dataset.
 
         Returns
@@ -819,12 +828,10 @@ class MLDataset(object):
 
         """
 
-        num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
+        subset_ids = [key for key in subset_ids_in if key in self.__data]
+        num_existing_keys = len(subset_ids)
         if subset_ids is not None and num_existing_keys > 0:
-            # need to ensure data are added to data, labels etc in the same order of sample IDs
-            # TODO come up with a way to do this even when not using OrderedDict()
-            # putting the access of data, labels and classes in the same loop would ensure there is correspondence
-            # across the three attributes of the class
+
             data = self.__get_subset_from_dict(self.__data, subset_ids)
             labels = self.__get_subset_from_dict(self.__labels, subset_ids)
             if self.__classes is not None:
@@ -872,8 +879,24 @@ class MLDataset(object):
 
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
-        # Using OrderedDict helps ensure data are added to data, labels etc in the same order of sample IDs
-        return OrderedDict((sid, value) for sid, value in input_dict.items() if sid in subset)
+        """
+        Returns dictionary formed from the subset of keys.
+
+        Parameters
+        ----------
+        input_dict : dict
+
+        subset : iterable
+            List of keys to be extracted.
+
+        Returns
+        -------
+        dict
+
+        """
+
+        # if sid in input_dict will avoid KeyError, although we are only passing keys that are already checked to exist
+        return {sid: input_dict[sid] for sid in subset if sid in input_dict}
 
     @property
     def keys(self):
@@ -1110,13 +1133,13 @@ class MLDataset(object):
         self.__description = arff_meta.name # to enable it as a label e.g. in neuropredict
 
         # initializing the key containers, before calling self.add_sample
-        self.__data = OrderedDict()
-        self.__labels = OrderedDict()
-        self.__classes = OrderedDict()
+        self.__data = dict()
+        self.__labels = dict()
+        self.__classes = dict()
 
         num_samples = len(arff_data)
         num_digits = len(str(num_samples))
-        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index,nd=num_digits)
+        make_id = lambda num_index: 'row{id:0{nd}d}'.format(id=num_index,nd=num_digits)
         sample_classes = [cls.decode('utf-8') for cls in arff_data['class']]
         class_set = set(sample_classes)
         label_dict = dict()

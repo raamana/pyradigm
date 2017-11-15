@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+import random
 from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
 
 sys.dont_write_bytecode = True
@@ -31,7 +32,10 @@ feat_names   = np.array([ str(x) for x in range(num_features) ])
 
 test_dataset = MLDataset()
 for class_index, class_id in enumerate(class_set):
-    for sub_ix in range(class_sizes[class_index]):
+    numeric_ids = list(range(class_sizes[class_index]))
+    # to ensure tests don't depend on the order of addition
+    random.shuffle(numeric_ids)
+    for sub_ix in numeric_ids:
         subj_id = '{}_S{:05d}'.format(class_set[class_index],sub_ix)
         feat = np.random.random(num_features)
         test_dataset.add_sample(subj_id, feat, class_index, class_id, feat_names)
@@ -120,9 +124,23 @@ def test_invalid_constructor():
                       classes='invalid_value')
 
 def test_return_data_labels():
-    matrix, vec_labels, sub_ids = test_dataset.data_and_labels()
-    assert len(vec_labels)==len(sub_ids)
-    assert len(vec_labels)==matrix.shape[0]
+
+    matrix1, vec_labels1, sub_ids1 = test_dataset.data_and_labels()
+    assert len(vec_labels1)==len(sub_ids1)
+    assert len(vec_labels1)==matrix1.shape[0]
+
+
+def test_return_data_labels_sorted():
+    matrix1, vec_labels1, sub_ids1 = test_dataset.data_and_labels(sorted_ids=True)
+    assert len(vec_labels1)==len(sub_ids1)
+    assert len(vec_labels1)==matrix1.shape[0]
+
+    matrix2, vec_labels2, sub_ids2 = test_dataset.data_and_labels(sorted_ids=True)
+    assert np.all(vec_labels1==vec_labels2)
+    assert np.all(matrix1==matrix2)
+    assert np.all(sub_ids1==sub_ids2)
+    assert matrix1.shape == matrix2.shape
+
 
 def test_init_with_dict():
     new_ds = MLDataset(data=test_dataset.data, labels=test_dataset.labels, classes=test_dataset.classes)
