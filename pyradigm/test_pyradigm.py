@@ -26,6 +26,7 @@ out_dir  = '.'
 num_classes  = np.random.randint( 2, 50)
 class_sizes  = np.random.randint(10, 1000, num_classes)
 num_features = np.random.randint(10, 500)
+data_type = 'float32'
 
 class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
@@ -37,7 +38,7 @@ for class_index, class_id in enumerate(class_set):
     random.shuffle(numeric_ids)
     for sub_ix in numeric_ids:
         subj_id = '{}_S{:05d}'.format(class_set[class_index],sub_ix)
-        feat = np.random.random(num_features)
+        feat = np.random.random(num_features).astype(data_type)
         test_dataset.add_sample(subj_id, feat, class_index, class_id, feat_names)
 
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
@@ -81,6 +82,9 @@ def test_num_classes():
 
 def test_num_features():
     assert test_dataset.num_features == num_features
+
+def test_dtype():
+    assert np.issubdtype(test_dataset.dtype, data_type)
 
 def test_num_features_setter():
     with raises(AttributeError):

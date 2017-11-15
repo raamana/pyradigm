@@ -109,7 +109,6 @@ class MLDataset(object):
             # but only in data, labels and classes, not feature names
             self.__validate(data, labels, classes)
 
-            # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
             self.__data = dict(data)
             self.__labels = dict(labels)
             self.__classes = dict(classes)
@@ -118,7 +117,7 @@ class MLDataset(object):
             sample_ids = list(data)
             features0 = data[sample_ids[0]]
             self.__num_features = features0.size if isinstance(features0,np.ndarray) else len(features0)
-            self.__dtype = type(data[sample_ids[0]])
+            self.__dtype = np.array(data[sample_ids[0]]).dtype
 
             # assigning default names for each feature
             if feature_names is None:
@@ -164,7 +163,7 @@ class MLDataset(object):
             sample_ids.sort()
 
         label_dict = self.labels
-        matrix = np.full([self.num_samples, self.num_features], np.nan)
+        matrix = np.empty([self.num_samples, self.num_features], dtype=self.dtype)
         labels = np.full([self.num_samples, 1], np.nan)
         for ix, sample in enumerate(sample_ids):
             matrix[ix, :] = self.__data[sample]
@@ -245,7 +244,7 @@ class MLDataset(object):
 
     @feature_names.setter
     def feature_names(self, names):
-        "Stores the text labels for features"
+        """Stores the text labels for features"""
 
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
@@ -334,6 +333,10 @@ class MLDataset(object):
         if not isinstance(features, np.ndarray):
             features = np.asarray(features)
 
+        # # avoid numeric restrictions to enable pyradigm's utility for broader range of applications.
+        # if not np.issubdtype(features.dtype, np.number):
+        #     raise TypeError('non-numeric features are provided, which are not supported!')
+
         if features.size <= 0:
             raise ValueError('provided features are empty.')
 
@@ -394,7 +397,7 @@ class MLDataset(object):
             self.__data[sample_id] = features
             self.__labels[sample_id] = label
             self.__classes[sample_id] = class_id
-            self.__dtype = type(features)
+            self.__dtype = features.dtype
             self.__num_features = features.size if isinstance(features, np.ndarray) else len(features)
             if feature_names is None:
                 self.__feature_names = self.__str_names(self.num_features)
@@ -402,7 +405,7 @@ class MLDataset(object):
             if self.__num_features != features.size:
                 raise ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
                     features.size, self.__num_features))
-            if not isinstance(features, self.__dtype):
+            if features.dtype != self.__dtype:
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
             self.__data[sample_id] = features
@@ -939,8 +942,8 @@ class MLDataset(object):
     @dtype.setter
     def dtype(self, type_val):
         if self.__dtype is None:
-            if not isinstance(type_val, type):
-                raise TypeError('Invalid data type.')
+            if not isinstance(type_val, np.dtype):
+                raise TypeError('Invalid data type. It must be a valid numpy dtype!')
             self.__dtype = type_val
         else:
             warnings.warn('Data type is already inferred. Can not be set!')
