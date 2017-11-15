@@ -133,7 +133,7 @@ class MLDataset(object):
         """data in its original dict form."""
         return self.__data
 
-    def data_and_labels(self, sorted_ids=False):
+    def data_and_labels(self, out_data_type=None, sorted_ids=False):
         """
         Dataset features and labels in a matrix form for learning.
 
@@ -142,6 +142,8 @@ class MLDataset(object):
 
         Parameters
         ----------
+        out_data_type : numpy.dtype
+            Valid numpy dtype to cast the features to.
 
         sorted_ids : bool
             Flag to request data and sample ids in sorted order.
@@ -150,7 +152,7 @@ class MLDataset(object):
         Returns
         -------
         data_matrix : ndarray
-            2D array of shape [num_samples, num_features] with features  corresponding row-wise to sample_ids
+            2D array of shape [num_samples, num_features] with features corresponding row-wise to sample_ids
         labels : ndarray
             Array of numeric labels for each sample corresponding row-wise to sample_ids
         sample_ids : list
@@ -162,11 +164,16 @@ class MLDataset(object):
         if sorted_ids:
             sample_ids.sort()
 
+        if out_data_type is not None and isinstance(out_data_type, np.dtype):
+            out_data_type = out_data_type
+        else:
+            out_data_type = self.dtype
+
         label_dict = self.labels
-        matrix = np.empty([self.num_samples, self.num_features], dtype=self.dtype)
+        matrix = np.empty([self.num_samples, self.num_features], dtype=out_data_type)
         labels = np.full([self.num_samples, 1], np.nan)
         for ix, sample in enumerate(sample_ids):
-            matrix[ix, :] = self.__data[sample]
+            matrix[ix, :] = self.__data[sample].astype(out_data_type)
             labels[ix] = label_dict[sample]
 
         return matrix, np.ravel(labels), sample_ids
