@@ -1329,14 +1329,14 @@ def cli_run():
 
     """
 
-    path_list, meta_requested, summary_requested, add_path_list, out_path = parse_args()
+    path_list, meta_requested, summary_requested, flag_extended, add_path_list, out_path = parse_args()
 
     # printing info if requested
     if path_list:
         for ds_path in path_list:
             ds = MLDataset(ds_path)
             if summary_requested:
-                print_info(ds, ds_path)
+                print_info(ds, ds_path, extended=flag_extended)
             if meta_requested:
                 print_meta(ds, ds_path)
 
@@ -1347,7 +1347,7 @@ def cli_run():
     return
 
 
-def print_info(ds, ds_path=None):
+def print_info(ds, ds_path=None, extended=False):
     "Prints basic summary of a given dataset."
 
     if ds_path is None:
@@ -1357,8 +1357,9 @@ def print_info(ds, ds_path=None):
 
     dashes = '-' * len(bname)
     print(bname)
-    print(dashes)
     print(ds)
+    if extended:
+        print('\nfeature names :\n{}'.format(ds.feature_names))
     print(dashes)
 
     return
@@ -1411,6 +1412,9 @@ def get_parser():
 
     parser.add_argument('-i', '--info', action='store_true', dest='summary_requested', required=False,
                         default=False, help='Prints summary info (classes, #samples, #features).')
+
+    parser.add_argument('-e', '--extended', action='store_true', dest='extended_summary_requested', required=False,
+                        default=False, help='Prints extended summary info (adding feature names etc).')
 
     arithmetic_group = parser.add_argument_group('Options for multiple datasets')
     arithmetic_group.add_argument('-a', '--add', nargs='+', action='store', dest='add_path_list', required=False,
@@ -1469,11 +1473,18 @@ def parse_args():
         if len(add_path_list) < 2:
             raise ValueError('Need a minimum of datasets to combine!!')
 
+    extended_summary_requested = params.extended_summary_requested
+    summary_requested = params.summary_requested
+    if extended_summary_requested:
+        summary_requested = True
+
     # removing duplicates (from regex etc)
     path_list = set(path_list)
     add_path_list = set(add_path_list)
 
-    return path_list, params.meta_requested, params.summary_requested, add_path_list, out_path
+    return path_list, params.meta_requested, \
+           summary_requested, extended_summary_requested, \
+           add_path_list, out_path
 
 
 if __name__ == '__main__':
