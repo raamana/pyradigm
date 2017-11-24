@@ -140,6 +140,20 @@ class MLDataset(object):
 
         return ds
 
+    @classmethod
+    def copy(cls, in_dataset):
+        "Copy constructor"
+
+        if not isinstance(in_dataset, MLDataset):
+            raise ValueError('Invalid class input: MLDataset expected!')
+        if in_dataset.num_samples <= 0:
+            raise ValueError('Dataset to copy is empty.')
+
+        ds = cls.__new__(cls)
+        ds = ds.__copy(in_dataset)
+
+        return ds
+
     @property
     def data(self):
         """data in its original dict form."""
@@ -1195,7 +1209,6 @@ class MLDataset(object):
 
         self.__feature_names = attr_names
 
-        return
         return self
 
     def save(self, file_path):

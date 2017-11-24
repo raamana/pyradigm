@@ -242,6 +242,9 @@ def test_eq_copy():
     new_copy = MLDataset(in_dataset=copy_dataset)
     assert new_copy == copy_dataset
 
+    new_copy2 = MLDataset.copy(copy_dataset)
+    assert new_copy2 == copy_dataset
+
 def test_unpickling():
     out_file = os.path.join(out_dir, 'random_pickled_dataset.pkl')
     copy_dataset.save(out_file)
@@ -346,5 +349,3 @@ def test_load_arff():
         raise ValueError('length of feature names do not match number of features')
 
     # print(mld)
-
-test_load_arff()
