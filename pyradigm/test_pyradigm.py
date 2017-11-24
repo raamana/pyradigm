@@ -28,18 +28,34 @@ class_sizes  = np.random.randint(10, 1000, num_classes)
 num_features = np.random.randint(10, 500)
 data_type = 'float32'
 
-class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
+class_set    = [ 'C{}'.format(x) for x in range(num_classes)  ]
 feat_names   = np.array([ str(x) for x in range(num_features) ])
 
+sample_ids = list()
+class_ids = list()
+num_labels = list()
+for class_index, cls_id in list(enumerate(class_set)):
+    ids_this_class = list([ '{}_S{}'.format(cls_id, sub_ix) for sub_ix in list(range(class_sizes[class_index]))])
+    sample_ids.extend(ids_this_class)
+    class_ids.extend([cls_id] * class_sizes[class_index])
+    num_labels.extend([class_index]*class_sizes[class_index])
+
+sample_ids = np.array(sample_ids)
+class_ids = np.array(class_ids)
+num_labels = np.array(num_labels)
+
+# to ensure tests don't depend on the order of sample/class addition
+shuffle_order = list(range(len(sample_ids)))
+random.shuffle(shuffle_order)
+
+sample_ids = sample_ids[shuffle_order]
+class_ids = class_ids[shuffle_order]
+num_labels = num_labels[shuffle_order]
+
 test_dataset = MLDataset()
-for class_index, class_id in enumerate(class_set):
-    numeric_ids = list(range(class_sizes[class_index]))
-    # to ensure tests don't depend on the order of addition
-    random.shuffle(numeric_ids)
-    for sub_ix in numeric_ids:
-        subj_id = '{}_S{:05d}'.format(class_set[class_index],sub_ix)
-        feat = np.random.random(num_features).astype(data_type)
-        test_dataset.add_sample(subj_id, feat, class_index, class_id, feat_names)
+for ix, id in enumerate(sample_ids):
+    feat = np.random.random(num_features).astype(data_type)
+    test_dataset.add_sample(id, feat, num_labels[ix], class_ids[ix], feat_names)
 
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
