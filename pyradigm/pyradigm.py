@@ -128,6 +128,18 @@ class MLDataset(object):
         else:
             raise ValueError('Incorrect way to construct the dataset.')
 
+    @classmethod
+    def arff(cls, arff_path, encode_nonnumeric=False):
+        "Constructor from ARFF file"
+
+        ds = cls.__new__(cls)
+        if isfile(arff_path):
+            ds = ds.__load_arff(arff_path, encode_nonnumeric)
+        else:
+            raise IOError('Given ARFF can not be found!')
+
+        return ds
+
     @property
     def data(self):
         """data in its original dict form."""
@@ -1184,6 +1196,7 @@ class MLDataset(object):
         self.__feature_names = attr_names
 
         return
+        return self
 
     def save(self, file_path):
         """

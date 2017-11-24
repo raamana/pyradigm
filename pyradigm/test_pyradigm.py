@@ -331,7 +331,7 @@ def test_train_test_split_ids_perc():
 
 def test_load_arff():
     arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
-    mld = MLDataset(arff_path=arff_path)
+    mld = MLDataset.arff(arff_path)
 
     if mld.num_samples != 150:
         raise ValueError('number of samples mismatch')
