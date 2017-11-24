@@ -133,7 +133,10 @@ class MLDataset(object):
         """data in its original dict form."""
         return self.__data
 
-    def data_and_labels(self, out_data_type=None, sorted_ids=False):
+    def data_and_labels(self,
+                        out_data_type=None,
+                        sorted_ids=False,
+                        group_by_class=False):
         """
         Dataset features and labels in a matrix form for learning.
 
@@ -149,6 +152,10 @@ class MLDataset(object):
             Flag to request data and sample ids in sorted order.
             This guarantees the same order upon different calls.
 
+        group_by_class : bool
+            Flag to help group the rows in the output matrix by class.
+            This helps to quickly visualize the patterns in data by class.
+
         Returns
         -------
         data_matrix : ndarray
@@ -160,9 +167,17 @@ class MLDataset(object):
 
         """
 
-        sample_ids = np.array(self.keys)
-        if sorted_ids:
-            sample_ids.sort()
+        if group_by_class:
+            sample_ids = list()
+            for cls in self.class_set:
+                ids_in_class = np.array(self.sample_ids_in_class(cls))
+                if sorted_ids:
+                    ids_in_class.sort()
+                sample_ids.extend(ids_in_class)
+        else:
+            sample_ids = np.array(self.keys)
+            if sorted_ids:
+                sample_ids.sort()
 
         if out_data_type is not None and isinstance(out_data_type, np.dtype):
             out_data_type = out_data_type
