@@ -72,6 +72,54 @@ reloaded_dataset = MLDataset(filepath=out_file, description='reloaded test_datas
 
 copy_dataset = MLDataset(in_dataset=test_dataset)
 
+# ------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+feat_generator = np.random.randn
+
+def make_random_MLdataset(max_num_classes = 20,
+                          max_class_size = 50,
+                          max_dim = 100,
+                          stratified = True):
+    "Generates a random MLDataset for use in testing."
+
+    smallest = 10
+    max_class_size = max(smallest, max_class_size)
+    largest = max(50, max_class_size)
+    largest = max(smallest+3,largest)
+
+    num_classes = np.random.randint(2, max_num_classes, 1)
+    if type(num_classes) == np.ndarray:
+        num_classes = num_classes[0]
+    if not stratified:
+        class_sizes = np.random.random_integers(smallest, largest,
+                                                size=[num_classes, 1])
+    else:
+        class_sizes = np.repeat(np.random.randint(smallest, largest),
+                                                  num_classes)
+
+    num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
+    feat_names = [ str(x) for x in range(num_features)]
+
+    class_ids = list()
+    labels = list()
+    for cl in range(num_classes):
+        class_ids.append('class-{}'.format(cl))
+        labels.append(int(cl))
+
+    ds = MLDataset()
+    for cc, class_ in enumerate(class_ids):
+        subids = [ 'sub{:03}-class{:03}'.format(ix,cc) for ix in range(class_sizes[cc]) ]
+        for sid in subids:
+            ds.add_sample(sid, feat_generator(num_features), int(cc), class_, feat_names)
+
+    return ds
+
+
+# ------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+
 rand_index = np.random.randint(0,len(class_set),1)[0]
 random_class_name = class_set[rand_index]
 random_class_ds = test_dataset.get_class(random_class_name)
@@ -327,6 +375,37 @@ def test_train_test_split_ids_perc():
 
     with raises(ValueError):
         copy_dataset.train_test_split_ids(train_perc=-1)
+
+
+def test_train_test_split_is_sufficiently_random():
+    """Test to ensure ids in repeated splits are sufficiently random"""
+
+    rand_ds = make_random_MLdataset(max_num_classes=10, max_class_size=1000, max_dim=1)
+
+    total_num_rep = 1000
+    for perc in np.arange(0.25, 1.0, 0.2):
+        accum_train = list()
+        accum_test = list()
+        for rep in range(total_num_rep):
+            cur_train, cur_test = rand_ds.train_test_split_ids(train_perc=perc)
+            accum_train.extend(cur_train)
+            accum_test.extend(cur_test)
+
+        ids_train, counts_train = np.unique(accum_train, return_counts=True)
+        ids_test , counts_test  = np.unique(accum_test , return_counts=True)
+
+        # if the splits were truly [sufficiently] random,
+        #  the counts for different ids must be similar
+        #  and close to equations below:
+        expected_count_train = total_num_rep * perc
+        expected_count_test  = total_num_rep * (1.0 - perc)
+        within_tol = lambda count, expd : np.isclose(np.mean(count), expd, rtol=0.05)
+
+        if not within_tol(counts_train, expected_count_train) or \
+                not within_tol(counts_test, expected_count_test):
+            raise ValueError('train/test splits ({}%) are NOT sufficiently random '
+                             'over {} repetitions'.format(100*perc,total_num_rep))
+
 
 # ------------------------------------------------
 # different file formats
