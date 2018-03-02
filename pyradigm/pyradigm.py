@@ -284,6 +284,23 @@ class MLDataset(object):
         else:
             raise ValueError('classes input must be a dictionary!')
 
+    def rename(self, class_name_dict=None, feature_names=None):
+        """Method to remap class names, and rename features"""
+
+        if class_name_dict is not None and feature_names is None:
+            if isinstance(class_name_dict,dict):
+                # ensure atleast one class name remap exists
+                if not any([cls in class_name_dict for cls in self.class_set]):
+                    raise ValueError('Input mapping does not contain atleast one known class names')
+
+                for id in self.__classes:
+                    self.__classes[id] = class_name_dict[self.__classes[id]]
+            else:
+                raise ValueError('remap must be a dict with previous class names as keys and new class names as values!')
+        elif class_name_dict is None and feature_names is not None:
+            # validation happens in feature_names.setter
+            self.feature_names = feature_names
+
     @property
     def feature_names(self):
         "Returns the feature names as an numpy array of strings."
@@ -1114,6 +1131,7 @@ class MLDataset(object):
                 'get_class',
                 'get_subset',
                 'random_subset',
+                'rename',
                 'get_feature_subset',
                 'keys',
                 'num_classes',
