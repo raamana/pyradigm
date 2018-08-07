@@ -85,7 +85,7 @@ def test_num_features_setter():
 def test_num_samples():
     assert test_dataset.num_samples == sum(class_sizes)
 
-def test_substract():
+def test_subtract():
     assert other_classes_ds.num_samples == sum(class_sizes) - class_sizes[rand_index]
 
 def test_get_class_list():

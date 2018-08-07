@@ -58,7 +58,7 @@ class MLDataset(object):
             dict of class names (keys must match with data/labels, are treated to be sample ids)
 
         description : str
-            Arbitray string to describe the current dataset.
+            Arbitrary string to describe the current dataset.
 
         feature_names : list, ndarray
             List of names for each feature in the dataset.
