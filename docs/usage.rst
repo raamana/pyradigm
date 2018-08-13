@@ -4,7 +4,7 @@ Usage examples (API)
 
 This examples and usage noted here ca be much better seen on a Jupter Notebook Viewer `here <https://nbviewer.jupyter.org/github/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ 
 
-The following is a html/rst version of the Jupyter notebook in the `pyradigm docs <https://github.com/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ . Downloading, interacting and playing with that notebook is highly recommened over passive reading of this html.
+The following is a html/rst version of the Jupyter notebook in the `pyradigm docs <https://github.com/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ . Downloading, interacting and playing with that notebook is highly recommend over passive reading of this html.
 
 ---
 
@@ -67,7 +67,7 @@ features, do some machine learning and dispose these features away!
 
 Because it doesn't simply end there.
 
-At a minimum, I often need to know * which samples are misclassified - meaning you need to know what the identifiers are and not simply their row indices in X? * what are the charecteristics of those samples? * what classes do they belong to?
+At a minimum, I often need to know * which samples are misclassified - meaning you need to know what the identifiers are and not simply their row indices in X? * what are the characteristics of those samples? * what classes do they belong to?
   
 And all this info needs to be obtained * without having to write lots of code connecting few non-obvious links to disparate sources of data (numerical features X, and sample identifiers in a CSV file) to find the relevant info * without having to track down who or which method originally produced these features * how the previous personnel or grad student organized the whole dataset, if you haven't generated the features yourself from scratch
 
@@ -650,7 +650,7 @@ the sample id), but also index-wise.
 
 
 
-Subject-wise tranform
+Subject-wise transform
 ---------------------
 
 Quite often, we are interested in computing some statistics on data for
@@ -1189,7 +1189,7 @@ same data and classes for each key... Easy:
 
 
 
-Now let's try the arithmentic:
+Now let's try the arithmetic:
 
 .. code:: python
 
