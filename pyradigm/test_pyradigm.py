@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+import random
 from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
 
 sys.dont_write_bytecode = True
@@ -25,16 +26,36 @@ out_dir  = '.'
 num_classes  = np.random.randint( 2, 50)
 class_sizes  = np.random.randint(10, 1000, num_classes)
 num_features = np.random.randint(10, 500)
+data_type = 'float32'
 
-class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
+class_set    = [ 'C{}'.format(x) for x in range(num_classes)  ]
 feat_names   = np.array([ str(x) for x in range(num_features) ])
 
+sample_ids = list()
+class_ids = list()
+num_labels = list()
+for class_index, cls_id in list(enumerate(class_set)):
+    ids_this_class = list([ '{}_S{}'.format(cls_id, sub_ix) for sub_ix in list(range(class_sizes[class_index]))])
+    sample_ids.extend(ids_this_class)
+    class_ids.extend([cls_id] * class_sizes[class_index])
+    num_labels.extend([class_index]*class_sizes[class_index])
+
+sample_ids = np.array(sample_ids)
+class_ids = np.array(class_ids)
+num_labels = np.array(num_labels)
+
+# to ensure tests don't depend on the order of sample/class addition
+shuffle_order = list(range(len(sample_ids)))
+random.shuffle(shuffle_order)
+
+sample_ids = sample_ids[shuffle_order]
+class_ids = class_ids[shuffle_order]
+num_labels = num_labels[shuffle_order]
+
 test_dataset = MLDataset()
-for class_index, class_id in enumerate(class_set):
-    for sub_ix in range(class_sizes[class_index]):
-        subj_id = '{}_S{:05d}'.format(class_set[class_index],sub_ix)
-        feat = np.random.random(num_features)
-        test_dataset.add_sample(subj_id, feat, class_index, class_id, feat_names)
+for ix, id in enumerate(sample_ids):
+    feat = np.random.random(num_features).astype(data_type)
+    test_dataset.add_sample(id, feat, num_labels[ix], class_ids[ix], feat_names)
 
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
@@ -50,6 +71,54 @@ class_set, label_set, class_sizes = test_dataset.summarize_classes()
 reloaded_dataset = MLDataset(filepath=out_file, description='reloaded test_dataset')
 
 copy_dataset = MLDataset(in_dataset=test_dataset)
+
+# ------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+feat_generator = np.random.randn
+
+def make_random_MLdataset(max_num_classes = 20,
+                          max_class_size = 50,
+                          max_dim = 100,
+                          stratified = True):
+    "Generates a random MLDataset for use in testing."
+
+    smallest = 10
+    max_class_size = max(smallest, max_class_size)
+    largest = max(50, max_class_size)
+    largest = max(smallest+3,largest)
+
+    num_classes = np.random.randint(2, max_num_classes, 1)
+    if type(num_classes) == np.ndarray:
+        num_classes = num_classes[0]
+    if not stratified:
+        class_sizes = np.random.random_integers(smallest, largest,
+                                                size=[num_classes, 1])
+    else:
+        class_sizes = np.repeat(np.random.randint(smallest, largest),
+                                                  num_classes)
+
+    num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
+    feat_names = [ str(x) for x in range(num_features)]
+
+    class_ids = list()
+    labels = list()
+    for cl in range(num_classes):
+        class_ids.append('class-{}'.format(cl))
+        labels.append(int(cl))
+
+    ds = MLDataset()
+    for cc, class_ in enumerate(class_ids):
+        subids = [ 'sub{:03}-class{:03}'.format(ix,cc) for ix in range(class_sizes[cc]) ]
+        for sid in subids:
+            ds.add_sample(sid, feat_generator(num_features), int(cc), class_, feat_names)
+
+    return ds
+
+
+# ------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
 
 rand_index = np.random.randint(0,len(class_set),1)[0]
 random_class_name = class_set[rand_index]
@@ -77,6 +146,9 @@ def test_num_classes():
 
 def test_num_features():
     assert test_dataset.num_features == num_features
+
+def test_dtype():
+    assert np.issubdtype(test_dataset.dtype, data_type)
 
 def test_num_features_setter():
     with raises(AttributeError):
@@ -120,9 +192,23 @@ def test_invalid_constructor():
                       classes='invalid_value')
 
 def test_return_data_labels():
-    matrix, vec_labels, sub_ids = test_dataset.data_and_labels()
-    assert len(vec_labels)==len(sub_ids)
-    assert len(vec_labels)==matrix.shape[0]
+
+    matrix1, vec_labels1, sub_ids1 = test_dataset.data_and_labels()
+    assert len(vec_labels1)==len(sub_ids1)
+    assert len(vec_labels1)==matrix1.shape[0]
+
+
+def test_return_data_labels_sorted():
+    matrix1, vec_labels1, sub_ids1 = test_dataset.data_and_labels(sorted_ids=True)
+    assert len(vec_labels1)==len(sub_ids1)
+    assert len(vec_labels1)==matrix1.shape[0]
+
+    matrix2, vec_labels2, sub_ids2 = test_dataset.data_and_labels(sorted_ids=True)
+    assert np.all(vec_labels1==vec_labels2)
+    assert np.all(matrix1==matrix2)
+    assert np.all(sub_ids1==sub_ids2)
+    assert matrix1.shape == matrix2.shape
+
 
 def test_init_with_dict():
     new_ds = MLDataset(data=test_dataset.data, labels=test_dataset.labels, classes=test_dataset.classes)
@@ -203,6 +289,9 @@ def test_eq_self():
 def test_eq_copy():
     new_copy = MLDataset(in_dataset=copy_dataset)
     assert new_copy == copy_dataset
+
+    new_copy2 = MLDataset.copy(copy_dataset)
+    assert new_copy2 == copy_dataset
 
 def test_unpickling():
     out_file = os.path.join(out_dir, 'random_pickled_dataset.pkl')
@@ -287,13 +376,44 @@ def test_train_test_split_ids_perc():
     with raises(ValueError):
         copy_dataset.train_test_split_ids(train_perc=-1)
 
+
+def test_train_test_split_is_sufficiently_random():
+    """Test to ensure ids in repeated splits are sufficiently random"""
+
+    rand_ds = make_random_MLdataset(max_num_classes=10, max_class_size=1000, max_dim=1)
+
+    total_num_rep = 1000
+    for perc in np.arange(0.25, 1.0, 0.2):
+        accum_train = list()
+        accum_test = list()
+        for rep in range(total_num_rep):
+            cur_train, cur_test = rand_ds.train_test_split_ids(train_perc=perc)
+            accum_train.extend(cur_train)
+            accum_test.extend(cur_test)
+
+        ids_train, counts_train = np.unique(accum_train, return_counts=True)
+        ids_test , counts_test  = np.unique(accum_test , return_counts=True)
+
+        # if the splits were truly [sufficiently] random,
+        #  the counts for different ids must be similar
+        #  and close to equations below:
+        expected_count_train = total_num_rep * perc
+        expected_count_test  = total_num_rep * (1.0 - perc)
+        within_tol = lambda count, expd : np.isclose(np.mean(count), expd, rtol=0.05)
+
+        if not within_tol(counts_train, expected_count_train) or \
+                not within_tol(counts_test, expected_count_test):
+            raise ValueError('train/test splits ({}%) are NOT sufficiently random '
+                             'over {} repetitions'.format(100*perc,total_num_rep))
+
+
 # ------------------------------------------------
 # different file formats
 # ------------------------------------------------
 
 def test_load_arff():
     arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
-    mld = MLDataset(arff_path=arff_path)
+    mld = MLDataset.arff(arff_path)
 
     if mld.num_samples != 150:
         raise ValueError('number of samples mismatch')
@@ -308,5 +428,3 @@ def test_load_arff():
         raise ValueError('length of feature names do not match number of features')
 
     # print(mld)
-
-test_load_arff()
