@@ -14,3 +14,5 @@ Documentation : http://pyradigm.readthedocs.io
 Installation : http://pyradigm.readthedocs.io/docs/installation.html
 
 Usage and examples: http://pyradigm.readthedocs.io/docs/usage.html
+
+[![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/raamana)
