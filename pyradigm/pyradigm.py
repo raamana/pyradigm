@@ -1,4 +1,4 @@
-__all__ = [ 'MLDataset', 'cli_run' ]
+__all__ = [ 'MLDataset', 'cli_run', 'check_compatibility' ]
 
 import copy
 import os
