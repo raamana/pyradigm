@@ -1047,6 +1047,7 @@ class MLDataset(object):
                 'num_samples',
                 'sample_ids',
                 'save',
+                'compatible',
                 'transform',
                 'add_classes']
 
@@ -1281,6 +1282,23 @@ class MLDataset(object):
             return True
         else:
             return True
+
+    def compatible(self, another):
+        """
+        Checks whether the input dataset is compatible with the current instance:
+        i.e. with same set of subjects, each beloning to the same class.
+
+        Parameters
+        ----------
+        dataset : MLdataset or similar
+
+        Returns
+        -------
+        compatible : bool
+            Boolean flag indicating whether two datasets are compatible or not
+        """
+        compatible, _ = check_compatibility([self, another])
+        return compatible
 
 
 def check_compatibility(datasets):
