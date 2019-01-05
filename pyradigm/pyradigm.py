@@ -1283,6 +1283,65 @@ class MLDataset(object):
             return True
 
 
+def check_compatibility(datasets):
+    """
+    Checks whether the given MLdataset instances are compatible
+
+    i.e. with same set of subjects, each beloning to the same class in all instances.
+
+    Checks the first dataset in the list against the rest, and returns a boolean array.
+
+    Parameters
+    ----------
+    datasets : Iterable
+        A list of n datasets
+
+    Returns
+    -------
+    all_are_compatible : bool
+        Boolean flag indicating whether all datasets are compatible or not
+
+    compatibility : list
+        List indicating whether first dataset is compatible with the rest individually.
+        This could be useful to select a subset of mutually compatible datasets.
+        Length : n-1
+
+    """
+
+    from collections import Iterable
+    if not isinstance(datasets, Iterable):
+        raise TypeError('Input must be an iterable '
+                        'i.e. (list/tuple) of MLdataset/similar instances')
+
+    datasets = list(datasets) # to make it indexable if coming from a set
+
+    pivot = datasets[0]
+    if not isinstance(pivot, MLDataset):
+        pivot = MLDataset(pivot)
+
+    compatible = list()
+    for ds in datasets[1:]:
+        if not isinstance(ds, MLDataset):
+            ds = MLDataset(ds)
+
+        is_compatible = True
+        # compound bool will short-circuit, not optim required
+        if pivot.num_samples != ds.num_samples \
+                or pivot.keys != ds.keys \
+                or pivot.classes != ds.classes:
+            is_compatible = False
+
+        # alt impl: check if any of the following attributes differ
+        # for attr in ('num_samples', 'sample_ids', 'classes'):
+        #     if getattr(pivot, attr) != getattr(ds, att):
+        #         is_compatible = False
+        #         break
+
+        compatible.append(is_compatible)
+
+    return all(compatible), compatible
+
+
 def cli_run():
     """
     Command line interface
