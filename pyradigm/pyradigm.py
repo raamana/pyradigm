@@ -1,4 +1,4 @@
-__all__ = [ 'MLDataset', 'cli_run' ]
+__all__ = [ 'MLDataset', 'cli_run', 'check_compatibility' ]
 
 import copy
 import os
@@ -1047,6 +1047,7 @@ class MLDataset(object):
                 'num_samples',
                 'sample_ids',
                 'save',
+                'compatible',
                 'transform',
                 'add_classes']
 
@@ -1106,7 +1107,8 @@ class MLDataset(object):
             raise NotImplementedError('encoding non-numeric features to numeric is not implemented yet! '
                                       'Encode features beforing to ARFF.')
 
-        self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
+        # self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
+        self.__description = arff_meta.name # to enable it as a label e.g. in neuropredict
 
         # initializing the key containers, before calling self.add_sample
         self.__data = OrderedDict()
@@ -1151,6 +1153,12 @@ class MLDataset(object):
             If saving to disk is not successful.
 
         """
+
+        # TODO need a file format that is flexible and efficient to allow the following:
+        #   1) being able to read just meta info without having to load the ENTIRE dataset
+        #       i.e. use case: compatibility check with #subjects, ids and their classes
+        #   2) random access layout: being able to read features for a single subject!
+
         try:
             file_path = os.path.abspath(file_path)
             with open(file_path, 'wb') as df:
@@ -1280,6 +1288,82 @@ class MLDataset(object):
             return True
         else:
             return True
+
+    def compatible(self, another):
+        """
+        Checks whether the input dataset is compatible with the current instance:
+        i.e. with same set of subjects, each beloning to the same class.
+
+        Parameters
+        ----------
+        dataset : MLdataset or similar
+
+        Returns
+        -------
+        compatible : bool
+            Boolean flag indicating whether two datasets are compatible or not
+        """
+        compatible, _ = check_compatibility([self, another])
+        return compatible
+
+
+def check_compatibility(datasets):
+    """
+    Checks whether the given MLdataset instances are compatible
+
+    i.e. with same set of subjects, each beloning to the same class in all instances.
+
+    Checks the first dataset in the list against the rest, and returns a boolean array.
+
+    Parameters
+    ----------
+    datasets : Iterable
+        A list of n datasets
+
+    Returns
+    -------
+    all_are_compatible : bool
+        Boolean flag indicating whether all datasets are compatible or not
+
+    compatibility : list
+        List indicating whether first dataset is compatible with the rest individually.
+        This could be useful to select a subset of mutually compatible datasets.
+        Length : n-1
+
+    """
+
+    from collections import Iterable
+    if not isinstance(datasets, Iterable):
+        raise TypeError('Input must be an iterable '
+                        'i.e. (list/tuple) of MLdataset/similar instances')
+
+    datasets = list(datasets) # to make it indexable if coming from a set
+
+    pivot = datasets[0]
+    if not isinstance(pivot, MLDataset):
+        pivot = MLDataset(pivot)
+
+    compatible = list()
+    for ds in datasets[1:]:
+        if not isinstance(ds, MLDataset):
+            ds = MLDataset(ds)
+
+        is_compatible = True
+        # compound bool will short-circuit, not optim required
+        if pivot.num_samples != ds.num_samples \
+                or pivot.keys != ds.keys \
+                or pivot.classes != ds.classes:
+            is_compatible = False
+
+        # alt impl: check if any of the following attributes differ
+        # for attr in ('num_samples', 'sample_ids', 'classes'):
+        #     if getattr(pivot, attr) != getattr(ds, att):
+        #         is_compatible = False
+        #         break
+
+        compatible.append(is_compatible)
+
+    return all(compatible), compatible
 
 
 def cli_run():
