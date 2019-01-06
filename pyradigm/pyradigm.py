@@ -1153,6 +1153,12 @@ class MLDataset(object):
             If saving to disk is not successful.
 
         """
+
+        # TODO need a file format that is flexible and efficient to allow the following:
+        #   1) being able to read just meta info without having to load the ENTIRE dataset
+        #       i.e. use case: compatibility check with #subjects, ids and their classes
+        #   2) random access layout: being able to read features for a single subject!
+
         try:
             file_path = os.path.abspath(file_path)
             with open(file_path, 'wb') as df:
