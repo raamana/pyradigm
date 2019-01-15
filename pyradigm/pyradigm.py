@@ -1,24 +1,24 @@
-__all__ = [ 'MLDataset', 'cli_run', 'check_compatibility' ]
+__all__ = ['MLDataset', 'cli_run', 'check_compatibility']
 
+import argparse
 import copy
+import logging
+import numpy as np
 import os
-import sys
 import pickle
 import random
-import warnings
-import argparse
+import sys
 import traceback
-import logging
-from os.path import join as pjoin, exists as pexists, realpath, basename, dirname, isfile
+import warnings
 from collections import Counter, OrderedDict, Sequence
 from itertools import islice
-
-import numpy as np
+from os.path import basename, dirname, exists as pexists, isfile, join as pjoin, realpath
 
 
 # TODO profile the class for different scales of samples and features
 class MLDataset(object):
     """An ML dataset to ease workflow and maintain integrity."""
+
 
     def __init__(self, filepath=None,
                  in_dataset=None,
@@ -118,7 +118,9 @@ class MLDataset(object):
 
             sample_ids = list(data)
             features0 = data[sample_ids[0]]
-            self.__num_features = features0.size if isinstance(features0,np.ndarray) else len(features0)
+            self.__num_features = features0.size if isinstance(features0,
+                                                               np.ndarray) else len(
+                features0)
             self.__dtype = type(data[sample_ids[0]])
 
             # assigning default names for each feature
@@ -130,10 +132,12 @@ class MLDataset(object):
         else:
             raise ValueError('Incorrect way to construct the dataset.')
 
+
     @property
     def data(self):
         """data in its original dict form."""
         return self.__data
+
 
     def data_and_labels(self):
         """
@@ -162,6 +166,7 @@ class MLDataset(object):
 
         return matrix, np.ravel(labels), sample_ids
 
+
     @data.setter
     def data(self, values):
         """
@@ -182,7 +187,8 @@ class MLDataset(object):
         """
         if isinstance(values, dict):
             if self.__labels is not None and len(self.__labels) != len(values):
-                raise ValueError('number of samples do not match the previously assigned labels')
+                raise ValueError(
+                    'number of samples do not match the previously assigned labels')
             elif len(values) < 1:
                 raise ValueError('There must be at least 1 sample in the dataset!')
             else:
@@ -190,18 +196,21 @@ class MLDataset(object):
         else:
             raise ValueError('data input must be a dictionary!')
 
+
     @property
     def labels(self):
         """Returns the array of labels for all the samples."""
         # TODO numeric label need to be removed, as this can be made up on the fly as needed from str to num encoders.
         return self.__labels
 
+
     @labels.setter
     def labels(self, values):
         """Class labels (such as 1, 2, -1, 'A', 'B' etc.) for each sample in the dataset."""
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
-                raise ValueError('number of samples do not match the previously assigned data')
+                raise ValueError(
+                    'number of samples do not match the previously assigned data')
             elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
@@ -209,17 +218,20 @@ class MLDataset(object):
         else:
             raise ValueError('labels input must be a dictionary!')
 
+
     @property
     def classes(self):
         """Identifiers (sample IDs, or sample names etc) forming the basis of dict-type MLDataset."""
         return self.__classes
+
 
     @classes.setter
     def classes(self, values):
         """Classes setter."""
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
-                raise ValueError('number of samples do not match the previously assigned data')
+                raise ValueError(
+                    'number of samples do not match the previously assigned data')
             elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
@@ -227,11 +239,13 @@ class MLDataset(object):
         else:
             raise ValueError('classes input must be a dictionary!')
 
+
     @property
     def feature_names(self):
         "Returns the feature names as an numpy array of strings."
 
         return self.__feature_names
+
 
     @feature_names.setter
     def feature_names(self, names):
@@ -240,24 +254,29 @@ class MLDataset(object):
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
         if not isinstance(names, (Sequence, np.ndarray, np.generic)):
-            raise ValueError("Input is not a sequence. Ensure names are in the same order and length as features.")
+            raise ValueError(
+                "Input is not a sequence. Ensure names are in the same order and length as features.")
 
         self.__feature_names = np.array(names)
+
 
     @property
     def class_sizes(self):
         """Returns the sizes of different objects in a Counter object."""
         return Counter(self.classes.values())
 
+
     @staticmethod
     def __take(nitems, iterable):
         """Return first n items of the iterable as a list"""
         return dict(islice(iterable, int(nitems)))
 
+
     @staticmethod
     def __str_names(num):
 
         return np.array(['f{}'.format(x) for x in range(num)])
+
 
     def glance(self, nitems=5):
         """Quick and partial glance of the data matrix.
@@ -275,6 +294,7 @@ class MLDataset(object):
         """
         nitems = max([1, min([nitems, self.num_samples - 1])])
         return self.__take(nitems, iter(self.__data.items()))
+
 
     def summarize_classes(self):
         """
@@ -299,6 +319,7 @@ class MLDataset(object):
 
         # TODO consider returning numeric label set e.g. for use in scikit-learn
         return self.class_set, self.label_set, class_sizes
+
 
     @classmethod
     def check_features(self, features):
@@ -331,6 +352,7 @@ class MLDataset(object):
             features = np.ravel(features)
 
         return features
+
 
     # TODO try implementing based on pandas
     def add_sample(self, sample_id, features, label,
@@ -386,13 +408,16 @@ class MLDataset(object):
             self.__labels[sample_id] = label
             self.__classes[sample_id] = class_id
             self.__dtype = type(features)
-            self.__num_features = features.size if isinstance(features, np.ndarray) else len(features)
+            self.__num_features = features.size if isinstance(features,
+                                                              np.ndarray) else len(
+                features)
             if feature_names is None:
                 self.__feature_names = self.__str_names(self.num_features)
         else:
             if self.__num_features != features.size:
-                raise ValueError('dimensionality of this sample ({}) does not match existing samples ({})'.format(
-                    features.size, self.__num_features))
+                raise ValueError(
+                        'dimensionality of this sample ({}) does not match existing samples ({})'.format(
+                                features.size, self.__num_features))
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
@@ -407,7 +432,9 @@ class MLDataset(object):
                 else:  # if set already, ensure a match
                     print('')
                     if not np.array_equal(self.feature_names, np.array(feature_names)):
-                        raise ValueError("supplied feature names do not match the existing names!")
+                        raise ValueError(
+                            "supplied feature names do not match the existing names!")
+
 
     def del_sample(self, sample_id):
         """
@@ -431,6 +458,7 @@ class MLDataset(object):
             self.__classes.pop(sample_id)
             self.__labels.pop(sample_id)
             print('{} removed.'.format(sample_id))
+
 
     def get_feature_subset(self, subset_idx):
         """
@@ -456,9 +484,11 @@ class MLDataset(object):
         subset_idx = np.asarray(subset_idx)
         if not (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0):
             raise UnboundLocalError('indices out of range for the dataset. '
-                                    'Max index: {} Min index : 0'.format(self.__num_features))
+                                    'Max index: {} Min index : 0'.format(
+                self.__num_features))
 
-        sub_data = {sample: features[subset_idx] for sample, features in self.__data.items()}
+        sub_data = {sample: features[subset_idx] for sample, features in
+                    self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
         subdataset = MLDataset(data=sub_data,
                                labels=self.__labels, classes=self.__classes,
@@ -467,6 +497,7 @@ class MLDataset(object):
 
         return subdataset
 
+
     @staticmethod
     def keys_with_value(dictionary, value):
         "Returns a subset of keys from the dict with the value supplied."
@@ -474,6 +505,7 @@ class MLDataset(object):
         subset = [key for key in dictionary if dictionary[key] == value]
 
         return subset
+
 
     def get_class(self, class_id):
         """
@@ -506,7 +538,8 @@ class MLDataset(object):
 
         non_existent = set(self.class_set).intersection(set(class_ids))
         if len(non_existent) < 1:
-            raise ValueError('These classes {} do not exist in this dataset.'.format(non_existent))
+            raise ValueError(
+                'These classes {} do not exist in this dataset.'.format(non_existent))
 
         subsets = list()
         for class_id in class_ids:
@@ -515,6 +548,7 @@ class MLDataset(object):
             subsets.extend(subsets_this_class)
 
         return self.get_subset(subsets)
+
 
     def transform(self, func, func_description=None):
         """
@@ -593,6 +627,7 @@ class MLDataset(object):
 
         return xfm_ds
 
+
     def train_test_split_ids(self, train_perc=None, count_per_class=None):
         """
         Returns two disjoint sets of sample ids for use in cross-validation.
@@ -635,8 +670,9 @@ class MLDataset(object):
             train_set = self.random_subset_ids(perc_per_class=train_perc)
         elif train_perc is None and count_per_class > 0:
             if count_per_class >= smallest_class_size:
-                raise ValueError('Selections would exclude the smallest class from test set. '
-                                 'Reduce sample count per class for the training set!')
+                raise ValueError(
+                    'Selections would exclude the smallest class from test set. '
+                    'Reduce sample count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
         else:
             raise ValueError('Invalid or out of range selection: '
@@ -645,9 +681,11 @@ class MLDataset(object):
         test_set = list(set(self.keys) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
-            raise ValueError('Selection resulted in empty training or test set - check your selections or dataset!')
+            raise ValueError(
+                'Selection resulted in empty training or test set - check your selections or dataset!')
 
         return train_set, test_set
+
 
     def random_subset_ids_by_count(self, count_per_class=1):
         """
@@ -701,6 +739,7 @@ class MLDataset(object):
             warnings.warn('Zero samples were selected. Returning an empty list!')
             return list()
 
+
     def random_subset_ids(self, perc_per_class=0.5):
         """
         Returns a random subset of sample ids (of specified size by percentage) within each class.
@@ -749,7 +788,8 @@ class MLDataset(object):
             subset_size_this_class = max(1, min(class_size, subset_size_this_class))
             if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
                 # warning if none were selected
-                raise ValueError('No subjects from class {} were selected.'.format(class_id))
+                raise ValueError(
+                    'No subjects from class {} were selected.'.format(class_id))
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -759,6 +799,7 @@ class MLDataset(object):
         else:
             warnings.warn('Zero samples were selected. Returning an empty list!')
             return list()
+
 
     def random_subset(self, perc_in_class=0.5):
         """
@@ -783,6 +824,7 @@ class MLDataset(object):
             warnings.warn('Zero samples were selected. Returning an empty dataset!')
             return MLDataset()
 
+
     def sample_ids_in_class(self, class_id):
         """
         Returns a list of sample ids belonging to a given class.
@@ -802,6 +844,7 @@ class MLDataset(object):
         # subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
         subset_ids = self.keys_with_value(self.classes, class_id)
         return subset_ids
+
 
     def get_subset(self, subset_ids):
         """
@@ -841,6 +884,7 @@ class MLDataset(object):
             warnings.warn('subset of IDs requested do not exist in the dataset!')
             return MLDataset()
 
+
     def get_data_matrix_in_order(self, subset_ids):
         """
         Returns a numpy array of features, rows in the same order as subset_ids
@@ -873,9 +917,10 @@ class MLDataset(object):
 
         matrix = np.full((num_existing_keys, self.num_features), np.nan)
         for idx, sid in enumerate(subset_ids):
-            matrix[idx,:] = self.__data[sid]
+            matrix[idx, :] = self.__data[sid]
 
         return matrix
+
 
     def __contains__(self, item):
         "Boolean test of membership of a sample in the dataset."
@@ -883,6 +928,7 @@ class MLDataset(object):
             return True
         else:
             return False
+
 
     def get(self, item, not_found_value=None):
         "Method like dict.get() which can return specified value if key not found"
@@ -892,6 +938,7 @@ class MLDataset(object):
         else:
             return not_found_value
 
+
     def __getitem__(self, item):
         "Method to ease data retrieval i.e. turn dataset.data['id'] into dataset['id'] "
 
@@ -900,31 +947,38 @@ class MLDataset(object):
         else:
             raise KeyError('{} not found in dataset.'.format(item))
 
+
     def __iter__(self):
         "Iterator over samples"
 
         for subject, data in self.data.items():
             yield subject, data
 
+
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
         # Using OrderedDict helps ensure data are added to data, labels etc in the same order of sample IDs
-        return OrderedDict((sid, value) for sid, value in input_dict.items() if sid in subset)
+        return OrderedDict(
+                (sid, value) for sid, value in input_dict.items() if sid in subset)
+
 
     @property
     def keys(self):
         """Sample identifiers (strings) forming the basis of MLDataset (same as sample_ids)"""
         return list(self.__data)
 
+
     @property
     def sample_ids(self):
         """Sample identifiers (strings) forming the basis of MLDataset (same as keys)."""
         return self.keys
 
+
     @property
     def description(self):
         """Text description (header) that can be set by user."""
         return self.__description
+
 
     @description.setter
     def description(self, str_val):
@@ -932,10 +986,12 @@ class MLDataset(object):
         if not str_val: raise ValueError('description can not be empty')
         self.__description = str_val
 
+
     @property
     def num_features(self):
         """number of features in each sample."""
         return np.int64(self.__num_features)
+
 
     @num_features.setter
     def num_features(self, int_val):
@@ -944,10 +1000,12 @@ class MLDataset(object):
         # assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
         # self.__num_features = int_val
 
+
     @property
     def dtype(self):
         """number of features in each sample."""
         return self.__dtype
+
 
     @dtype.setter
     def dtype(self, type_val):
@@ -958,6 +1016,7 @@ class MLDataset(object):
         else:
             warnings.warn('Data type is already inferred. Can not be set!')
 
+
     @property
     def num_samples(self):
         """number of samples in the entire dataset."""
@@ -966,16 +1025,19 @@ class MLDataset(object):
         else:
             return 0
 
+
     @property
     def num_classes(self):
         """Total number of classes in the dataset."""
         return len(self.class_set)
+
 
     @property
     def class_set(self):
         """Set of unique classes in the dataset."""
 
         return list(set(self.__classes.values()))
+
 
     @property
     def label_set(self):
@@ -986,6 +1048,7 @@ class MLDataset(object):
             label_set.append(self.labels[samples_in_class[0]])
 
         return label_set
+
 
     def add_classes(self, classes):
         """
@@ -1013,8 +1076,10 @@ class MLDataset(object):
             raise ValueError('One or more unrecognized keys!')
         self.__classes = classes
 
+
     def __len__(self):
         return self.num_samples
+
 
     def __nonzero__(self):
         if self.num_samples < 1:
@@ -1022,10 +1087,11 @@ class MLDataset(object):
         else:
             return True
 
+
     def __str__(self):
         """Returns a concise and useful text summary of the dataset."""
         full_descr = list()
-        if self.description not in [ None, '' ]:
+        if self.description not in [None, '']:
             full_descr.append(self.description)
         if bool(self):
             full_descr.append('{} samples, {} classes, {} features'.format(
@@ -1034,25 +1100,32 @@ class MLDataset(object):
             max_width = max([len(cls) for cls in class_ids])
             num_digit = max([len(str(val)) for val in self.class_sizes.values()])
             for cls in class_ids:
-                full_descr.append('Class {cls:>{clswidth}} : {size:>{numwidth}} samples'.format(cls=cls,
-                    clswidth=max_width, size=self.class_sizes.get(cls), numwidth=num_digit))
+                full_descr.append(
+                    'Class {cls:>{clswidth}} : {size:>{numwidth}} samples'.format(cls=cls,
+                                                                                  clswidth=max_width,
+                                                                                  size=self.class_sizes.get(
+                                                                                      cls),
+                                                                                  numwidth=num_digit))
         else:
             full_descr.append('Empty dataset.')
 
         return '\n'.join(full_descr)
 
+
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
             return '{} samples x {} features each in {} classes'.format(
-                self.num_samples, self.num_features, self.num_classes)
+                    self.num_samples, self.num_features, self.num_classes)
         elif fmt_str.lower() in ['f', 'full']:
             return self.__str__()
         else:
             raise NotImplementedError("Requsted type of format not implemented.\n"
                                       "It can only be 'short' (default) or 'full', or a shorthand: 's' or 'f' ")
 
+
     def __repr__(self):
         return self.__str__()
+
 
     @staticmethod
     def __dir__():
@@ -1091,6 +1164,7 @@ class MLDataset(object):
                 'transform',
                 'add_classes']
 
+
     def __copy(self, other):
         """Copy constructor."""
         self.__data = copy.deepcopy(other.data)
@@ -1102,6 +1176,7 @@ class MLDataset(object):
         self.__num_features = copy.deepcopy(other.num_features)
 
         return self
+
 
     def __load(self, path):
         """Method to load the serialized dataset from disk."""
@@ -1121,6 +1196,7 @@ class MLDataset(object):
         except:
             raise
 
+
     def __load_arff(self, arff_path, encode_nonnumeric=False):
         """Loads a given dataset saved in Weka's ARFF format. """
         try:
@@ -1129,13 +1205,14 @@ class MLDataset(object):
         except:
             raise ValueError('Error loading the ARFF dataset!')
 
-        attr_names = arff_meta.names()[:-1] # last column is class
+        attr_names = arff_meta.names()[:-1]  # last column is class
         attr_types = arff_meta.types()[:-1]
         if not encode_nonnumeric:
             # ensure all the attributes are numeric
             uniq_types = set(attr_types)
             if 'numeric' not in uniq_types:
-                raise ValueError('Currently only numeric attributes in ARFF are supported!')
+                raise ValueError(
+                    'Currently only numeric attributes in ARFF are supported!')
 
             non_numeric = uniq_types.difference({'numeric'})
             if len(non_numeric) > 0:
@@ -1144,11 +1221,12 @@ class MLDataset(object):
                                  'Try setting encode_nonnumeric=True '
                                  'or encode features to numeric!'.format(non_numeric))
         else:
-            raise NotImplementedError('encoding non-numeric features to numeric is not implemented yet! '
-                                      'Encode features beforing to ARFF.')
+            raise NotImplementedError(
+                'encoding non-numeric features to numeric is not implemented yet! '
+                'Encode features beforing to ARFF.')
 
         # self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
-        self.__description = arff_meta.name # to enable it as a label e.g. in neuropredict
+        self.__description = arff_meta.name  # to enable it as a label e.g. in neuropredict
 
         # initializing the key containers, before calling self.add_sample
         self.__data = OrderedDict()
@@ -1157,26 +1235,27 @@ class MLDataset(object):
 
         num_samples = len(arff_data)
         num_digits = len(str(num_samples))
-        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index,nd=num_digits)
+        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index, nd=num_digits)
         sample_classes = [cls.decode('utf-8') for cls in arff_data['class']]
         class_set = set(sample_classes)
         label_dict = dict()
         # encoding class names to labels 1 to n
         for ix, cls in enumerate(class_set):
-            label_dict[cls] = ix+1
+            label_dict[cls] = ix + 1
 
         for index in range(num_samples):
             sample = arff_data.take([index])[0].tolist()
             sample_attrs = sample[:-1]
             sample_class = sample[-1].decode('utf-8')
-            self.add_sample(sample_id=make_id(index), # ARFF rows do not have an ID
+            self.add_sample(sample_id=make_id(index),  # ARFF rows do not have an ID
                             features=sample_attrs,
                             label=label_dict[sample_class],
-                            class_id=sample_class) # not necessary to set feature_names=attr_names for each sample, as we do it globally after loop
+                            class_id=sample_class)  # not necessary to set feature_names=attr_names for each sample, as we do it globally after loop
 
         self.__feature_names = attr_names
 
         return
+
 
     def save(self, file_path):
         """
@@ -1213,28 +1292,35 @@ class MLDataset(object):
         except:
             raise
 
+
     @staticmethod
     def __validate(data, classes, labels):
         "Validator of inputs."
 
         if not isinstance(data, dict):
-            raise TypeError('data must be a dict! keys: sample ID or any unique identifier')
+            raise TypeError(
+                'data must be a dict! keys: sample ID or any unique identifier')
         if not isinstance(labels, dict):
-            raise TypeError('labels must be a dict! keys: sample ID or any unique identifier')
+            raise TypeError(
+                'labels must be a dict! keys: sample ID or any unique identifier')
         if classes is not None:
             if not isinstance(classes, dict):
-                raise TypeError('labels must be a dict! keys: sample ID or any unique identifier')
+                raise TypeError(
+                    'labels must be a dict! keys: sample ID or any unique identifier')
 
         if not len(data) == len(labels) == len(classes):
             raise ValueError('Lengths of data, labels and classes do not match!')
         if not set(list(data)) == set(list(labels)) == set(list(classes)):
-            raise ValueError('data, classes and labels dictionaries must have the same keys!')
+            raise ValueError(
+                'data, classes and labels dictionaries must have the same keys!')
 
         num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
-            raise ValueError('different samples have different number of features - invalid!')
+            raise ValueError(
+                'different samples have different number of features - invalid!')
 
         return True
+
 
     def extend(self, other):
         """
@@ -1255,7 +1341,9 @@ class MLDataset(object):
             raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for sample in other.keys:
-            self.add_sample(sample, other.data[sample], other.labels[sample], other.classes[sample])
+            self.add_sample(sample, other.data[sample], other.labels[sample],
+                            other.classes[sample])
+
 
     def __add__(self, other):
         "Method to combine to MLDatasets, sample-wise or feature-wise."
@@ -1264,9 +1352,11 @@ class MLDataset(object):
             raise TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
-            print('Identical keys found. Trying to horizontally concatenate features for each sample.')
+            print(
+                'Identical keys found. Trying to horizontally concatenate features for each sample.')
             if not self.__classes == other.classes:
-                raise ValueError('Class identifiers per sample differ in the two datasets!')
+                raise ValueError(
+                    'Class identifiers per sample differ in the two datasets!')
             if other.num_features < 1:
                 raise ValueError('No features to concatenate.')
             # making an empty dataset
@@ -1274,11 +1364,13 @@ class MLDataset(object):
             # populating it with the concatenated feature set
             for sample in self.keys:
                 comb_data = np.concatenate([self.__data[sample], other.data[sample]])
-                combined.add_sample(sample, comb_data, self.__labels[sample], self.__classes[sample])
+                combined.add_sample(sample, comb_data, self.__labels[sample],
+                                    self.__classes[sample])
 
             return combined
 
-        elif len(set(self.keys).intersection(other.keys)) < 1 and self.__num_features == other.num_features:
+        elif len(set(self.keys).intersection(
+                other.keys)) < 1 and self.__num_features == other.num_features:
             # making a copy of self first
             combined = MLDataset(in_dataset=self)
             # adding the new dataset
@@ -1287,6 +1379,7 @@ class MLDataset(object):
         else:
             raise ArithmeticError('Two datasets could not be combined.')
 
+
     def __sub__(self, other):
         """Removing one dataset from another."""
         if not isinstance(other, type(self)):
@@ -1294,9 +1387,11 @@ class MLDataset(object):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn('None of the sample ids to be removed found in this dataset - nothing to do.')
+            warnings.warn(
+                'None of the sample ids to be removed found in this dataset - nothing to do.')
         if len(self.keys) == num_existing_keys:
-            warnings.warn('Requested removal of all the samples - output dataset would be empty.')
+            warnings.warn(
+                'Requested removal of all the samples - output dataset would be empty.')
 
         removed = copy.deepcopy(self)
         for sample in other.keys:
@@ -1304,13 +1399,16 @@ class MLDataset(object):
 
         return removed
 
+
     def __iadd__(self, other):
         """Augmented assignment for add."""
         return self.__add__(other)
 
+
     def __isub__(self, other):
         """Augmented assignment for sample."""
         return self.__sub__(other)
+
 
     def __eq__(self, other):
         """Equality of two datasets in samples and their values."""
@@ -1328,6 +1426,7 @@ class MLDataset(object):
             return True
         else:
             return True
+
 
     def compatible(self, another):
         """
@@ -1389,7 +1488,7 @@ def check_compatibility(datasets, reqd_num_features=None):
         raise TypeError('Input must be an iterable '
                         'i.e. (list/tuple) of MLdataset/similar instances')
 
-    datasets = list(datasets) # to make it indexable if coming from a set
+    datasets = list(datasets)  # to make it indexable if coming from a set
     num_datasets = len(datasets)
 
     check_dimensionality = False
@@ -1401,8 +1500,8 @@ def check_compatibility(datasets, reqd_num_features=None):
                                  ' Given for a different number {}'
                                  ''.format(num_datasets, len(reqd_num_features)))
             reqd_num_features = list(map(int, reqd_num_features))
-        else: # same dimensionality for all
-            reqd_num_features = [int(reqd_num_features)]*num_datasets
+        else:  # same dimensionality for all
+            reqd_num_features = [int(reqd_num_features)] * num_datasets
 
         check_dimensionality = True
 
@@ -1440,7 +1539,8 @@ def check_compatibility(datasets, reqd_num_features=None):
 
         compatible.append(is_compatible)
 
-    return all(compatible), compatible, dim_mismatch, (pivot.num_samples, pivot.num_features)
+    return all(compatible), compatible, dim_mismatch, (
+    pivot.num_samples, pivot.num_features)
 
 
 def cli_run():
@@ -1494,7 +1594,7 @@ def print_info(ds, ds_path=None):
 def print_meta(ds, ds_path=None):
     "Prints meta data for subjects in given dataset."
 
-    print('#'+ds_path)
+    print('#' + ds_path)
     for sub, cls in ds.classes.items():
         print('{},{}'.format(sub, cls))
 
@@ -1511,7 +1611,8 @@ def combine_and_save(add_path_list, out_path):
             combined = MLDataset(ds_path)
         else:
             try:
-                print('Combining <1> with <2>, where \n<1> : {}\n<2> : {}'.format(ds_path, first_path))
+                print('Combining <1> with <2>, where \n<1> : {}\n<2> : {}'.format(ds_path,
+                                                                                  first_path))
                 combined = combined + MLDataset(ds_path)
                 first_path = ds_path
             except:
@@ -1533,18 +1634,25 @@ def get_parser():
     parser.add_argument('path_list', nargs='*', action='store',
                         default=None, help='List of paths to display info about.')
 
-    parser.add_argument('-m', '--meta', action='store_true', dest='meta_requested', required=False,
+    parser.add_argument('-m', '--meta', action='store_true', dest='meta_requested',
+                        required=False,
                         default=False, help='Prints the meta data (subject_id,class).')
 
-    parser.add_argument('-i', '--info', action='store_true', dest='summary_requested', required=False,
-                        default=False, help='Prints summary info (classes, #samples, #features).')
+    parser.add_argument('-i', '--info', action='store_true', dest='summary_requested',
+                        required=False,
+                        default=False,
+                        help='Prints summary info (classes, #samples, #features).')
 
     arithmetic_group = parser.add_argument_group('Options for multiple datasets')
-    arithmetic_group.add_argument('-a', '--add', nargs='+', action='store', dest='add_path_list', required=False,
-                        default=None, help='List of MLDatasets to combine into a larger dataset.')
+    arithmetic_group.add_argument('-a', '--add', nargs='+', action='store',
+                                  dest='add_path_list', required=False,
+                                  default=None,
+                                  help='List of MLDatasets to combine into a larger dataset.')
 
-    arithmetic_group.add_argument('-o', '--out_path', action='store', dest='out_path', required=False,
-                        default=None, help='Output path to save the resulting dataset.')
+    arithmetic_group.add_argument('-o', '--out_path', action='store', dest='out_path',
+                                  required=False,
+                                  default=None,
+                                  help='Output path to save the resulting dataset.')
 
     return parser
 
@@ -1586,7 +1694,8 @@ def parse_args():
                 print('Below dataset does not exist. Ignoring it.\n{}'.format(dpath))
 
         if params.out_path is None:
-            raise ValueError('Output path must be specified to save the combined dataset to')
+            raise ValueError(
+                'Output path must be specified to save the combined dataset to')
 
         out_path = realpath(params.out_path)
         parent_dir = dirname(out_path)
