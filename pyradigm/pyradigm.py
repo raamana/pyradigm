@@ -1347,7 +1347,7 @@ class MLDataset(object):
         return compatible
 
 
-def check_compatibility(datasets):
+def check_compatibility(datasets, reqd_num_features=None):
     """
     Checks whether the given MLdataset instances are compatible
 
@@ -1360,6 +1360,11 @@ def check_compatibility(datasets):
     datasets : Iterable
         A list of n datasets
 
+    reqd_num_features : int
+        The required number of features in each dataset.
+        Helpful to ensure test sets are compatible with training set,
+            as well as within themselves.
+
     Returns
     -------
     all_are_compatible : bool
@@ -1370,6 +1375,13 @@ def check_compatibility(datasets):
         This could be useful to select a subset of mutually compatible datasets.
         Length : n-1
 
+    dim_mismatch : bool
+        Boolean flag indicating mismatch in dimensionality from that specified
+
+    size_descriptor : tuple
+        A tuple with values for (num_samples, num_features) that must be common
+        for all datasets that are evaluated for compatibility.
+
     """
 
     from collections import Iterable
@@ -1378,13 +1390,33 @@ def check_compatibility(datasets):
                         'i.e. (list/tuple) of MLdataset/similar instances')
 
     datasets = list(datasets) # to make it indexable if coming from a set
+    num_datasets = len(datasets)
+
+    check_dimensionality = False
+    dim_mismatch = False
+    if reqd_num_features is not None:
+        if isinstance(reqd_num_features, Iterable):
+            if len(reqd_num_features) != num_datasets:
+                raise ValueError('Specify dimensionality for exactly {} datasets.'
+                                 ' Given for a different number {}'
+                                 ''.format(num_datasets, len(reqd_num_features)))
+            reqd_num_features = list(map(int, reqd_num_features))
+        else: # same dimensionality for all
+            reqd_num_features = [int(reqd_num_features)]*num_datasets
+
+        check_dimensionality = True
 
     pivot = datasets[0]
     if not isinstance(pivot, MLDataset):
         pivot = MLDataset(pivot)
 
+    if check_dimensionality and pivot.num_features != reqd_num_features[0]:
+        warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+                      ''.format(reqd_num_features[0], pivot.num_features))
+        dim_mismatch = True
+
     compatible = list()
-    for ds in datasets[1:]:
+    for ds_index, ds in enumerate(datasets[1:]):
         if not isinstance(ds, MLDataset):
             ds = MLDataset(ds)
 
@@ -1395,6 +1427,11 @@ def check_compatibility(datasets):
                 or pivot.classes != ds.classes:
             is_compatible = False
 
+        if check_dimensionality and reqd_num_features[ds_index] != ds.num_features:
+            warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+                          ''.format(reqd_num_features[ds_index], ds.num_features))
+            dim_mismatch = True
+
         # alt impl: check if any of the following attributes differ
         # for attr in ('num_samples', 'sample_ids', 'classes'):
         #     if getattr(pivot, attr) != getattr(ds, att):
@@ -1403,7 +1440,7 @@ def check_compatibility(datasets):
 
         compatible.append(is_compatible)
 
-    return all(compatible), compatible
+    return all(compatible), compatible, dim_mismatch, (pivot.num_samples, pivot.num_features)
 
 
 def cli_run():
