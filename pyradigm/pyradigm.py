@@ -1478,8 +1478,10 @@ def check_compatibility(datasets, reqd_num_features=None):
         Boolean flag indicating mismatch in dimensionality from that specified
 
     size_descriptor : tuple
-        A tuple with values for (num_samples, num_features) that must be common
-        for all datasets that are evaluated for compatibility.
+        A tuple with values for (num_samples, reqd_num_features)
+        - num_samples must be common for all datasets that are evaluated for compatibility
+        - reqd_num_features is None (when no check on dimensionality is perfomed), or
+            list of corresponding dimensionalities for each input dataset
 
     """
 
@@ -1531,16 +1533,10 @@ def check_compatibility(datasets, reqd_num_features=None):
                           ''.format(reqd_num_features[ds_index], ds.num_features))
             dim_mismatch = True
 
-        # alt impl: check if any of the following attributes differ
-        # for attr in ('num_samples', 'sample_ids', 'classes'):
-        #     if getattr(pivot, attr) != getattr(ds, att):
-        #         is_compatible = False
-        #         break
-
         compatible.append(is_compatible)
 
-    return all(compatible), compatible, dim_mismatch, (
-    pivot.num_samples, pivot.num_features)
+    return all(compatible), compatible, dim_mismatch, \
+           (pivot.num_samples, reqd_num_features)
 
 
 def cli_run():
