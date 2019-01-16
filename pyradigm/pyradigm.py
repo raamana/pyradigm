@@ -29,12 +29,14 @@ class MLDataset(object):
                  encode_nonnumeric=False):
         """
         Default constructor.
-        Suggested way to construct the dataset is via add_sample method, one sample at a time.
+        Recommended way to construct the dataset is via add_sample method, one sample
+        at a time, as it allows for unambiguous identification of each row in data matrix.
 
         This constructor can be used in 3 ways:
             - As a copy constructor to make a copy of the given in_dataset
             - Or by specifying the tuple of data, labels and classes.
-                In this usage, you can provide additional inputs such as description and feature_names.
+                In this usage, you can provide additional inputs such as description
+                and feature_names.
             - Or by specifying a file path which contains previously saved MLDataset.
 
         Parameters
@@ -52,10 +54,12 @@ class MLDataset(object):
             dict of features (keys are treated to be sample ids)
 
         labels : dict
-            dict of labels (keys must match with data/classes, are treated to be sample ids)
+            dict of labels
+            (keys must match with data/classes, are treated to be sample ids)
 
         classes : dict
-            dict of class names (keys must match with data/labels, are treated to be sample ids)
+            dict of class names
+            (keys must match with data/labels, are treated to be sample ids)
 
         description : str
             Arbitrary string to describe the current dataset.
@@ -64,9 +68,11 @@ class MLDataset(object):
             List of names for each feature in the dataset.
 
         encode_nonnumeric : bool
-            Flag to specify whether to encode non-numeric (categorical, nominal or string) features to numeric values.
+            Flag to specify whether to encode non-numeric features (categorical,
+            nominal or string) features to numeric values.
             Currently used only when importing ARFF files.
-            It is usually better to encode your data at the source, and them import them to Use with caution!
+            It is usually better to encode your data at the source,
+            and them import them to Use with caution!
 
         Raises
         ------
@@ -97,7 +103,8 @@ class MLDataset(object):
                 raise ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
         elif data is None and labels is None and classes is None:
-            # TODO refactor the code to use only basic dict, as it allows for better equality comparisons
+            # TODO refactor the code to use only basic dict,
+            # as it allows for better equality comparisons
             self.__data = OrderedDict()
             self.__labels = OrderedDict()
             self.__classes = OrderedDict()
@@ -110,7 +117,8 @@ class MLDataset(object):
             # but only in data, labels and classes, not feature names
             self.__validate(data, labels, classes)
 
-            # OrderedDict to ensure the order is maintained when data/labels are returned in a matrix/array form
+            # OrderedDict to ensure the order is maintained when
+            # data/labels are returned in a matrix/array form
             self.__data = OrderedDict(data)
             self.__labels = OrderedDict(labels)
             self.__classes = OrderedDict(classes)
@@ -148,7 +156,8 @@ class MLDataset(object):
         Returns
         -------
         data_matrix : ndarray
-            2D array of shape [num_samples, num_features] with features  corresponding row-wise to sample_ids
+            2D array of shape [num_samples, num_features]
+            with features corresponding row-wise to sample_ids
         labels : ndarray
             Array of numeric labels for each sample corresponding row-wise to sample_ids
         sample_ids : list
@@ -200,7 +209,8 @@ class MLDataset(object):
     @property
     def labels(self):
         """Returns the array of labels for all the samples."""
-        # TODO numeric label need to be removed, as this can be made up on the fly as needed from str to num encoders.
+        # TODO numeric label need to be removed,
+        # as this can be made up on the fly as needed from str to num encoders.
         return self.__labels
 
 
@@ -221,7 +231,10 @@ class MLDataset(object):
 
     @property
     def classes(self):
-        """Identifiers (sample IDs, or sample names etc) forming the basis of dict-type MLDataset."""
+        """
+        Identifiers (sample IDs, or sample names etc)
+            forming the basis of dict-type MLDataset.
+        """
         return self.__classes
 
 
@@ -254,8 +267,9 @@ class MLDataset(object):
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
         if not isinstance(names, (Sequence, np.ndarray, np.generic)):
-            raise ValueError(
-                "Input is not a sequence. Ensure names are in the same order and length as features.")
+            raise ValueError("Input is not a sequence. "
+                             "Ensure names are in the same order "
+                             "and length as features.")
 
         self.__feature_names = np.array(names)
 
@@ -415,9 +429,9 @@ class MLDataset(object):
                 self.__feature_names = self.__str_names(self.num_features)
         else:
             if self.__num_features != features.size:
-                raise ValueError(
-                        'dimensionality of this sample ({}) does not match existing samples ({})'.format(
-                                features.size, self.__num_features))
+                raise ValueError('dimensionality of this sample ({}) '
+                                 'does not match existing samples ({})'
+                                 ''.format(features.size, self.__num_features))
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
@@ -426,7 +440,8 @@ class MLDataset(object):
             self.__classes[sample_id] = class_id
             if feature_names is not None:
                 # if it was never set, allow it
-                # class gets here when adding the first sample, after dataset was initialized with empty constructor
+                # class gets here when adding the first sample,
+                #   after dataset was initialized with empty constructor
                 if self.__feature_names is None:
                     self.__feature_names = np.array(feature_names)
                 else:  # if set already, ensure a match
@@ -543,7 +558,6 @@ class MLDataset(object):
 
         subsets = list()
         for class_id in class_ids:
-            # subsets_this_class = [sample for sample in self.__classes if self.__classes[sample] == class_id]
             subsets_this_class = self.keys_with_value(self.__classes, class_id)
             subsets.extend(subsets_this_class)
 
@@ -561,7 +575,9 @@ class MLDataset(object):
             A valid callable that takes in a single ndarray and returns a single ndarray.
             Ensure the transformed dimensionality must be the same for all subjects.
 
-            If your function requires more than one argument, use `functools.partial` to freeze all the arguments except the features for the subject.
+            If your function requires more than one argument,
+            use `functools.partial` to freeze all the arguments
+            except the features for the subject.
 
         func_description : str, optional
             Human readable description of the given function.
@@ -719,7 +735,6 @@ class MLDataset(object):
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
-            # this_class = [sample for sample in self.classes if self.classes[sample] == class_id]
             this_class = self.keys_with_value(self.classes, class_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
@@ -742,7 +757,7 @@ class MLDataset(object):
 
     def random_subset_ids(self, perc_per_class=0.5):
         """
-        Returns a random subset of sample ids (of specified size by percentage) within each class.
+        Returns a random subset of sample ids (size in percentage) within each class.
 
         Parameters
         ----------
@@ -778,7 +793,6 @@ class MLDataset(object):
 
         for class_id, class_size in class_sizes.items():
             # samples belonging to the class
-            # this_class = [sample for sample in self.classes if self.classes[sample] == class_id]
             this_class = self.keys_with_value(self.classes, class_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
@@ -864,10 +878,10 @@ class MLDataset(object):
 
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
-            # need to ensure data are added to data, labels etc in the same order of sample IDs
+            # ensure items are added to data, labels etc in the same order of sample IDs
             # TODO come up with a way to do this even when not using OrderedDict()
-            # putting the access of data, labels and classes in the same loop would ensure there is correspondence
-            # across the three attributes of the class
+            # putting the access of data, labels and classes in the same loop  would
+            # ensure there is correspondence across the three attributes of the class
             data = self.__get_subset_from_dict(self.__data, subset_ids)
             labels = self.__get_subset_from_dict(self.__labels, subset_ids)
             if self.__classes is not None:
@@ -957,14 +971,15 @@ class MLDataset(object):
 
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
-        # Using OrderedDict helps ensure data are added to data, labels etc in the same order of sample IDs
+        # Using OrderedDict helps ensure data are added to data, labels etc
+        # in the same order of sample IDs
         return OrderedDict(
                 (sid, value) for sid, value in input_dict.items() if sid in subset)
 
 
     @property
     def keys(self):
-        """Sample identifiers (strings) forming the basis of MLDataset (same as sample_ids)"""
+        """Sample identifiers (strings) - the basis of MLDataset (same as sample_ids)"""
         return list(self.__data)
 
 
@@ -997,8 +1012,6 @@ class MLDataset(object):
     def num_features(self, int_val):
         "Method that should not exist!"
         raise AttributeError("num_features property can't be set, only retrieved!")
-        # assert isinstance(int_val, int) and (0 < int_val < np.Inf), UnboundLocalError('Invalid number of features.')
-        # self.__num_features = int_val
 
 
     @property
@@ -1101,11 +1114,10 @@ class MLDataset(object):
             num_digit = max([len(str(val)) for val in self.class_sizes.values()])
             for cls in class_ids:
                 full_descr.append(
-                    'Class {cls:>{clswidth}} : {size:>{numwidth}} samples'.format(cls=cls,
-                                                                                  clswidth=max_width,
-                                                                                  size=self.class_sizes.get(
-                                                                                      cls),
-                                                                                  numwidth=num_digit))
+                    'Class {cls:>{clswidth}} : '
+                    '{size:>{numwidth}} samples'.format(cls=cls, clswidth=max_width,
+                                                        size=self.class_sizes.get(cls),
+                                                        numwidth=num_digit))
         else:
             full_descr.append('Empty dataset.')
 
@@ -1120,7 +1132,8 @@ class MLDataset(object):
             return self.__str__()
         else:
             raise NotImplementedError("Requsted type of format not implemented.\n"
-                                      "It can only be 'short' (default) or 'full', or a shorthand: 's' or 'f' ")
+                                      "It can only be 'short' (default) or 'full', "
+                                      "or a shorthand: 's' or 'f' ")
 
 
     def __repr__(self):
@@ -1225,7 +1238,6 @@ class MLDataset(object):
                 'encoding non-numeric features to numeric is not implemented yet! '
                 'Encode features beforing to ARFF.')
 
-        # self.__description = 'ARFF relation {}\n read from {}'.format(arff_meta.name, arff_path)
         self.__description = arff_meta.name  # to enable it as a label e.g. in neuropredict
 
         # initializing the key containers, before calling self.add_sample
@@ -1250,7 +1262,9 @@ class MLDataset(object):
             self.add_sample(sample_id=make_id(index),  # ARFF rows do not have an ID
                             features=sample_attrs,
                             label=label_dict[sample_class],
-                            class_id=sample_class)  # not necessary to set feature_names=attr_names for each sample, as we do it globally after loop
+                            class_id=sample_class)
+            # not necessary to set feature_names=attr_names for each sample,
+            # as we do it globally after loop
 
         self.__feature_names = attr_names
 
@@ -1329,7 +1343,8 @@ class MLDataset(object):
         Parameters
         ----------
         other : MLDataset
-            second dataset to be combined with the current (different samples, but same dimensionality)
+            second dataset to be combined with the current
+            (different samples, but same dimensionality)
 
         Raises
         ------
@@ -1352,8 +1367,8 @@ class MLDataset(object):
             raise TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
-            print(
-                'Identical keys found. Trying to horizontally concatenate features for each sample.')
+            print('Identical keys found. '
+                  'Trying to horizontally concatenate features for each sample.')
             if not self.__classes == other.classes:
                 raise ValueError(
                     'Class identifiers per sample differ in the two datasets!')
@@ -1387,8 +1402,8 @@ class MLDataset(object):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn(
-                'None of the sample ids to be removed found in this dataset - nothing to do.')
+            warnings.warn('None of the sample ids to be removed found in this dataset '
+                          '- nothing to do.')
         if len(self.keys) == num_existing_keys:
             warnings.warn(
                 'Requested removal of all the samples - output dataset would be empty.')
@@ -1598,7 +1613,10 @@ def print_meta(ds, ds_path=None):
 
 
 def combine_and_save(add_path_list, out_path):
-    "Combines whatever datasets that can be, and save the bigger dataset to a given location."
+    """
+    Combines whatever datasets that can be combined,
+    and save the bigger dataset to a given location.
+    """
 
     combined = None
     first_path = None
@@ -1607,8 +1625,8 @@ def combine_and_save(add_path_list, out_path):
             combined = MLDataset(ds_path)
         else:
             try:
-                print('Combining <1> with <2>, where \n<1> : {}\n<2> : {}'.format(ds_path,
-                                                                                  first_path))
+                print('Combining <1> with <2>, '
+                      'where \n<1> : {}\n<2> : {}'.format(ds_path, first_path))
                 combined = combined + MLDataset(ds_path)
                 first_path = ds_path
             except:
@@ -1643,7 +1661,7 @@ def get_parser():
     arithmetic_group.add_argument('-a', '--add', nargs='+', action='store',
                                   dest='add_path_list', required=False,
                                   default=None,
-                                  help='List of MLDatasets to combine into a larger dataset.')
+                                  help='List of MLDatasets to combine')
 
     arithmetic_group.add_argument('-o', '--out_path', action='store', dest='out_path',
                                   required=False,
@@ -1705,7 +1723,8 @@ def parse_args():
     path_list = set(path_list)
     add_path_list = set(add_path_list)
 
-    return path_list, params.meta_requested, params.summary_requested, add_path_list, out_path
+    return path_list, params.meta_requested, params.summary_requested, \
+           add_path_list, out_path
 
 
 if __name__ == '__main__':
