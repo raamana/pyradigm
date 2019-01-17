@@ -539,13 +539,13 @@ class MLDataset(object):
 
         Parameters
         ----------
-        class_id : str
-            identifier of the class to be returned.
+        class_id : str or list
+            identifier(s) of the class(es) to be returned.
 
         Returns
         -------
         MLDataset
-            With subset of samples belonging to the given class.
+            With subset of samples belonging to the given class(es).
 
         Raises
         ------
