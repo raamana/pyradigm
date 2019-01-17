@@ -110,6 +110,8 @@ class MultiDataset(object):
             self._dataset = copy(dataset)
             # replacing its data with zeros
             self._dataset.data = {id_: np.zeros(1) for id_ in self._ids}
+
+            self._is_init = True
         else:
             # this also checks for the size (num_samples)
             if set(dataset.keys) != self._ids:
