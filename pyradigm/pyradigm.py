@@ -1532,6 +1532,9 @@ def check_compatibility(datasets, reqd_num_features=None):
             reqd_num_features = [int(reqd_num_features)] * num_datasets
 
         check_dimensionality = True
+    else:
+        # to enable iteration
+        reqd_num_features = [None,] * num_datasets
 
     pivot = datasets[0]
     if not isinstance(pivot, MLDataset):
@@ -1543,7 +1546,7 @@ def check_compatibility(datasets, reqd_num_features=None):
         dim_mismatch = True
 
     compatible = list()
-    for ds_index, ds in enumerate(datasets[1:]):
+    for ds, reqd_dim in zip(datasets[1:], reqd_num_features[1:]):
         if not isinstance(ds, MLDataset):
             ds = MLDataset(ds)
 
@@ -1554,9 +1557,9 @@ def check_compatibility(datasets, reqd_num_features=None):
                 or pivot.classes != ds.classes:
             is_compatible = False
 
-        if check_dimensionality and reqd_num_features[ds_index] != ds.num_features:
+        if check_dimensionality and reqd_dim != ds.num_features:
             warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
-                          ''.format(reqd_num_features[ds_index], ds.num_features))
+                          ''.format(reqd_dim, ds.num_features))
             dim_mismatch = True
 
         compatible.append(is_compatible)
