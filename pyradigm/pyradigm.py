@@ -177,7 +177,7 @@ class MLDataset(object):
 
 
     @data.setter
-    def data(self, values):
+    def data(self, values, feature_names=None):
         """
         Populates this dataset with the provided data.
         Usage of this method is discourage (unless you know what you are doing).
@@ -186,6 +186,9 @@ class MLDataset(object):
         ----------
         values : dict
             dict of features keyed in by sample ids.
+
+        feature_names : list of str
+            New feature names for the new features, if available.
 
         Raises
         ------
@@ -202,6 +205,14 @@ class MLDataset(object):
                 raise ValueError('There must be at least 1 sample in the dataset!')
             else:
                 self.__data = values
+                # update dimensionality
+                # assuming all keys in dict have same len arrays
+                self.__num_features = len(values[self.keys[0]])
+
+            if feature_names is None:
+                self.__feature_names = self.__str_names(self.num_features)
+            else:
+                self.feature_names = feature_names
         else:
             raise ValueError('data input must be a dictionary!')
 
