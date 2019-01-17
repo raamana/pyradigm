@@ -29,7 +29,7 @@ def make_random_MLdataset(max_num_classes = 20,
         class_sizes = np.repeat(np.random.randint(smallest, largest), num_classes)
 
     num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
-    feat_names = [ str(x) for x in range(num_features)]
+    # feat_names = [ str(x) for x in range(num_features)]
 
     class_ids = list()
     labels = list()
@@ -41,7 +41,7 @@ def make_random_MLdataset(max_num_classes = 20,
     for cc, class_ in enumerate(class_ids):
         subids = [ 's{}-c{}'.format(ix,cc) for ix in range(class_sizes[cc]) ]
         for sid in subids:
-            ds.add_sample(sid, feat_generator(num_features), int(cc), class_, feat_names)
+            ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
 
     return ds
 
