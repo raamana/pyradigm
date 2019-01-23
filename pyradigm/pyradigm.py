@@ -456,7 +456,6 @@ class MLDataset(object):
                 if self.__feature_names is None:
                     self.__feature_names = np.array(feature_names)
                 else:  # if set already, ensure a match
-                    print('')
                     if not np.array_equal(self.feature_names, np.array(feature_names)):
                         raise ValueError(
                             "supplied feature names do not match the existing names!")
@@ -1608,10 +1607,7 @@ def print_info(ds, ds_path=None):
         bname = basename(ds_path)
 
     dashes = '-' * len(bname)
-    print(bname)
-    print(dashes)
-    print(ds)
-    print(dashes)
+    print('\n{}\n{}\n{:full}'.format(dashes, bname, ds))
 
     return
 
@@ -1619,7 +1615,7 @@ def print_info(ds, ds_path=None):
 def print_meta(ds, ds_path=None):
     "Prints meta data for subjects in given dataset."
 
-    print('#' + ds_path)
+    print('\n#' + ds_path)
     for sub, cls in ds.classes.items():
         print('{},{}'.format(sub, cls))
 
