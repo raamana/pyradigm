@@ -98,6 +98,9 @@ def test_add():
     n2 = random_class_ds.num_samples
     assert n1 + n2 == n
 
+    assert set(a.sample_ids) == set(other_classes_ds.sample_ids+random_class_ds.sample_ids)
+    assert a.num_features == other_classes_ds.num_features == random_class_ds.num_features
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
@@ -309,4 +312,5 @@ def test_load_arff():
 
     # print(mld)
 
-test_load_arff()
+# test_load_arff()
+test_add()
