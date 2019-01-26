@@ -1628,20 +1628,19 @@ def combine_and_save(add_path_list, out_path):
     and save the bigger dataset to a given location.
     """
 
-    combined = None
-    first_path = None
-    for ds_path in add_path_list:
-        if combined is None:
-            combined = MLDataset(ds_path)
+    add_path_list = list(add_path_list)
+    # first one!
+    first_ds_path = add_path_list[0]
+    print('Starting with {}'.format(first_ds_path))
+    combined = MLDataset(first_ds_path)
+    for ds_path in add_path_list[1:]:
+        try:
+            combined = combined + MLDataset(ds_path)
+        except:
+            print('      Failed to add {}'.format(ds_path))
+            traceback.print_exc()
         else:
-            try:
-                print('Combining <1> with <2>, '
-                      'where \n<1> : {}\n<2> : {}'.format(ds_path, first_path))
-                combined = combined + MLDataset(ds_path)
-                first_path = ds_path
-            except:
-                print('Failed - skipping <1>')
-                traceback.print_exc()
+            print('Successfully added {}'.format(ds_path))
 
     combined.save(out_path)
 
