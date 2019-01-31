@@ -23,8 +23,8 @@ else:
 out_dir  = '.'
 
 num_classes  = np.random.randint( 2, 50)
-class_sizes  = np.random.randint(10, 1000, num_classes)
-num_features = np.random.randint(10, 500)
+class_sizes  = np.random.randint(10, 100, num_classes)
+num_features = np.random.randint(10, 100)
 
 class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
@@ -38,6 +38,17 @@ for class_index, class_id in enumerate(class_set):
 
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
+
+# same IDs, new features
+same_ids_new_feat = MLDataset()
+for sub_id in test_dataset.keys:
+    feat = np.random.random(num_features)
+    same_ids_new_feat.add_sample(sub_id, feat,
+                                 test_dataset.labels[sub_id],
+                                 test_dataset.classes[sub_id])
+
+same_ids_new_feat.feature_names = np.array([ 'new_f{}'.format(x) for x in range(
+        num_features) ])
 
 test_dataset.description = 'test dataset'
 print(test_dataset)
@@ -100,6 +111,14 @@ def test_add():
 
     assert set(a.sample_ids) == set(other_classes_ds.sample_ids+random_class_ds.sample_ids)
     assert a.num_features == other_classes_ds.num_features == random_class_ds.num_features
+    assert all(a.feature_names == other_classes_ds.feature_names)
+
+    comb_ds = test_dataset + same_ids_new_feat
+    comb_names = np.concatenate([ test_dataset.feature_names,
+                            same_ids_new_feat.feature_names])
+    if not all(comb_ds.feature_names == comb_names):
+        raise ValueError('feature names were not carried forward in combining two '
+                         'datasets with same IDs and different feature names!')
 
 def test_cant_read_nonexisting_file():
     with raises(IOError):
