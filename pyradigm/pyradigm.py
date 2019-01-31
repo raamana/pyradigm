@@ -1389,8 +1389,11 @@ class MLDataset(object):
             # populating it with the concatenated feature set
             for sample in self.keys:
                 comb_data = np.concatenate([self.__data[sample], other.data[sample]])
-                combined.add_sample(sample, comb_data, self.__labels[sample],
-                                    self.__classes[sample])
+                combined.add_sample(sample, comb_data,
+                                    self.__labels[sample], self.__classes[sample])
+
+            comb_names = np.concatenate([self.__feature_names, other.feature_names])
+            combined.feature_names = comb_names
 
             return combined
 
