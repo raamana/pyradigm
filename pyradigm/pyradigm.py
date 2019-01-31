@@ -1369,6 +1369,9 @@ class MLDataset(object):
             self.add_sample(sample, other.data[sample], other.labels[sample],
                             other.classes[sample])
 
+        # TODO need a mechanism add one feature at a time, and
+        #   consequently update feature names for any subset of features
+
 
     def __add__(self, other):
         "Method to combine to MLDatasets, sample-wise or feature-wise."
