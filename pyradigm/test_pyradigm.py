@@ -228,7 +228,7 @@ def test_add_new_id_diff_dim():
     sid = test_dataset.sample_ids[0]
     data_diff_dim = np.random.rand(test_dataset.num_features+1,1)
     with raises(ValueError):
-        test_dataset.add_sample(new_id, data_diff_dim, None, None)
+        test_dataset.add_sample(new_id, data_diff_dim, label_set[0], class_set[0])
 
 def test_del_nonexisting_id():
     nonexisting_id = u'dsfdkfslj38748937439kdshfkjhf38'
