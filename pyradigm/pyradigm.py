@@ -490,6 +490,7 @@ class MLDataset(object):
             class_id = str(label)
 
         features = self._check_features(features)
+        class_id, label = self._check_id_label(class_id, label)
         if self.num_samples <= 0:
             self.__data[sample_id] = features
             self.__labels[sample_id] = label
