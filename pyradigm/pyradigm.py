@@ -245,6 +245,7 @@ class MLDataset(object):
                     raise TypeError('One of the labels is not valid.'
                                     'Each label must be a non-NaN non-complex scalar.')
                 self.__labels = values
+                self._check_class_ids_corr_to_labels(self.__classes, self.__labels)
         else:
             raise ValueError('labels input must be a dictionary!')
 
@@ -272,6 +273,7 @@ class MLDataset(object):
                     raise TypeError('One of the class Ids is not valid.'
                                     'Each ID must be a string or an int, not a list.')
                 self.__classes = values
+                self._check_class_ids_corr_to_labels(self.__classes, self.__labels)
         else:
             raise ValueError('classes input must be a dictionary!')
 
