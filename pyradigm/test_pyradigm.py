@@ -18,7 +18,8 @@ elif version_info.major > 2:
     except:
         raise ImportError('could not import pyradigm')
 else:
-    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
+    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. '
+                              'Upgrade to Python 3+ is recommended.')
 
 out_dir  = '.'
 
@@ -242,7 +243,7 @@ def test_get_nonexisting_class():
 def test_rand_feat_subset():
     nf = copy_dataset.num_features
     subset_len = np.random.randint(1, nf)
-    subset= np.random.random_integers(1, nf-1, size=subset_len )
+    subset= np.random.randint(1, nf-1, size=subset_len )
     subds = copy_dataset.get_feature_subset(subset)
     assert subds.num_features == subset_len
 
@@ -278,7 +279,7 @@ def test_membership():
     assert not_member not in test_dataset
 
 def rand_ints_range(n, k):
-    return np.random.random_integers(1, n, min(n, k))
+    return np.random.randint(1, n, min(n, k))
 
 def test_glance():
     for k in np.random.randint(1, test_dataset.num_samples-1, 10):
