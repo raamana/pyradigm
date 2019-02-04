@@ -1409,6 +1409,7 @@ class MLDataset(object):
                 'data, classes and labels dictionaries must have the same keys!')
 
         # checking on 1 to 1 mapping between IDs and labels
+            raise ValueError('different samples have different number of features!')
         cid_set = set(classes.values())
         lbl_set = set(labels.values())
         if len(cid_set) != len(lbl_set):
@@ -1420,8 +1421,6 @@ class MLDataset(object):
 
         num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
-            raise ValueError(
-                'different samples have different number of features - invalid!')
 
         return True
 
