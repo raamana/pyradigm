@@ -364,6 +364,23 @@ class MLDataset(object):
                np.iscomplex(label) or \
                isinstance(label, (str, Iterable))
 
+
+    def _check_class_id(self, cid):
+        """Checks the given identifier is valid for use and converts it to string."""
+
+        if self._is_class_id_invalid(cid):
+            raise TypeError('Class ID can be an integer or string, but not a list/array!')
+
+        return str(cid)
+
+
+    @staticmethod
+    def _is_class_id_invalid(cid):
+        """Label validity checker. ID can not be a list or array!"""
+
+        return isinstance(cid, (Sequence, Iterable)) and not isinstance(cid, str)
+
+
     @staticmethod
     def _check_features(features):
         """
