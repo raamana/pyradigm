@@ -140,6 +140,12 @@ class MLDataset(object):
         else:
             raise ValueError('Incorrect way to construct the dataset.')
 
+        if len(self.__labels) <= 0:
+            self.__id_to_label = dict()
+        else:
+            self.__id_to_label = {self.__classes[sid]: self.__labels[sid] for sid in
+                                  self.__labels}
+
 
     @property
     def data(self):
@@ -1289,6 +1295,7 @@ class MLDataset(object):
         self.__data = OrderedDict()
         self.__labels = OrderedDict()
         self.__classes = OrderedDict()
+        self.__id_to_label = dict()
 
         num_samples = len(arff_data)
         num_digits = len(str(num_samples))
