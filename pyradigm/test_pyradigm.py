@@ -120,6 +120,13 @@ def test_add():
         raise ValueError('feature names were not carried forward in combining two '
                          'datasets with same IDs and different feature names!')
 
+def test_label_validity():
+
+    feat = np.random.random(num_features)
+    for invalid_label in [np.NaN, 1j, [2, 3], 'label']:
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, invalid_label, class_set[0])
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
