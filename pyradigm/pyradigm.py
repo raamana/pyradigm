@@ -346,8 +346,8 @@ class MLDataset(object):
         return self.class_set, self.label_set, class_sizes
 
 
-    @classmethod
-    def check_features(self, features):
+    @staticmethod
+    def check_features(features):
         """
         Method to ensure data to be added is not empty and vectorized.
 
