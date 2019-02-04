@@ -345,6 +345,25 @@ class MLDataset(object):
         return self.class_set, self.label_set, class_sizes
 
 
+    def _check_labels(self, label):
+        """Validation method for sample labels."""
+
+        if self._is_label_invalid(label):
+            raise TypeError('Sample label must be a scalar - it can not be NaN or '
+                            'complex number or string or a list. Given {}'.format(label))
+
+        return label
+
+
+    @staticmethod
+    def _is_label_invalid(label):
+        """Label validity checker"""
+
+        return (not np.isscalar(label)) or \
+               np.isnan(label) or \
+               np.iscomplex(label) or \
+               isinstance(label, (str, Iterable))
+
     @staticmethod
     def _check_features(features):
         """
