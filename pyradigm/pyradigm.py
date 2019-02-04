@@ -1387,8 +1387,8 @@ class MLDataset(object):
             raise
 
 
-    @staticmethod
-    def __validate(data, classes, labels):
+    @classmethod
+    def __validate(cls, data, classes, labels):
         "Validator of inputs."
 
         if not isinstance(data, dict):
@@ -1409,7 +1409,23 @@ class MLDataset(object):
                 'data, classes and labels dictionaries must have the same keys!')
 
         # checking on 1 to 1 mapping between IDs and labels
+        cls._check_class_ids_corr_to_labels(classes, labels)
+
+        num_features_in_elements = np.unique([sample.size for sample in data.values()])
+        if len(num_features_in_elements) > 1:
             raise ValueError('different samples have different number of features!')
+
+        return True
+
+
+    @staticmethod
+    def _check_class_ids_corr_to_labels(classes, labels):
+        """
+        Helper to check each class ID corresponds to exactly one label e.g.
+         by checking that the number of unique classes and unique labels are the same,
+         as well as explicitly checking them too.
+        """
+
         cid_set = set(classes.values())
         lbl_set = set(labels.values())
         if len(cid_set) != len(lbl_set):
@@ -1418,11 +1434,6 @@ class MLDataset(object):
                              'unique numerical labels ({}).\n'
                              'Class IDs: {}\nLabels : {}'
                              ''.format(len(cid_set), len(lbl_set), cid_set, lbl_set))
-
-        num_features_in_elements = np.unique([sample.size for sample in data.values()])
-        if len(num_features_in_elements) > 1:
-
-        return True
 
 
     def extend(self, other):
