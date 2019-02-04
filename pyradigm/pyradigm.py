@@ -1373,6 +1373,16 @@ class MLDataset(object):
             raise ValueError(
                 'data, classes and labels dictionaries must have the same keys!')
 
+        # checking on 1 to 1 mapping between IDs and labels
+        cid_set = set(classes.values())
+        lbl_set = set(labels.values())
+        if len(cid_set) != len(lbl_set):
+            raise ValueError('Number of unique class IDs ({}) '
+                             'does not match the number of'
+                             'unique numerical labels ({}).\n'
+                             'Class IDs: {}\nLabels : {}'
+                             ''.format(len(cid_set), len(lbl_set), cid_set, lbl_set))
+
         num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
             raise ValueError(
