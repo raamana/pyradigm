@@ -347,7 +347,7 @@ class MLDataset(object):
 
 
     @staticmethod
-    def check_features(features):
+    def _check_features(features):
         """
         Method to ensure data to be added is not empty and vectorized.
 
@@ -427,7 +427,7 @@ class MLDataset(object):
         if class_id is None:
             class_id = str(label)
 
-        features = self.check_features(features)
+        features = self._check_features(features)
         if self.num_samples <= 0:
             self.__data[sample_id] = features
             self.__labels[sample_id] = label
