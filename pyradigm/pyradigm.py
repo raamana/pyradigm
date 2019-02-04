@@ -338,9 +338,8 @@ class MLDataset(object):
 
         """
 
-        class_sizes = np.zeros(len(self.class_set))
-        for idx, cls in enumerate(self.class_set):
-            class_sizes[idx] = self.class_sizes[cls]
+        size_dict = self.class_sizes # to avoid recomputation for every call
+        class_sizes = np.array([size_dict[cls] for cls in self.class_set])
 
         # TODO consider returning numeric label set e.g. for use in scikit-learn
         return self.class_set, self.label_set, class_sizes
