@@ -127,6 +127,26 @@ def test_label_validity():
         with raises((ValueError, TypeError)):
             test_dataset.add_sample('subj_id', feat, invalid_label, class_set[0])
 
+def test_class_id_validity():
+
+    feat = np.random.random(num_features)
+
+    # class_id can not be an iterable
+    for invalid_id in [('df', 2), [34, ]]:
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, label_set[0], invalid_id)
+
+    # label_set[ix], ix=1 to n-1 can only be associated with class_set[ix]
+    num_labels = len(label_set)
+    for ix in range(num_labels):
+        if ix > 1:
+            new_ix = ix-1
+        else:
+            new_ix = ix+1
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, label_set[ix], class_set[new_ix])
+
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
