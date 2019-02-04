@@ -241,6 +241,9 @@ class MLDataset(object):
             elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
+                if any([self._is_label_invalid(lbl) for lbl in values.values()]):
+                    raise TypeError('One of the labels is not valid.'
+                                    'Each label must be a non-NaN non-complex scalar.')
                 self.__labels = values
         else:
             raise ValueError('labels input must be a dictionary!')
@@ -265,6 +268,9 @@ class MLDataset(object):
             elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
+                if any([self._is_class_id_invalid(cid) for cid in values.values()]):
+                    raise TypeError('One of the class Ids is not valid.'
+                                    'Each ID must be a string or an int, not a list.')
                 self.__classes = values
         else:
             raise ValueError('classes input must be a dictionary!')
