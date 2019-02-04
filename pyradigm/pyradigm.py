@@ -327,6 +327,27 @@ class MLDataset(object):
         return self.__take(nitems, iter(self.__data.items()))
 
 
+    def _check_id_label(self, class_id, label):
+        """
+        Checks that label and class ID are valid, as well as
+        ensure each class ID is associated with one type of label, and vice versa.
+
+        """
+
+        label = self._check_labels(label)
+        class_id = self._check_class_id(class_id)
+
+        # ensuring a one-to-one mapping between class_id and label
+        if class_id not in self.__id_to_label:
+            self.__id_to_label[class_id] = label
+        elif self.__id_to_label[class_id] != label:
+            raise ValueError('Class ID {} was previously associated with a different'
+                             'label {}, compared to the currently provided {}'
+                             ''.format(class_id, self.__id_to_label[class_id], label))
+
+        return class_id, label
+
+
     def summarize_classes(self):
         """
         Summary of classes: names, numeric labels and sizes
