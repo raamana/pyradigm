@@ -10,7 +10,7 @@ import random
 import sys
 import traceback
 import warnings
-from collections import Counter, OrderedDict, Sequence
+from collections import Counter, OrderedDict, Sequence, Iterable
 from itertools import islice
 from os.path import basename, dirname, exists as pexists, isfile, join as pjoin, realpath
 
@@ -376,7 +376,6 @@ class MLDataset(object):
         size_dict = self.class_sizes # to avoid recomputation for every call
         class_sizes = np.array([size_dict[cls] for cls in self.class_set])
 
-        # TODO consider returning numeric label set e.g. for use in scikit-learn
         return self.class_set, self.label_set, class_sizes
 
 
@@ -450,7 +449,10 @@ class MLDataset(object):
 
 
     # TODO try implementing based on pandas
-    def add_sample(self, sample_id, features, label,
+    def add_sample(self,
+                   sample_id,
+                   features,
+                   label,
                    class_id=None,
                    overwrite=False,
                    feature_names=None):
@@ -465,7 +467,7 @@ class MLDataset(object):
             The identifier that uniquely identifies this sample.
         features : list, ndarray
             The features for this sample
-        label : int, str
+        label : int
             The label for this sample
         class_id : int, str
             The class for this sample.
@@ -1406,6 +1408,7 @@ class MLDataset(object):
 
         if not len(data) == len(labels) == len(classes):
             raise ValueError('Lengths of data, labels and classes do not match!')
+
         if not set(list(data)) == set(list(labels)) == set(list(classes)):
             raise ValueError(
                 'data, classes and labels dictionaries must have the same keys!')
@@ -1492,8 +1495,8 @@ class MLDataset(object):
 
             return combined
 
-        elif len(set(self.keys).intersection(
-                other.keys)) < 1 and self.__num_features == other.num_features:
+        elif len(set(self.keys).intersection(other.keys)) < 1 \
+                and self.__num_features == other.num_features:
             # making a copy of self first
             combined = MLDataset(in_dataset=self)
             # adding the new dataset
