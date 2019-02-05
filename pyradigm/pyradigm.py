@@ -1456,11 +1456,12 @@ class MLDataset(object):
         if not len(data) == len(labels) == len(classes):
             raise ValueError('Lengths of data, labels and classes do not match!')
 
-        if not set(list(data)) == set(list(labels)) == set(list(classes)):
+        ds_keys = list(data)
+        if not set(ds_keys) == set(list(labels)) == set(list(classes)):
             raise ValueError(
                 'data, classes and labels dictionaries must have the same keys!')
 
-        if not cls._multi_output:
+        if not cls._multi_output and np.array(labels[ds_keys[0]]).size<=1:
             # checking on 1 to 1 mapping between IDs and labels
             cls._check_class_ids_corr_to_labels(classes, labels)
 
