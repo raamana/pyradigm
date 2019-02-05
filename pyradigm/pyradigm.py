@@ -116,7 +116,7 @@ class MLDataset(object):
         elif data is not None and labels is not None and classes is not None:
             # ensuring the inputs really correspond to each other
             # but only in data, labels and classes, not feature names
-            self.__validate(data, labels, classes)
+            self._validate(data, labels, classes)
 
             # OrderedDict to ensure the order is maintained when
             # data/labels are returned in a matrix/array form
@@ -1330,7 +1330,7 @@ class MLDataset(object):
                 self.__num_features, self.__feature_names = pickle.load(df)
 
             # ensure the loaded dataset is valid
-            self.__validate(self.__data, self.__classes, self.__labels)
+            self._validate(self.__data, self.__classes, self.__labels)
 
         except IOError as ioe:
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
@@ -1438,8 +1438,7 @@ class MLDataset(object):
             raise
 
 
-    @classmethod
-    def __validate(cls, data, classes, labels):
+    def _validate(self, data, classes, labels):
         "Validator of inputs."
 
         if not isinstance(data, dict):
