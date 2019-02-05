@@ -18,7 +18,8 @@ elif version_info.major > 2:
     except:
         raise ImportError('could not import pyradigm')
 else:
-    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
+    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. '
+                              'Upgrade to Python 3+ is recommended.')
 
 out_dir  = '.'
 
@@ -120,6 +121,33 @@ def test_add():
         raise ValueError('feature names were not carried forward in combining two '
                          'datasets with same IDs and different feature names!')
 
+def test_label_validity():
+
+    feat = np.random.random(num_features)
+    for invalid_label in [np.NaN, 1j, [2, 3], 'label']:
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, invalid_label, class_set[0])
+
+def test_class_id_validity():
+
+    feat = np.random.random(num_features)
+
+    # class_id can not be an iterable
+    for invalid_id in [('df', 2), [34, ]]:
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, label_set[0], invalid_id)
+
+    # label_set[ix], ix=1 to n-1 can only be associated with class_set[ix]
+    num_labels = len(label_set)
+    for ix in range(num_labels):
+        if ix > 1:
+            new_ix = ix-1
+        else:
+            new_ix = ix+1
+        with raises((ValueError, TypeError)):
+            test_dataset.add_sample('subj_id', feat, label_set[ix], class_set[new_ix])
+
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
@@ -200,7 +228,7 @@ def test_add_new_id_diff_dim():
     sid = test_dataset.sample_ids[0]
     data_diff_dim = np.random.rand(test_dataset.num_features+1,1)
     with raises(ValueError):
-        test_dataset.add_sample(new_id, data_diff_dim, None, None)
+        test_dataset.add_sample(new_id, data_diff_dim, label_set[0], class_set[0])
 
 def test_del_nonexisting_id():
     nonexisting_id = u'dsfdkfslj38748937439kdshfkjhf38'
@@ -215,7 +243,7 @@ def test_get_nonexisting_class():
 def test_rand_feat_subset():
     nf = copy_dataset.num_features
     subset_len = np.random.randint(1, nf)
-    subset= np.random.random_integers(1, nf-1, size=subset_len )
+    subset= np.random.randint(1, nf-1, size=subset_len )
     subds = copy_dataset.get_feature_subset(subset)
     assert subds.num_features == subset_len
 
@@ -251,7 +279,7 @@ def test_membership():
     assert not_member not in test_dataset
 
 def rand_ints_range(n, k):
-    return np.random.random_integers(1, n, min(n, k))
+    return np.random.randint(1, n, min(n, k))
 
 def test_glance():
     for k in np.random.randint(1, test_dataset.num_samples-1, 10):
@@ -314,7 +342,7 @@ def test_train_test_split_ids_perc():
 # ------------------------------------------------
 
 def test_load_arff():
-    arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
+    arff_path = realpath(pjoin(dirname(__file__),'../../example_datasets/iris.arff'))
     mld = MLDataset(arff_path=arff_path)
 
     if mld.num_samples != 150:

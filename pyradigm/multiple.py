@@ -16,6 +16,95 @@ else:
                               'Upgrade to Python 3+ is recommended.')
 
 
+class MultiOutputMLDataset(MLDataset):
+    """
+    New class allowing the labels for a sample to be a vector.
+
+    Recommended way to construct the dataset is via add_sample method, one sample
+    at a time, as it allows for unambiguous identification of each row in data matrix.
+
+    This constructor can be used in 3 ways:
+        - As a copy constructor to make a copy of the given in_dataset
+        - Or by specifying the tuple of dictionaries for data, labels and classes.
+            In this usage, you can provide additional inputs such as description
+            and feature_names.
+        - Or by specifying a file path which contains previously saved
+        MultiOutputMLDataset.
+
+    Parameters
+    ----------
+    filepath : str
+        path to saved MLDataset on disk, to directly load it.
+
+    in_dataset : MLDataset
+        MLDataset to be copied to create a new one.
+
+    data : dict
+        dict of features (keys are treated to be sample ids)
+
+    labels : dict
+        dict of labels
+        (keys must match with data/classes, are treated to be sample ids)
+
+    classes : dict
+        dict of class names
+        (keys must match with data/labels, are treated to be sample ids)
+
+    description : str
+        Arbitrary string to describe the current dataset.
+
+    feature_names : list, ndarray
+        List of names for each feature in the dataset.
+
+    encode_nonnumeric : bool
+        Flag to specify whether to encode non-numeric features (categorical,
+        nominal or string) features to numeric values.
+        Currently used only when importing ARFF files.
+        It is usually better to encode your data at the source,
+        and them import them to Use with caution!
+
+    Raises
+    ------
+    ValueError
+        If in_dataset is not of type MLDataset or is empty, or
+        An invalid combination of input args is given.
+    IOError
+        If filepath provided does not exist.
+
+    """
+
+    _multi_output = True
+
+
+    def __init__(self,
+                 num_outputs=None,
+                 filepath=None,
+                 in_dataset=None,
+                 data=None,
+                 labels=None,
+                 classes=None,
+                 description='',
+                 feature_names=None,
+                 encode_nonnumeric=False):
+        super().__init__(filepath=filepath,
+                         in_dataset=in_dataset,
+                         data=data, labels=labels, classes=classes,
+                         description=description,
+                         feature_names=feature_names,
+                         encode_nonnumeric=encode_nonnumeric)
+
+        self._num_outputs = num_outputs
+
+
+    def _check_labels(self, label_array):
+        """Label check for multi-output datasets: label for a subject can be a vector!"""
+
+        if any([self._is_label_invalid(lbl) for lbl in label_array]):
+            raise ValueError('One or more of the labels is not valid!')
+
+        return np.array(label_array)
+
+
 class MultiDataset(object):
     """
     Container data structure to hold and manage multiple MLDataset instances.
@@ -137,7 +226,8 @@ class MultiDataset(object):
         string = "{}: {} samples, " \
                  "{} modalities, " \
                  "dims: {}\nclass sizes: ".format(self._name, self._num_samples,
-                                                 self._modality_count, self._num_features)
+                                                  self._modality_count,
+                                                  self._num_features)
 
         string += ', '.join(['{}: {}'.format(c, n) for c, n in self._class_sizes.items()])
 
@@ -207,7 +297,7 @@ class MultiDataset(object):
                 # getting container with fake data
                 subset = self._dataset.get_subset(id_list)
                 # injecting actual features
-                subset.data = { id_: data[id_] for id_ in id_list }
+                subset.data = {id_: data[id_] for id_ in id_list}
             else:
                 raise ValueError('Invalid output format - choose only one of '
                                  'MLDataset or data_matrix')
