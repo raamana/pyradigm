@@ -519,13 +519,15 @@ class MLDataset(object):
         features = self._check_features(features)
         class_id, label = self._check_id_label(class_id, label)
         if self.num_samples <= 0:
-            self.__data[sample_id] = features
+
             self.__labels[sample_id] = label
             self.__classes[sample_id] = class_id
             if isinstance(label, (Iterable, np.ndarray)):
                 self._num_outputs = len(label)
             else:
                 self.num_outputs = 1
+
+            self.__data[sample_id] = features
             self.__dtype = type(features)
             self.__num_features = features.size if isinstance(features,
                                                               np.ndarray) else len(
@@ -540,9 +542,11 @@ class MLDataset(object):
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
-            self.__data[sample_id] = features
+
             self.__labels[sample_id] = label
+            self.__data[sample_id] = features
             self.__classes[sample_id] = class_id
+
             if feature_names is not None:
                 # if it was never set, allow it
                 # class gets here when adding the first sample,
