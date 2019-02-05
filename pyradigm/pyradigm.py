@@ -529,9 +529,7 @@ class MLDataset(object):
 
             self.__data[sample_id] = features
             self.__dtype = type(features)
-            self.__num_features = features.size if isinstance(features,
-                                                              np.ndarray) else len(
-                features)
+            self.__num_features = features.size
             if feature_names is None:
                 self.__feature_names = self.__str_names(self.num_features)
         else:
