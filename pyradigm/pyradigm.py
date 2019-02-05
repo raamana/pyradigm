@@ -542,6 +542,10 @@ class MLDataset(object):
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
+            if self._num_outputs > 1 and len(label) != self._num_outputs:
+                raise ValueError('Number of target outputs ({}) given for {}'
+                                 'do not match that of previous samples ({})!'
+                                 ''.format(len(label), self._num_outputs))
 
             self.__labels[sample_id] = label
             self.__data[sample_id] = features
