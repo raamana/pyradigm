@@ -347,7 +347,7 @@ class MLDataset(object):
         """
 
         label = self._check_labels(label)
-        class_id = self._check_class_id(class_id)
+        class_id = self._check_class_id(class_id, label)
 
         # ensuring a one-to-one mapping between class_id and label
         if class_id not in self.__id_to_label:
@@ -421,8 +421,11 @@ class MLDataset(object):
                isinstance(label, (str, Iterable))
 
 
-    def _check_class_id(self, cid):
+    def _check_class_id(self, cid, label):
         """Checks the given identifier is valid for use and converts it to string."""
+
+        if cid is None:
+            return str(label)
 
         if self._is_class_id_invalid(cid):
             raise TypeError('Class ID can be an integer or string, but not a list/array!'
@@ -514,13 +517,6 @@ class MLDataset(object):
 
         if sample_id in self.__data and not overwrite:
             raise ValueError('{} already exists in this dataset!'.format(sample_id))
-
-        # ensuring there is always a class name, even when not provided by the user.
-        # this is needed, in order for __str__ method to work.
-        # TODO consider enforcing label to be numeric and class_id to be string
-        #  so portability with other packages is more uniform e.g. for use in scikit-learn
-        if class_id is None:
-            class_id = str(label)
 
         features = self._check_features(features)
         class_id, label = self._check_id_label(class_id, label)
