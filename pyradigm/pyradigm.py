@@ -177,13 +177,18 @@ class MLDataset(object):
 
         sample_ids = np.array(self.keys)
         label_dict = self.labels
-        matrix = np.full([self.num_samples, self.num_features], np.nan)
-        labels = np.full([self.num_samples, 1], np.nan)
-        for ix, sample in enumerate(sample_ids):
-            matrix[ix, :] = self.__data[sample]
-            labels[ix] = label_dict[sample]
+        data_dict = self.data # to allow for derived class to work
 
-        return matrix, np.ravel(labels), sample_ids
+        matrix = np.full([self.num_samples, self.num_features], np.nan)
+        labels = np.full([self.num_samples, self.num_outputs], np.nan)
+        for ix, sample in enumerate(sample_ids):
+            matrix[ix, :] = data_dict[sample]
+            labels[ix, :] = label_dict[sample]
+
+        if self.num_outputs == 1:
+            labels = labels.ravel()
+
+        return matrix, labels, sample_ids
 
 
     @data.setter
