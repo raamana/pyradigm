@@ -530,7 +530,7 @@ class MLDataset(object):
             if isinstance(label, (Iterable, np.ndarray)):
                 self._num_outputs = len(label)
             else:
-                self.num_outputs = 1
+                self._num_outputs = 1
 
             self.__data[sample_id] = features
             self.__dtype = type(features)
