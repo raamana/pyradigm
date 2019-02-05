@@ -364,18 +364,16 @@ class MLDataset(object):
     def _do_labels_match(cls, label1, label2):
         """Method to check if two labels are equal, irrespective of their dimension."""
 
-        len1=len(label1)
-        if len1 > 1:
-            if len(label2) != len1:
+        if np.isscalar(label1) and np.isscalar(label2):
+            return label1==label2
+        else:
+            if len(label1) != len(label2):
                 return False
+
             if not all(label1==label2):
                 return False
-        elif len(label2) > 1: # label1 is a scalar or empty, label2 has 2 or more elements
-            return False
-        elif label1 != label2:
-            return False
-        else:
-            return True
+            else:
+                return True
 
 
     def summarize_classes(self):
