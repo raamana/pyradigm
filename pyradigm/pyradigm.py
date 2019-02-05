@@ -1231,9 +1231,16 @@ class MLDataset(object):
             full_descr.append('{} samples, {} classes, {} features'.format(
                     self.num_samples, self.num_classes, self.num_features))
             class_ids = list(self.class_sizes)
+            partial_print_indicator = False
+            max_num_classes = 5
+            if len(class_ids) > 2*max_num_classes:
+                class_ids = class_ids[:max_num_classes] + class_ids[-max_num_classes:]
+                partial_print_indicator = True
             max_width = max([len(cls) for cls in class_ids])
             num_digit = max([len(str(val)) for val in self.class_sizes.values()])
-            for cls in class_ids:
+            for cc, cls in enumerate(class_ids):
+                if partial_print_indicator and cc==max_num_classes:
+                    full_descr.append('\t...\t')
                 full_descr.append(
                     'Class {cls:>{clswidth}} : '
                     '{size:>{numwidth}} samples'.format(cls=cls, clswidth=max_width,
