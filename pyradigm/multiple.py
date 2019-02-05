@@ -86,7 +86,6 @@ class MultiOutputMLDataset(MLDataset):
                  description='',
                  feature_names=None,
                  encode_nonnumeric=False):
-
         super().__init__(filepath=filepath,
                          in_dataset=in_dataset,
                          data=data, labels=labels, classes=classes,
@@ -227,7 +226,8 @@ class MultiDataset(object):
         string = "{}: {} samples, " \
                  "{} modalities, " \
                  "dims: {}\nclass sizes: ".format(self._name, self._num_samples,
-                                                 self._modality_count, self._num_features)
+                                                  self._modality_count,
+                                                  self._num_features)
 
         string += ', '.join(['{}: {}'.format(c, n) for c, n in self._class_sizes.items()])
 
@@ -297,7 +297,7 @@ class MultiDataset(object):
                 # getting container with fake data
                 subset = self._dataset.get_subset(id_list)
                 # injecting actual features
-                subset.data = { id_: data[id_] for id_ in id_list }
+                subset.data = {id_: data[id_] for id_ in id_list}
             else:
                 raise ValueError('Invalid output format - choose only one of '
                                  'MLDataset or data_matrix')
