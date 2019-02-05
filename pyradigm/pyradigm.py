@@ -147,8 +147,8 @@ class MLDataset(object):
             self.__id_to_label = {self.__classes[sid]: self.__labels[sid] for sid in
                                   self.__labels}
 
-        # fixing this to be 1
-        self._num_outputs = 1
+        if not hasattr(self, '_num_outputs'):
+            self._num_outputs = 1
 
 
     @property
