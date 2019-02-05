@@ -19,6 +19,7 @@ from os.path import basename, dirname, exists as pexists, isfile, join as pjoin,
 class MLDataset(object):
     """An ML dataset to ease workflow and maintain integrity."""
 
+    _multi_output = False
 
     def __init__(self, filepath=None,
                  in_dataset=None,
@@ -145,6 +146,9 @@ class MLDataset(object):
         else:
             self.__id_to_label = {self.__classes[sid]: self.__labels[sid] for sid in
                                   self.__labels}
+
+        # fixing this to be 1
+        self._num_outputs = 1
 
 
     @property
