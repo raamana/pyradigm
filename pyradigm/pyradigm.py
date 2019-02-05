@@ -1256,42 +1256,42 @@ class MLDataset(object):
         return self.__str__()
 
 
-    @staticmethod
-    def __dir__():
-        """Returns the preferred list of attributes to be used with the dataset."""
-        return ['add_sample',
-                'glance',
-                'summarize_classes',
-                'sample_ids_in_class',
-                'train_test_split_ids',
-                'random_subset_ids',
-                'random_subset_ids_by_count',
-                'classes',
-                'class_set',
-                'class_sizes',
-                'data_and_labels',
-                'get_data_matrix_in_order',
-                'data',
-                'del_sample',
-                'description',
-                'extend',
-                'feature_names',
-                'get',
-                'get_class',
-                'get_subset',
-                'random_subset',
-                'get_feature_subset',
-                'keys',
-                'labels',
-                'label_set',
-                'num_classes',
-                'num_features',
-                'num_samples',
-                'sample_ids',
-                'save',
-                'compatible',
-                'transform',
-                'add_classes']
+    # @staticmethod
+    # def __dir__():
+    #     """Returns the preferred list of attributes to be used with the dataset."""
+    #     return ['add_sample',
+    #             'glance',
+    #             'summarize_classes',
+    #             'sample_ids_in_class',
+    #             'train_test_split_ids',
+    #             'random_subset_ids',
+    #             'random_subset_ids_by_count',
+    #             'classes',
+    #             'class_set',
+    #             'class_sizes',
+    #             'data_and_labels',
+    #             'get_data_matrix_in_order',
+    #             'data',
+    #             'del_sample',
+    #             'description',
+    #             'extend',
+    #             'feature_names',
+    #             'get',
+    #             'get_class',
+    #             'get_subset',
+    #             'random_subset',
+    #             'get_feature_subset',
+    #             'keys',
+    #             'labels',
+    #             'label_set',
+    #             'num_classes',
+    #             'num_features',
+    #             'num_samples',
+    #             'sample_ids',
+    #             'save',
+    #             'compatible',
+    #             'transform',
+    #             'add_classes']
 
 
     def __copy(self, other):
