@@ -1125,6 +1125,12 @@ class MLDataset(object):
 
 
     @property
+    def num_outputs(self):
+        """Returns number of outputs (target labels) for each sample in thicdataset."""
+        return self._num_outputs
+
+
+    @property
     def dtype(self):
         """number of features in each sample."""
         return self.__dtype
