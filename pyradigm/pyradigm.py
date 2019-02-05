@@ -1461,10 +1461,10 @@ class MLDataset(object):
             raise ValueError(
                 'data, classes and labels dictionaries must have the same keys!')
 
-        if not cls._multi_output and np.array(labels[ds_keys[0]]).size<=1:
         self._num_outputs = np.array(labels[ds_keys[0]]).size
+        if not self._multi_output and self._num_outputs==1:
             # checking on 1 to 1 mapping between IDs and labels
-            cls._check_class_ids_corr_to_labels(classes, labels)
+            self._check_class_ids_corr_to_labels(classes, labels)
 
         num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
