@@ -421,7 +421,8 @@ class MLDataset(object):
         """Checks the given identifier is valid for use and converts it to string."""
 
         if self._is_class_id_invalid(cid):
-            raise TypeError('Class ID can be an integer or string, but not a list/array!')
+            raise TypeError('Class ID can be an integer or string, but not a list/array!'
+                            'Given: {}'.format(cid))
 
         return str(cid)
 
