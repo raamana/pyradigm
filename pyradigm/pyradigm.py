@@ -348,12 +348,30 @@ class MLDataset(object):
         # ensuring a one-to-one mapping between class_id and label
         if class_id not in self.__id_to_label:
             self.__id_to_label[class_id] = label
-        elif self.__id_to_label[class_id] != label:
+        elif not self._do_labels_match(self.__id_to_label[class_id], label):
             raise ValueError('Class ID {} was previously associated with a different'
                              'label {}, compared to the currently provided {}'
                              ''.format(class_id, self.__id_to_label[class_id], label))
 
         return class_id, label
+
+
+    @classmethod
+    def _do_labels_match(cls, label1, label2):
+        """Method to check if two labels are equal, irrespective of their dimension."""
+
+        len1=len(label1)
+        if len1 > 1:
+            if len(label2) != len1:
+                return False
+            if not all(label1==label2):
+                return False
+        elif len(label2) > 1: # label1 is a scalar or empty, label2 has 2 or more elements
+            return False
+        elif label1 != label2:
+            return False
+        else:
+            return True
 
 
     def summarize_classes(self):
