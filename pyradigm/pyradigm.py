@@ -522,6 +522,10 @@ class MLDataset(object):
             self.__data[sample_id] = features
             self.__labels[sample_id] = label
             self.__classes[sample_id] = class_id
+            if isinstance(label, (Iterable, np.ndarray)):
+                self._num_outputs = len(label)
+            else:
+                self.num_outputs = 1
             self.__dtype = type(features)
             self.__num_features = features.size if isinstance(features,
                                                               np.ndarray) else len(
