@@ -1053,7 +1053,7 @@ class MLDataset(object):
 
     def __contains__(self, item):
         "Boolean test of membership of a sample in the dataset."
-        if item in self.keys:
+        if item in self.__data:
             return True
         else:
             return False
@@ -1062,7 +1062,7 @@ class MLDataset(object):
     def get(self, item, not_found_value=None):
         "Method like dict.get() which can return specified value if key not found"
 
-        if item in self.keys:
+        if item in self.__data:
             return self.__data[item]
         else:
             return not_found_value
@@ -1071,7 +1071,7 @@ class MLDataset(object):
     def __getitem__(self, item):
         "Method to ease data retrieval i.e. turn dataset.data['id'] into dataset['id'] "
 
-        if item in self.keys:
+        if item in self.__data:
             return self.__data[item]
         else:
             raise KeyError('{} not found in dataset.'.format(item))
