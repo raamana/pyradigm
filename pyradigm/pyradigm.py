@@ -48,7 +48,7 @@ class MLDataset(object):
         in_dataset : MLDataset
             MLDataset to be copied to create a new one.
 
-        arff_path : str
+        arff_path : str or None
             Path to a dataset saved in Weka's ARFF file format.
 
         data : dict
@@ -1351,6 +1351,8 @@ class MLDataset(object):
         self.__labels = OrderedDict()
         self.__classes = OrderedDict()
         self.__id_to_label = dict()
+        # ARFF does not support multi-output AFAIK
+        self._num_outputs = 1
 
         num_samples = len(arff_data)
         num_digits = len(str(num_samples))
