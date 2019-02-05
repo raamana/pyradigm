@@ -1462,6 +1462,7 @@ class MLDataset(object):
                 'data, classes and labels dictionaries must have the same keys!')
 
         if not cls._multi_output and np.array(labels[ds_keys[0]]).size<=1:
+        self._num_outputs = np.array(labels[ds_keys[0]]).size
             # checking on 1 to 1 mapping between IDs and labels
             cls._check_class_ids_corr_to_labels(classes, labels)
 
