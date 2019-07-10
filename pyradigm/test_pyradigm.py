@@ -120,6 +120,17 @@ def test_add():
         raise ValueError('feature names were not carried forward in combining two '
                          'datasets with same IDs and different feature names!')
 
+def test_set_existing_sample():
+
+    sid = test_dataset.sample_ids[0]
+    new_feat = np.random.random(num_features)
+
+    with raises(KeyError):
+        test_dataset[sid+'nonexisting'] = new_feat
+
+    with raises(ValueError):
+        test_dataset[sid] = new_feat[:-2] # diff dimensionality
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
@@ -332,4 +343,5 @@ def test_load_arff():
     # print(mld)
 
 # test_load_arff()
-test_add()
+# test_add()
+test_set_existing_sample()
