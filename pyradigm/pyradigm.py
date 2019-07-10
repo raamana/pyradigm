@@ -972,6 +972,21 @@ class MLDataset(object):
             raise KeyError('{} not found in dataset.'.format(item))
 
 
+    def __setitem__(self, item, features):
+        """Method to replace features for existing samplet"""
+
+        if item in self.__data:
+            features = self.check_features(features)
+            if self.__num_features != features.size:
+                raise ValueError('dimensionality of supplied features ({}) '
+                                 'does not match existing samples ({})'
+                                 ''.format(features.size, self.__num_features))
+            self.__data[item] = features
+        else:
+            raise KeyError('{} not found in dataset.'
+                           ' Can not replace features of a non-existing sample.'
+                           ' Add it first via .add_sample()'.format(item))
+
     def __iter__(self):
         "Iterator over samples"
 

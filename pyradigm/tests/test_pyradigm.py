@@ -120,6 +120,22 @@ def test_add():
         raise ValueError('feature names were not carried forward in combining two '
                          'datasets with same IDs and different feature names!')
 
+def test_set_existing_sample():
+
+    sid = test_dataset.sample_ids[0]
+    new_feat = np.random.random(num_features)
+
+    with raises(KeyError):
+        test_dataset[sid+'nonexisting'] = new_feat
+
+    with raises(ValueError):
+        test_dataset[sid] = new_feat[:-2] # diff dimensionality
+
+    test_dataset[sid] = new_feat
+    if not np.all(test_dataset[sid]==new_feat):
+        raise ValueError('Bug in replacing features for an existing sample!'
+                         'Retrieved features do not match previously set features.')
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
@@ -314,7 +330,8 @@ def test_train_test_split_ids_perc():
 # ------------------------------------------------
 
 def test_load_arff():
-    arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
+    arff_path = realpath(pjoin(dirname(__file__),
+                               '..', '..', 'example_datasets', 'iris.arff'))
     mld = MLDataset(arff_path=arff_path)
 
     if mld.num_samples != 150:
@@ -332,4 +349,5 @@ def test_load_arff():
     # print(mld)
 
 # test_load_arff()
-test_add()
+# test_add()
+test_set_existing_sample()
