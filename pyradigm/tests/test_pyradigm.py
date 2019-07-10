@@ -131,6 +131,11 @@ def test_set_existing_sample():
     with raises(ValueError):
         test_dataset[sid] = new_feat[:-2] # diff dimensionality
 
+    test_dataset[sid] = new_feat
+    if not np.all(test_dataset[sid]==new_feat):
+        raise ValueError('Bug in replacing features for an existing sample!'
+                         'Retrieved features do not match previously set features.')
+
 def test_cant_read_nonexisting_file():
     with raises(IOError):
         a = MLDataset('/nonexistentrandomdir/disofddlsfj/arbitrary.noname.pkl')
