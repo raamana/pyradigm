@@ -25,6 +25,7 @@ out_dir  = '.'
 num_classes  = np.random.randint( 2, 50)
 class_sizes  = np.random.randint(10, 100, num_classes)
 num_features = np.random.randint(10, 100)
+num_samples = sum(class_sizes)
 
 class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
@@ -88,6 +89,9 @@ def test_num_classes():
 
 def test_num_features():
     assert test_dataset.num_features == num_features
+
+def test_shape():
+    assert test_dataset.shape == (num_samples, num_features)
 
 def test_num_features_setter():
     with raises(AttributeError):
