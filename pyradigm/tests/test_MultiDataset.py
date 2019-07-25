@@ -58,9 +58,9 @@ for trn, tst in multi.holdout(num_rep=5, train_perc=0.51, stratified=True,
         print('train: {}\ttest: {}\n'.format(len(trn), len(tst)))
     else:
         for aa, bb in zip(trn, tst):
-            if aa.shape[1] != bb.shape[1]:
+            if aa.num_features != bb.num_features:
                 raise ValueError('train and test dimensionality do not match!')
 
-            print('train: {}\ntest: {}\n'.format(aa.shape, bb.shape))
+            print('train: {}\ntest : {}\n'.format(aa.shape, bb.shape))
 
 print()
