@@ -1071,6 +1071,14 @@ class MLDataset(object):
 
 
     @property
+    def shape(self):
+        """Returns the pythonic shape of the dataset: num_samples x num_features.
+        """
+
+        return (self.num_samples, self.num_features)
+
+
+    @property
     def class_set(self):
         """Set of unique classes in the dataset."""
 
