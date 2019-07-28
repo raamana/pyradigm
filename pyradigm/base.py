@@ -28,7 +28,7 @@ class BaseMLDataset(ABC):
     def __init__(self, filepath=None,
                  in_dataset=None,
                  arff_path=None,
-                 data=None, labels=None, classes=None,
+                 data=None, targets=None, classes=None,
                  description='',
                  feature_names=None,
                  encode_nonnumeric=False):
@@ -39,7 +39,7 @@ class BaseMLDataset(ABC):
 
         This constructor can be used in 3 ways:
             - As a copy constructor to make a copy of the given in_dataset
-            - Or by specifying the tuple of data, labels and classes.
+            - Or by specifying the tuple of data, targets and classes.
                 In this usage, you can provide additional inputs such as description
                 and feature_names.
             - Or by specifying a file path which contains previously saved MLDataset.
@@ -58,13 +58,13 @@ class BaseMLDataset(ABC):
         data : dict
             dict of features (keys are treated to be sample ids)
 
-        labels : dict
-            dict of labels
+        targets : dict
+            dict of targets
             (keys must match with data/classes, are treated to be sample ids)
 
         classes : dict
             dict of class names
-            (keys must match with data/labels, are treated to be sample ids)
+            (keys must match with data/targets, are treated to be sample ids)
 
         description : str
             Arbitrary string to describe the current dataset.
@@ -108,25 +108,25 @@ class BaseMLDataset(ABC):
             if in_dataset.num_samples <= 0:
                 raise ValueError('Dataset to copy is empty.')
             self.__copy(in_dataset)
-        elif data is None and labels is None and classes is None:
+        elif data is None and targets is None and classes is None:
             # TODO refactor the code to use only basic dict,
             # as it allows for better equality comparisons
             self.__data = OrderedDict()
-            self.__labels = OrderedDict()
+            self.__targets = OrderedDict()
             self.__classes = OrderedDict()
             self.__num_features = 0
             self.__dtype = None
             self.__description = ''
             self.__feature_names = None
-        elif data is not None and labels is not None and classes is not None:
+        elif data is not None and targets is not None and classes is not None:
             # ensuring the inputs really correspond to each other
-            # but only in data, labels and classes, not feature names
-            self.__validate(data, labels, classes)
+            # but only in data, targets and classes, not feature names
+            self.__validate(data, targets, classes)
 
             # OrderedDict to ensure the order is maintained when
-            # data/labels are returned in a matrix/array form
+            # data/targets are returned in a matrix/array form
             self.__data = OrderedDict(data)
-            self.__labels = OrderedDict(labels)
+            self.__targets = OrderedDict(targets)
             self.__classes = OrderedDict(classes)
             self.__description = description
 
@@ -155,7 +155,7 @@ class BaseMLDataset(ABC):
 
     def data_and_labels(self):
         """
-        Dataset features and labels in a matrix form for learning.
+        Dataset features and targets in a matrix form for learning.
 
         Also returns sample_ids in the same order.
 
@@ -164,22 +164,22 @@ class BaseMLDataset(ABC):
         data_matrix : ndarray
             2D array of shape [num_samples, num_features]
             with features corresponding row-wise to sample_ids
-        labels : ndarray
-            Array of numeric labels for each sample corresponding row-wise to sample_ids
+        targets : ndarray
+            Array of numeric targets for each sample corresponding row-wise to sample_ids
         sample_ids : list
             List of sample ids
 
         """
 
         sample_ids = np.array(self.keys)
-        label_dict = self.labels
+        label_dict = self.targets
         matrix = np.full([self.num_samples, self.num_features], np.nan)
-        labels = np.full([self.num_samples, 1], np.nan)
+        targets = np.full([self.num_samples, 1], np.nan)
         for ix, sample in enumerate(sample_ids):
             matrix[ix, :] = self.__data[sample]
-            labels[ix] = label_dict[sample]
+            targets[ix] = label_dict[sample]
 
-        return matrix, np.ravel(labels), sample_ids
+        return matrix, np.ravel(targets), sample_ids
 
 
     @data.setter
@@ -204,9 +204,9 @@ class BaseMLDataset(ABC):
 
         """
         if isinstance(values, dict):
-            if self.__labels is not None and len(self.__labels) != len(values):
+            if self.__targets is not None and len(self.__targets) != len(values):
                 raise ValueError(
-                    'number of samples do not match the previously assigned labels')
+                    'number of samples do not match the previously assigned targets')
             elif len(values) < 1:
                 raise ValueError('There must be at least 1 sample in the dataset!')
             else:
@@ -224,16 +224,16 @@ class BaseMLDataset(ABC):
 
 
     @property
-    def labels(self):
-        """Returns the array of labels for all the samples."""
+    def targets(self):
+        """Returns the array of targets for all the samples."""
         # TODO numeric label need to be removed,
         # as this can be made up on the fly as needed from str to num encoders.
-        return self.__labels
+        return self.__targets
 
 
-    @labels.setter
-    def labels(self, values):
-        """Class labels (such as 1, 2, -1, 'A', 'B' etc.) for each sample in the dataset."""
+    @targets.setter
+    def targets(self, values):
+        """Class targets (such as 1, 2, -1, 'A', 'B' etc.) for each sample in the dataset."""
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError(
@@ -241,9 +241,9 @@ class BaseMLDataset(ABC):
             elif set(self.keys) != set(list(values)):
                 raise ValueError('sample ids do not match the previously assigned ids.')
             else:
-                self.__labels = values
+                self.__targets = values
         else:
-            raise ValueError('labels input must be a dictionary!')
+            raise ValueError('targets input must be a dictionary!')
 
 
     @property
@@ -279,7 +279,7 @@ class BaseMLDataset(ABC):
 
     @feature_names.setter
     def feature_names(self, names):
-        "Stores the text labels for features"
+        "Stores the text targets for features"
 
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
@@ -329,7 +329,7 @@ class BaseMLDataset(ABC):
 
     def summarize_classes(self):
         """
-        Summary of classes: names, numeric labels and sizes
+        Summary of classes: names, numeric targets and sizes
 
         Returns
         -------
@@ -386,7 +386,7 @@ class BaseMLDataset(ABC):
 
 
     # TODO try implementing based on pandas
-    def add_sample(self, sample_id, features, label,
+    def add_sample(self, sample_id, features, target,
                    class_id=None,
                    overwrite=False,
                    feature_names=None):
@@ -431,12 +431,12 @@ class BaseMLDataset(ABC):
         # TODO consider enforcing label to be numeric and class_id to be string
         #  so portability with other packages is more uniform e.g. for use in scikit-learn
         if class_id is None:
-            class_id = str(label)
+            class_id = str(target)
 
         features = self.check_features(features)
         if self.num_samples <= 0:
             self.__data[sample_id] = features
-            self.__labels[sample_id] = label
+            self.__targets[sample_id] = target
             self.__classes[sample_id] = class_id
             self.__dtype = type(features)
             self.__num_features = features.size if isinstance(features,
@@ -453,7 +453,7 @@ class BaseMLDataset(ABC):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
 
             self.__data[sample_id] = features
-            self.__labels[sample_id] = label
+            self.__targets[sample_id] = target
             self.__classes[sample_id] = class_id
             if feature_names is not None:
                 # if it was never set, allow it
@@ -487,7 +487,7 @@ class BaseMLDataset(ABC):
         else:
             self.__data.pop(sample_id)
             self.__classes.pop(sample_id)
-            self.__labels.pop(sample_id)
+            self.__targets.pop(sample_id)
             print('{} removed.'.format(sample_id))
 
 
@@ -521,7 +521,7 @@ class BaseMLDataset(ABC):
         sub_data = {sample: features[subset_idx] for sample, features in
                     self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
-        subdataset = self.__class__(data=sub_data, labels=self.__labels,
+        subdataset = self.__class__(data=sub_data, targets=self.__targets,
                                     classes=self.__classes, description=new_descr,
                                     feature_names=self.__feature_names[subset_idx])
 
@@ -536,47 +536,6 @@ class BaseMLDataset(ABC):
 
         return subset
 
-
-    def get_class(self, class_id):
-        """
-        Returns a smaller dataset belonging to the requested classes.
-
-        Parameters
-        ----------
-        class_id : str or list
-            identifier(s) of the class(es) to be returned.
-
-        Returns
-        -------
-        MLDataset
-            With subset of samples belonging to the given class(es).
-
-        Raises
-        ------
-        ValueError
-            If one or more of the requested classes do not exist in this dataset.
-            If the specified id is empty or None
-
-        """
-        if class_id in [None, '']:
-            raise ValueError("class id can not be empty or None.")
-
-        if isinstance(class_id, str):
-            class_ids = [class_id, ]
-        else:
-            class_ids = class_id
-
-        non_existent = set(self.class_set).intersection(set(class_ids))
-        if len(non_existent) < 1:
-            raise ValueError(
-                'These classes {} do not exist in this dataset.'.format(non_existent))
-
-        subsets = list()
-        for class_id in class_ids:
-            subsets_this_class = self.keys_with_value(self.__classes, class_id)
-            subsets.extend(subsets_this_class)
-
-        return self.get_subset(subsets)
 
 
     def transform(self, func, func_description=None):
@@ -651,7 +610,7 @@ class BaseMLDataset(ABC):
                 raise
 
             xfm_ds.add_sample(sample, xfm_data,
-                              label=self.__labels[sample],
+                              target=self.__targets[sample],
                               class_id=self.__classes[sample])
 
         xfm_ds.description = "{}\n{}".format(func_description, self.__description)
@@ -712,8 +671,8 @@ class BaseMLDataset(ABC):
         test_set = list(set(self.keys) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
-            raise ValueError(
-                'Selection resulted in empty training or test set - check your selections or dataset!')
+            raise ValueError('Selection resulted in empty training or test set: '
+                             'check your selections or dataset!')
 
         return train_set, test_set
 
@@ -846,33 +805,6 @@ class BaseMLDataset(ABC):
 
         """
 
-        subsets = self.random_subset_ids(perc_in_class)
-        if len(subsets) > 0:
-            return self.get_subset(subsets)
-        else:
-            warnings.warn('Zero samples were selected. Returning an empty dataset!')
-            return self.__class__()
-
-
-    def sample_ids_in_class(self, class_id):
-        """
-        Returns a list of sample ids belonging to a given class.
-
-        Parameters
-        ----------
-        class_id : str
-            class id to query.
-
-        Returns
-        -------
-        subset_ids : list
-            List of sample ids belonging to a given class.
-
-        """
-
-        # subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
-        subset_ids = self.keys_with_value(self.classes, class_id)
-        return subset_ids
 
 
     def get_subset(self, subset_ids):
@@ -893,17 +825,17 @@ class BaseMLDataset(ABC):
 
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
-            # ensure items are added to data, labels etc in the same order of sample IDs
+            # ensure items are added to data, targets etc in the same order of sample IDs
             # TODO come up with a way to do this even when not using OrderedDict()
-            # putting the access of data, labels and classes in the same loop  would
+            # putting the access of data, targets and classes in the same loop  would
             # ensure there is correspondence across the three attributes of the class
             data = self.__get_subset_from_dict(self.__data, subset_ids)
-            labels = self.__get_subset_from_dict(self.__labels, subset_ids)
+            targets = self.__get_subset_from_dict(self.__targets, subset_ids)
             if self.__classes is not None:
                 classes = self.__get_subset_from_dict(self.__classes, subset_ids)
             else:
                 classes = None
-            subdataset = self.__class__(data=data, labels=labels, classes=classes)
+            subdataset = self.__class__(data=data, targets=targets, classes=classes)
             # Appending the history
             subdataset.description += '\n Subset derived from: ' + self.description
             subdataset.feature_names = self.__feature_names
@@ -1001,7 +933,7 @@ class BaseMLDataset(ABC):
 
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
-        # Using OrderedDict helps ensure data are added to data, labels etc
+        # Using OrderedDict helps ensure data are added to data, targets etc
         # in the same order of sample IDs
         return OrderedDict(
                 (sid, value) for sid, value in input_dict.items() if sid in subset)
@@ -1204,7 +1136,7 @@ class BaseMLDataset(ABC):
                 'random_subset',
                 'get_feature_subset',
                 'keys',
-                'labels',
+                'targets',
                 'label_set',
                 'num_classes',
                 'num_features',
@@ -1220,7 +1152,7 @@ class BaseMLDataset(ABC):
         """Copy constructor."""
         self.__data = copy.deepcopy(other.data)
         self.__classes = copy.deepcopy(other.classes)
-        self.__labels = copy.deepcopy(other.labels)
+        self.__targets = copy.deepcopy(other.targets)
         self.__dtype = copy.deepcopy(other.dtype)
         self.__description = copy.deepcopy(other.description)
         self.__feature_names = copy.deepcopy(other.feature_names)
@@ -1235,12 +1167,12 @@ class BaseMLDataset(ABC):
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
                 # loaded_dataset = pickle.load(df)
-                self.__data, self.__classes, self.__labels, \
+                self.__data, self.__classes, self.__targets, \
                 self.__dtype, self.__description, \
                 self.__num_features, self.__feature_names = pickle.load(df)
 
             # ensure the loaded dataset is valid
-            self.__validate(self.__data, self.__classes, self.__labels)
+            self.__validate(self.__data, self.__classes, self.__targets)
 
         except IOError as ioe:
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
@@ -1280,7 +1212,7 @@ class BaseMLDataset(ABC):
 
         # initializing the key containers, before calling self.add_sample
         self.__data = OrderedDict()
-        self.__labels = OrderedDict()
+        self.__targets = OrderedDict()
         self.__classes = OrderedDict()
 
         num_samples = len(arff_data)
@@ -1289,7 +1221,7 @@ class BaseMLDataset(ABC):
         sample_classes = [cls.decode('utf-8') for cls in arff_data['class']]
         class_set = set(sample_classes)
         label_dict = dict()
-        # encoding class names to labels 1 to n
+        # encoding class names to targets 1 to n
         for ix, cls in enumerate(class_set):
             label_dict[cls] = ix + 1
 
@@ -1299,7 +1231,7 @@ class BaseMLDataset(ABC):
             sample_class = sample[-1].decode('utf-8')
             self.add_sample(sample_id=make_id(index),  # ARFF rows do not have an ID
                             features=sample_attrs,
-                            label=label_dict[sample_class],
+                            target=label_dict[sample_class],
                             class_id=sample_class)
             # not necessary to set feature_names=attr_names for each sample,
             # as we do it globally after loop
@@ -1334,7 +1266,7 @@ class BaseMLDataset(ABC):
             file_path = os.path.abspath(file_path)
             with open(file_path, 'wb') as df:
                 # pickle.dump(self, df)
-                pickle.dump((self.__data, self.__classes, self.__labels,
+                pickle.dump((self.__data, self.__classes, self.__targets,
                              self.__dtype, self.__description, self.__num_features,
                              self.__feature_names),
                             df)
@@ -1346,25 +1278,25 @@ class BaseMLDataset(ABC):
 
 
     @staticmethod
-    def __validate(data, classes, labels):
+    def __validate(data, classes, targets):
         "Validator of inputs."
 
         if not isinstance(data, dict):
             raise TypeError(
                 'data must be a dict! keys: sample ID or any unique identifier')
-        if not isinstance(labels, dict):
+        if not isinstance(targets, dict):
             raise TypeError(
-                'labels must be a dict! keys: sample ID or any unique identifier')
+                'targets must be a dict! keys: sample ID or any unique identifier')
         if classes is not None:
             if not isinstance(classes, dict):
                 raise TypeError(
-                    'labels must be a dict! keys: sample ID or any unique identifier')
+                    'targets must be a dict! keys: sample ID or any unique identifier')
 
-        if not len(data) == len(labels) == len(classes):
-            raise ValueError('Lengths of data, labels and classes do not match!')
-        if not set(list(data)) == set(list(labels)) == set(list(classes)):
+        if not len(data) == len(targets) == len(classes):
+            raise ValueError('Lengths of data, targets and classes do not match!')
+        if not set(list(data)) == set(list(targets)) == set(list(classes)):
             raise ValueError(
-                'data, classes and labels dictionaries must have the same keys!')
+                'data, classes and targets dictionaries must have the same keys!')
 
         num_features_in_elements = np.unique([sample.size for sample in data.values()])
         if len(num_features_in_elements) > 1:
@@ -1394,7 +1326,7 @@ class BaseMLDataset(ABC):
             raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for sample in other.keys:
-            self.add_sample(sample, other.data[sample], other.labels[sample],
+            self.add_sample(sample, other.data[sample], other.targets[sample],
                             other.classes[sample])
 
         # TODO need a mechanism add one feature at a time, and
@@ -1421,7 +1353,7 @@ class BaseMLDataset(ABC):
             for sample in self.keys:
                 comb_data = np.concatenate([self.__data[sample], other.data[sample]])
                 combined.add_sample(sample, comb_data,
-                                    self.__labels[sample], self.__classes[sample])
+                                    self.__targets[sample], self.__classes[sample])
 
             comb_names = np.concatenate([self.__feature_names, other.feature_names])
             combined.feature_names = comb_names
