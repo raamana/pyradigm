@@ -162,7 +162,7 @@ def test_invalid_constructor():
                       classes='invalid_value')
 
 def test_return_data_labels():
-    matrix, vec_labels, sub_ids = test_dataset.data_and_labels()
+    matrix, vec_labels, sub_ids = test_dataset.data_and_targets()
     assert len(vec_labels)==len(sub_ids)
     assert len(vec_labels)==matrix.shape[0]
 

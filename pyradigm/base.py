@@ -153,7 +153,7 @@ class BaseDataset(ABC):
         return self.__data
 
 
-    def data_and_labels(self):
+    def data_and_targets(self):
         """
         Dataset features and targets in a matrix form for learning.
 
@@ -1123,7 +1123,7 @@ class BaseDataset(ABC):
                 'classes',
                 'class_set',
                 'class_sizes',
-                'data_and_labels',
+                'data_and_targets',
                 'get_data_matrix_in_order',
                 'data',
                 'del_sample',
