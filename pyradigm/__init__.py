@@ -5,7 +5,7 @@ from sys import version_info
 if version_info.major==2:
     raise NotImplementedError()
 elif version_info.major > 2:
-    from pyradigm.base import BaseMLDataset, check_compatibility
+    from pyradigm.base import BaseDataset, check_compatibility
     from pyradigm.pyradigm import MLDataset, cli_run
     from pyradigm.multiple import MultiDataset
 else:

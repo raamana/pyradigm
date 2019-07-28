@@ -17,7 +17,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 
-class BaseMLDataset(ABC):
+class BaseDataset(ABC):
     """Abstract Base class MLDataset.
 
     self.__class__() refers to the inherited child class at runtime!

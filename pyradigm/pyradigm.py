@@ -16,10 +16,10 @@ from itertools import islice
 from os.path import basename, dirname, exists as pexists, isfile, join as pjoin, realpath
 
 
-from pyradigm.base import BaseMLDataset
+from pyradigm.base import BaseDataset
 
 
-class MLDataset(BaseMLDataset):
+class MLDataset(BaseDataset):
     """The main class for user-facing MLDataset, defaulted for classification.
     """
 
