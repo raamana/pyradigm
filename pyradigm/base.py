@@ -34,7 +34,7 @@ class BaseDataset(ABC):
                  encode_nonnumeric=False):
         """
         Default constructor.
-        Recommended way to construct the dataset is via add_sample method, one sample
+        Recommended way to construct the dataset is via add_sample method, one samplet
         at a time, as it allows for unambiguous identification of each row in data matrix.
 
         This constructor can be used in 3 ways:
@@ -56,15 +56,15 @@ class BaseDataset(ABC):
             Path to a dataset saved in Weka's ARFF file format.
 
         data : dict
-            dict of features (keys are treated to be sample ids)
+            dict of features (keys are treated to be samplet ids)
 
         targets : dict
             dict of targets
-            (keys must match with data/classes, are treated to be sample ids)
+            (keys must match with data/classes, are treated to be samplet ids)
 
         classes : dict
             dict of class names
-            (keys must match with data/targets, are treated to be sample ids)
+            (keys must match with data/targets, are treated to be samplet ids)
 
         description : str
             Arbitrary string to describe the current dataset.
@@ -165,9 +165,9 @@ class BaseDataset(ABC):
             2D array of shape [num_samples, num_features]
             with features corresponding row-wise to sample_ids
         targets : ndarray
-            Array of numeric targets for each sample corresponding row-wise to sample_ids
+            Array of numeric targets for each samplet corresponding row-wise to sample_ids
         sample_ids : list
-            List of sample ids
+            List of samplet ids
 
         """
 
@@ -175,9 +175,9 @@ class BaseDataset(ABC):
         label_dict = self.targets
         matrix = np.full([self.num_samples, self.num_features], np.nan)
         targets = np.full([self.num_samples, 1], np.nan)
-        for ix, sample in enumerate(sample_ids):
-            matrix[ix, :] = self.__data[sample]
-            targets[ix] = label_dict[sample]
+        for ix, samplet in enumerate(sample_ids):
+            matrix[ix, :] = self.__data[samplet]
+            targets[ix] = label_dict[samplet]
 
         return matrix, np.ravel(targets), sample_ids
 
@@ -191,7 +191,7 @@ class BaseDataset(ABC):
         Parameters
         ----------
         values : dict
-            dict of features keyed in by sample ids.
+            dict of features keyed in by samplet ids.
 
         feature_names : list of str
             New feature names for the new features, if available.
@@ -199,16 +199,16 @@ class BaseDataset(ABC):
         Raises
         ------
         ValueError
-            If number of samples does not match the size of existing set, or
-            If atleast one sample is not provided.
+            If number of samplets does not match the size of existing set, or
+            If atleast one samplet is not provided.
 
         """
         if isinstance(values, dict):
             if self.__targets is not None and len(self.__targets) != len(values):
                 raise ValueError(
-                    'number of samples do not match the previously assigned targets')
+                    'number of samplets do not match the previously assigned targets')
             elif len(values) < 1:
-                raise ValueError('There must be at least 1 sample in the dataset!')
+                raise ValueError('There must be at least 1 samplet in the dataset!')
             else:
                 self.__data = values
                 # update dimensionality
@@ -225,7 +225,7 @@ class BaseDataset(ABC):
 
     @property
     def targets(self):
-        """Returns the array of targets for all the samples."""
+        """Returns the array of targets for all the samplets."""
         # TODO numeric label need to be removed,
         # as this can be made up on the fly as needed from str to num encoders.
         return self.__targets
@@ -233,13 +233,13 @@ class BaseDataset(ABC):
 
     @targets.setter
     def targets(self, values):
-        """Class targets (such as 1, 2, -1, 'A', 'B' etc.) for each sample in the dataset."""
+        """Class targets (such as 1, 2, -1, 'A', 'B' etc.) for each samplet in the dataset."""
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError(
-                    'number of samples do not match the previously assigned data')
+                    'number of samplets do not match the previously assigned data')
             elif set(self.keys) != set(list(values)):
-                raise ValueError('sample ids do not match the previously assigned ids.')
+                raise ValueError('samplet ids do not match the previously assigned ids.')
             else:
                 self.__targets = values
         else:
@@ -249,7 +249,7 @@ class BaseDataset(ABC):
     @property
     def classes(self):
         """
-        Identifiers (sample IDs, or sample names etc)
+        Identifiers (samplet IDs, or samplet names etc)
             forming the basis of dict-type MLDataset.
         """
         return self.__classes
@@ -261,9 +261,9 @@ class BaseDataset(ABC):
         if isinstance(values, dict):
             if self.__data is not None and len(self.__data) != len(values):
                 raise ValueError(
-                    'number of samples do not match the previously assigned data')
+                    'number of samplets do not match the previously assigned data')
             elif set(self.keys) != set(list(values)):
-                raise ValueError('sample ids do not match the previously assigned ids.')
+                raise ValueError('samplet ids do not match the previously assigned ids.')
             else:
                 self.__classes = values
         else:
@@ -340,7 +340,7 @@ class BaseDataset(ABC):
         label_set : list
             Label for each class in class_set
         class_sizes : list
-            Size of each class (number of samples)
+            Size of each class (number of samplets)
 
         """
 
@@ -390,7 +390,7 @@ class BaseDataset(ABC):
                    class_id=None,
                    overwrite=False,
                    feature_names=None):
-        """Adds a new sample to the dataset with its features, label and class ID.
+        """Adds a new samplet to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
 
@@ -398,13 +398,13 @@ class BaseDataset(ABC):
         ----------
 
         sample_id : str, int
-            The identifier that uniquely identifies this sample.
+            The identifier that uniquely identifies this samplet.
         features : list, ndarray
-            The features for this sample
+            The features for this samplet
         label : int, str
-            The label for this sample
+            The label for this samplet
         class_id : int, str
-            The class for this sample.
+            The class for this samplet.
             If not provided, label converted to a string becomes its ID.
         overwrite : bool
             If True, allows the overwite of features for an existing subject ID.
@@ -416,10 +416,10 @@ class BaseDataset(ABC):
         ------
         ValueError
             If `sample_id` is already in the MLDataset (and overwrite=False), or
-            If dimensionality of the current sample does not match the current, or
+            If dimensionality of the current samplet does not match the current, or
             If `feature_names` do not match existing names
         TypeError
-            If sample to be added is of different data type compared to existing samples.
+            If samplet to be added is of different data type compared to existing samplets.
 
         """
 
@@ -446,8 +446,8 @@ class BaseDataset(ABC):
                 self.__feature_names = self.__str_names(self.num_features)
         else:
             if self.__num_features != features.size:
-                raise ValueError('dimensionality of this sample ({}) '
-                                 'does not match existing samples ({})'
+                raise ValueError('dimensionality of this samplet ({}) '
+                                 'does not match existing samplets ({})'
                                  ''.format(features.size, self.__num_features))
             if not isinstance(features, self.__dtype):
                 raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
@@ -457,7 +457,7 @@ class BaseDataset(ABC):
             self.__classes[sample_id] = class_id
             if feature_names is not None:
                 # if it was never set, allow it
-                # class gets here when adding the first sample,
+                # class gets here when adding the first samplet,
                 #   after dataset was initialized with empty constructor
                 if self.__feature_names is None:
                     self.__feature_names = np.array(feature_names)
@@ -469,17 +469,17 @@ class BaseDataset(ABC):
 
     def del_sample(self, sample_id):
         """
-        Method to remove a sample from the dataset.
+        Method to remove a samplet from the dataset.
 
         Parameters
         ----------
         sample_id : str
-            sample id to be removed.
+            samplet id to be removed.
 
         Raises
         ------
         UserWarning
-            If sample id to delete was not found in the dataset.
+            If samplet id to delete was not found in the dataset.
 
         """
         if sample_id not in self.__data:
@@ -518,7 +518,7 @@ class BaseDataset(ABC):
                                     'Max index: {} Min index : 0'.format(
                 self.__num_features))
 
-        sub_data = {sample: features[subset_idx] for sample, features in
+        sub_data = {samplet: features[subset_idx] for samplet, features in
                     self.__data.items()}
         new_descr = 'Subset features derived from: \n ' + self.__description
         subdataset = self.__class__(data=sub_data, targets=self.__targets,
@@ -602,16 +602,16 @@ class BaseDataset(ABC):
             raise TypeError('Given function {} is not a callable'.format(func))
 
         xfm_ds = self.__class__()
-        for sample, data in self.__data.items():
+        for samplet, data in self.__data.items():
             try:
                 xfm_data = func(data)
             except:
-                print('Unable to transform features for {}. Quitting.'.format(sample))
+                print('Unable to transform features for {}. Quitting.'.format(samplet))
                 raise
 
-            xfm_ds.add_sample(sample, xfm_data,
-                              target=self.__targets[sample],
-                              class_id=self.__classes[sample])
+            xfm_ds.add_sample(samplet, xfm_data,
+                              target=self.__targets[samplet],
+                              class_id=self.__classes[samplet])
 
         xfm_ds.description = "{}\n{}".format(func_description, self.__description)
 
@@ -620,7 +620,7 @@ class BaseDataset(ABC):
 
     def train_test_split_ids(self, train_perc=None, count_per_class=None):
         """
-        Returns two disjoint sets of sample ids for use in cross-validation.
+        Returns two disjoint sets of samplet ids for use in cross-validation.
 
         Offers two ways to specify the sizes: fraction or count.
         Only one access method can be used at a time.
@@ -628,10 +628,10 @@ class BaseDataset(ABC):
         Parameters
         ----------
         train_perc : float
-            fraction of samples from each class to build the training subset.
+            fraction of samplets from each class to build the training subset.
 
         count_per_class : int
-            exact count of samples from each class to build the training subset.
+            exact count of samplets from each class to build the training subset.
 
         Returns
         -------
@@ -656,13 +656,13 @@ class BaseDataset(ABC):
         if count_per_class is None and (0.0 < train_perc < 1.0):
             if train_perc < 1.0 / smallest_class_size:
                 raise ValueError('Training percentage selected too low '
-                                 'to return even one sample from the smallest class!')
+                                 'to return even one samplet from the smallest class!')
             train_set = self.random_subset_ids(perc_per_class=train_perc)
         elif train_perc is None and count_per_class > 0:
             if count_per_class >= smallest_class_size:
                 raise ValueError(
                     'Selections would exclude the smallest class from test set. '
-                    'Reduce sample count per class for the training set!')
+                    'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
         else:
             raise ValueError('Invalid or out of range selection: '
@@ -677,126 +677,18 @@ class BaseDataset(ABC):
         return train_set, test_set
 
 
-    def random_subset_ids_by_count(self, count_per_class=1):
+
+    @abstractmethod
+    def random_subset(self, perc=0.5):
         """
-        Returns a random subset of sample ids of specified size by count,
-            within each class.
+        Returns a random sub-dataset of specified size by percentage
 
         Parameters
         ----------
-        count_per_class : int
-            Exact number of samples per each class.
-
-        Returns
-        -------
-        subset : list
-            Combined list of sample ids from all classes.
-
-        """
-
-        class_sizes = self.class_sizes
-        subsets = list()
-
-        if count_per_class < 1:
-            warnings.warn('Atleast one sample must be selected from each class')
-            return list()
-        elif count_per_class >= self.num_samples:
-            warnings.warn('All samples requested - returning a copy!')
-            return self.keys
-
-        # seeding the random number generator
-        # random.seed(random_seed)
-
-        for class_id, class_size in class_sizes.items():
-            # samples belonging to the class
-            this_class = self.keys_with_value(self.classes, class_id)
-            # shuffling the sample order; shuffling works in-place!
-            random.shuffle(this_class)
-
-            # clipping the range to [0, class_size]
-            subset_size_this_class = max(0, min(class_size, count_per_class))
-            if subset_size_this_class < 1 or this_class is None:
-                # warning if none were selected
-                warnings.warn('No subjects from class {} were selected.'.format(class_id))
-            else:
-                subsets_this_class = this_class[0:count_per_class]
-                subsets.extend(subsets_this_class)
-
-        if len(subsets) > 0:
-            return subsets
-        else:
-            warnings.warn('Zero samples were selected. Returning an empty list!')
-            return list()
-
-
-    def random_subset_ids(self, perc_per_class=0.5):
-        """
-        Returns a random subset of sample ids (size in percentage) within each class.
-
-        Parameters
-        ----------
-        perc_per_class : float
-            Fraction of samples per class
-
-        Returns
-        -------
-        subset : list
-            Combined list of sample ids from all classes.
-
-        Raises
-        ------
-        ValueError
-            If no subjects from one or more classes were selected.
-        UserWarning
-            If an empty or full dataset is requested.
-
-        """
-
-        class_sizes = self.class_sizes
-        subsets = list()
-
-        if perc_per_class <= 0.0:
-            warnings.warn('Zero percentage requested - returning an empty dataset!')
-            return list()
-        elif perc_per_class >= 1.0:
-            warnings.warn('Full or a larger dataset requested - returning a copy!')
-            return self.keys
-
-        # seeding the random number generator
-        # random.seed(random_seed)
-
-        for class_id, class_size in class_sizes.items():
-            # samples belonging to the class
-            this_class = self.keys_with_value(self.classes, class_id)
-            # shuffling the sample order; shuffling works in-place!
-            random.shuffle(this_class)
-            # calculating the requested number of samples
-            subset_size_this_class = np.int64(np.floor(class_size * perc_per_class))
-            # clipping the range to [1, n]
-            subset_size_this_class = max(1, min(class_size, subset_size_this_class))
-            if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
-                # warning if none were selected
-                raise ValueError(
-                    'No subjects from class {} were selected.'.format(class_id))
-            else:
-                subsets_this_class = this_class[0:subset_size_this_class]
-                subsets.extend(subsets_this_class)
-
-        if len(subsets) > 0:
-            return subsets
-        else:
-            warnings.warn('Zero samples were selected. Returning an empty list!')
-            return list()
-
-
-    def random_subset(self, perc_in_class=0.5):
-        """
-        Returns a random sub-dataset (of specified size by percentage) within each class.
-
-        Parameters
-        ----------
-        perc_in_class : float
-            Fraction of samples to be taken from each class.
+        perc : float
+            Fraction of samplets to be taken
+            The meaning of this varies based on the child class: for
+            classification- oriented MLDataset, this can be perc from each class.
 
         Returns
         -------
@@ -809,23 +701,23 @@ class BaseDataset(ABC):
 
     def get_subset(self, subset_ids):
         """
-        Returns a smaller dataset identified by their keys/sample IDs.
+        Returns a smaller dataset identified by their keys/samplet IDs.
 
         Parameters
         ----------
         subset_ids : list
-            List od sample IDs to extracted from the dataset.
+            List od samplet IDs to extracted from the dataset.
 
         Returns
         -------
         sub-dataset : MLDataset
-            sub-dataset containing only requested sample IDs.
+            sub-dataset containing only requested samplet IDs.
 
         """
 
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if subset_ids is not None and num_existing_keys > 0:
-            # ensure items are added to data, targets etc in the same order of sample IDs
+            # ensure items are added to data, targets etc in the same order of samplet IDs
             # TODO come up with a way to do this even when not using OrderedDict()
             # putting the access of data, targets and classes in the same loop  would
             # ensure there is correspondence across the three attributes of the class
@@ -853,7 +745,7 @@ class BaseDataset(ABC):
         Parameters
         ----------
         subset_ids : list
-            List od sample IDs to extracted from the dataset.
+            List od samplet IDs to extracted from the dataset.
 
         Returns
         -------
@@ -884,7 +776,7 @@ class BaseDataset(ABC):
 
 
     def __contains__(self, item):
-        "Boolean test of membership of a sample in the dataset."
+        "Boolean test of membership of a samplet in the dataset."
         if item in self.keys:
             return True
         else:
@@ -916,16 +808,16 @@ class BaseDataset(ABC):
             features = self.check_features(features)
             if self.__num_features != features.size:
                 raise ValueError('dimensionality of supplied features ({}) '
-                                 'does not match existing samples ({})'
+                                 'does not match existing samplets ({})'
                                  ''.format(features.size, self.__num_features))
             self.__data[item] = features
         else:
             raise KeyError('{} not found in dataset.'
-                           ' Can not replace features of a non-existing sample.'
+                           ' Can not replace features of a non-existing samplet.'
                            ' Add it first via .add_sample()'.format(item))
 
     def __iter__(self):
-        "Iterator over samples"
+        "Iterator over samplets"
 
         for subject, data in self.data.items():
             yield subject, data
@@ -934,7 +826,7 @@ class BaseDataset(ABC):
     @staticmethod
     def __get_subset_from_dict(input_dict, subset):
         # Using OrderedDict helps ensure data are added to data, targets etc
-        # in the same order of sample IDs
+        # in the same order of samplet IDs
         return OrderedDict(
                 (sid, value) for sid, value in input_dict.items() if sid in subset)
 
@@ -966,7 +858,7 @@ class BaseDataset(ABC):
 
     @property
     def num_features(self):
-        """number of features in each sample."""
+        """number of features in each samplet."""
         return np.int64(self.__num_features)
 
 
@@ -978,7 +870,7 @@ class BaseDataset(ABC):
 
     @property
     def dtype(self):
-        """number of features in each sample."""
+        """number of features in each samplet."""
         return self.__dtype
 
 
@@ -994,17 +886,11 @@ class BaseDataset(ABC):
 
     @property
     def num_samples(self):
-        """number of samples in the entire dataset."""
+        """number of samplets in the entire dataset."""
         if self.__data is not None:
             return len(self.__data)
         else:
             return 0
-
-
-    @property
-    def num_classes(self):
-        """Total number of classes in the dataset."""
-        return len(self.class_set)
 
 
     @property
@@ -1015,49 +901,6 @@ class BaseDataset(ABC):
         return (self.num_samples, self.num_features)
 
 
-    @property
-    def class_set(self):
-        """Set of unique classes in the dataset."""
-
-        return list(set(self.__classes.values()))
-
-
-    @property
-    def label_set(self):
-        """Set of labels in the dataset corresponding to class_set."""
-        label_set = list()
-        for class_ in self.class_set:
-            samples_in_class = self.sample_ids_in_class(class_)
-            label_set.append(self.labels[samples_in_class[0]])
-
-        return label_set
-
-
-    def add_classes(self, classes):
-        """
-        Helper to rename the classes, if provided by a dict keyed in by the orignal keys
-
-        Parameters
-        ----------
-        classes : dict
-            Dict of class named keyed in by sample IDs.
-
-        Raises
-        ------
-        TypeError
-            If classes is not a dict.
-        ValueError
-            If all samples in dataset are not present in input dict,
-            or one of they samples in input is not recognized.
-
-        """
-        if not isinstance(classes, dict):
-            raise TypeError('Input classes is not a dict!')
-        if not len(classes) == self.num_samples:
-            raise ValueError('Too few items - need {} keys'.format(self.num_samples))
-        if not all([key in self.keys for key in classes]):
-            raise ValueError('One or more unrecognized keys!')
-        self.__classes = classes
 
 
     def __len__(self):
@@ -1077,7 +920,7 @@ class BaseDataset(ABC):
         if self.description not in [None, '']:
             full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samples, {} classes, {} features'.format(
+            full_descr.append('{} samplets, {} classes, {} features'.format(
                     self.num_samples, self.num_classes, self.num_features))
             class_ids = list(self.class_sizes)
             max_width = max([len(cls) for cls in class_ids])
@@ -1085,7 +928,7 @@ class BaseDataset(ABC):
             for cls in class_ids:
                 full_descr.append(
                     'Class {cls:>{clswidth}} : '
-                    '{size:>{numwidth}} samples'.format(cls=cls, clswidth=max_width,
+                    '{size:>{numwidth}} samplets'.format(cls=cls, clswidth=max_width,
                                                         size=self.class_sizes.get(cls),
                                                         numwidth=num_digit))
         else:
@@ -1096,7 +939,7 @@ class BaseDataset(ABC):
 
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
-            return '{} samples x {} features each in {} classes'.format(
+            return '{} samplets x {} features each in {} classes'.format(
                     self.num_samples, self.num_features, self.num_classes)
         elif fmt_str.lower() in ['f', 'full']:
             return self.__str__()
@@ -1226,14 +1069,14 @@ class BaseDataset(ABC):
             label_dict[cls] = ix + 1
 
         for index in range(num_samples):
-            sample = arff_data.take([index])[0].tolist()
-            sample_attrs = sample[:-1]
-            sample_class = sample[-1].decode('utf-8')
+            samplet = arff_data.take([index])[0].tolist()
+            sample_attrs = samplet[:-1]
+            sample_class = samplet[-1].decode('utf-8')
             self.add_sample(sample_id=make_id(index),  # ARFF rows do not have an ID
                             features=sample_attrs,
                             target=label_dict[sample_class],
                             class_id=sample_class)
-            # not necessary to set feature_names=attr_names for each sample,
+            # not necessary to set feature_names=attr_names for each samplet,
             # as we do it globally after loop
 
         self.__feature_names = attr_names
@@ -1283,14 +1126,14 @@ class BaseDataset(ABC):
 
         if not isinstance(data, dict):
             raise TypeError(
-                'data must be a dict! keys: sample ID or any unique identifier')
+                'data must be a dict! keys: samplet ID or any unique identifier')
         if not isinstance(targets, dict):
             raise TypeError(
-                'targets must be a dict! keys: sample ID or any unique identifier')
+                'targets must be a dict! keys: samplet ID or any unique identifier')
         if classes is not None:
             if not isinstance(classes, dict):
                 raise TypeError(
-                    'targets must be a dict! keys: sample ID or any unique identifier')
+                    'targets must be a dict! keys: samplet ID or any unique identifier')
 
         if not len(data) == len(targets) == len(classes):
             raise ValueError('Lengths of data, targets and classes do not match!')
@@ -1298,23 +1141,23 @@ class BaseDataset(ABC):
             raise ValueError(
                 'data, classes and targets dictionaries must have the same keys!')
 
-        num_features_in_elements = np.unique([sample.size for sample in data.values()])
+        num_features_in_elements = np.unique([samplet.size for samplet in data.values()])
         if len(num_features_in_elements) > 1:
             raise ValueError(
-                'different samples have different number of features - invalid!')
+                'different samplets have different number of features - invalid!')
 
         return True
 
 
     def extend(self, other):
         """
-        Method to extend the dataset vertically (add samples from  anotehr dataset).
+        Method to extend the dataset vertically (add samplets from  anotehr dataset).
 
         Parameters
         ----------
         other : MLDataset
             second dataset to be combined with the current
-            (different samples, but same dimensionality)
+            (different samplets, but same dimensionality)
 
         Raises
         ------
@@ -1325,35 +1168,35 @@ class BaseDataset(ABC):
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
-        for sample in other.keys:
-            self.add_sample(sample, other.data[sample], other.targets[sample],
-                            other.classes[sample])
+        for samplet in other.keys:
+            self.add_sample(samplet, other.data[samplet], other.targets[samplet],
+                            other.classes[samplet])
 
         # TODO need a mechanism add one feature at a time, and
         #   consequently update feature names for any subset of features
 
 
     def __add__(self, other):
-        "Method to combine to MLDatasets, sample-wise or feature-wise."
+        "Method to combine to MLDatasets, samplet-wise or feature-wise."
 
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
 
         if set(self.keys) == set(other.keys):
             print('Identical keys found. '
-                  'Trying to horizontally concatenate features for each sample.')
+                  'Trying to horizontally concatenate features for each samplet.')
             if not self.__classes == other.classes:
                 raise ValueError(
-                    'Class identifiers per sample differ in the two datasets!')
+                    'Class identifiers per samplet differ in the two datasets!')
             if other.num_features < 1:
                 raise ValueError('No features to concatenate.')
             # making an empty dataset
             combined = self.__class__()
             # populating it with the concatenated feature set
-            for sample in self.keys:
-                comb_data = np.concatenate([self.__data[sample], other.data[sample]])
-                combined.add_sample(sample, comb_data,
-                                    self.__targets[sample], self.__classes[sample])
+            for samplet in self.keys:
+                comb_data = np.concatenate([self.__data[samplet], other.data[samplet]])
+                combined.add_sample(samplet, comb_data,
+                                    self.__targets[samplet], self.__classes[samplet])
 
             comb_names = np.concatenate([self.__feature_names, other.feature_names])
             combined.feature_names = comb_names
@@ -1378,15 +1221,15 @@ class BaseDataset(ABC):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn('None of the sample ids to be removed found in this dataset '
+            warnings.warn('None of the samplet ids to be removed found in this dataset '
                           '- nothing to do.')
         if len(self.keys) == num_existing_keys:
             warnings.warn(
-                'Requested removal of all the samples - output dataset would be empty.')
+                'Requested removal of all the samplets - output dataset would be empty.')
 
         removed = copy.deepcopy(self)
-        for sample in other.keys:
-            removed.del_sample(sample)
+        for samplet in other.keys:
+            removed.del_sample(samplet)
 
         return removed
 
@@ -1397,22 +1240,22 @@ class BaseDataset(ABC):
 
 
     def __isub__(self, other):
-        """Augmented assignment for sample."""
+        """Augmented assignment for samplet."""
         return self.__sub__(other)
 
 
     def __eq__(self, other):
-        """Equality of two datasets in samples and their values."""
+        """Equality of two datasets in samplets and their values."""
         if set(self.keys) != set(other.keys):
-            print('differing sample ids.')
+            print('differing samplet ids.')
             return False
         elif dict(self.__classes) != dict(other.classes):
-            print('differing classes for the sample ids.')
+            print('differing classes for the samplet ids.')
             return False
         elif id(self.__data) != id(other.data):
             for key in self.keys:
                 if not np.all(self.data[key] == other.data[key]):
-                    print('differing data for the sample ids.')
+                    print('differing data for the samplet ids.')
                     return False
             return True
         else:
