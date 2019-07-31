@@ -9,6 +9,7 @@ import os
 import pickle
 import random
 import warnings
+from warnings import warn
 from collections import Counter, OrderedDict, Sequence
 from itertools import islice
 from os.path import isfile, realpath
@@ -18,14 +19,14 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 class BaseDataset(ABC):
-    """Abstract Base class MLDataset.
+    """Abstract Base class for Dataset.
 
-    self.__class__() refers to the inherited child class at runtime!
+    self.__class__() refers to the inherited child class instance at runtime!
 
     """
 
 
-    def __init__(self, filepath=None,
+    def __init__(self, dataset_path=None,
                  in_dataset=None,
                  arff_path=None,
                  data=None,
@@ -36,23 +37,24 @@ class BaseDataset(ABC):
                  encode_nonnumeric=False):
         """
         Default constructor.
-        Recommended way to construct the dataset is via add_samplet method, one samplet
-        at a time, as it allows for unambiguous identification of each row in data matrix.
+        Recommended way to construct the dataset is via add_samplet method, 
+        one samplet at a time, as it allows for unambiguous identification of 
+        each row in data matrix.
 
         This constructor can be used in 3 ways:
             - As a copy constructor to make a copy of the given in_dataset
             - Or by specifying the tuple of data, targets and classes.
                 In this usage, you can provide additional inputs such as description
                 and feature_names.
-            - Or by specifying a file path which contains previously saved MLDataset.
+            - Or by specifying a file path which contains previously saved Dataset.
 
         Parameters
         ----------
-        filepath : str
-            path to saved MLDataset on disk, to directly load it.
+        dataset_path : str
+            path to saved Dataset on disk, to directly load it.
 
-        in_dataset : MLDataset
-            MLDataset to be copied to create a new one.
+        in_dataset : Dataset
+            Dataset to be copied to create a new one.
 
         arff_path : str
             Path to a dataset saved in Weka's ARFF file format.
@@ -84,17 +86,17 @@ class BaseDataset(ABC):
         Raises
         ------
         ValueError
-            If in_dataset is not of type MLDataset or is empty, or
+            If in_dataset is not of type Dataset or is empty, or
             An invalid combination of input args is given.
         IOError
-            If filepath provided does not exist.
+            If dataset_path provided does not exist.
 
         """
 
-        if filepath is not None:
-            if isfile(realpath(filepath)):
-                # print('Loading the dataset from: {}'.format(filepath))
-                self.__load(filepath)
+        if dataset_path is not None:
+            if isfile(realpath(dataset_path)):
+                # print('Loading the dataset from: {}'.format(dataset_path))
+                self.__load(dataset_path)
             else:
                 raise IOError('Specified file could not be read.')
         elif arff_path is not None:
@@ -252,7 +254,7 @@ class BaseDataset(ABC):
     def classes(self):
         """
         Identifiers (samplet IDs, or samplet names etc)
-            forming the basis of dict-type MLDataset.
+            forming the basis of dict-type Dataset.
         """
         return self.__classes
 
@@ -419,7 +421,7 @@ class BaseDataset(ABC):
         Raises
         ------
         ValueError
-            If `sample_id` is already in the MLDataset (and overwrite=False), or
+            If `sample_id` is already in the Dataset (and overwrite=False), or
             If dimensionality of the current samplet does not match the current, or
             If `feature_names` do not match existing names
         TypeError
@@ -432,8 +434,6 @@ class BaseDataset(ABC):
 
         # ensuring there is always a class name, even when not provided by the user.
         # this is needed, in order for __str__ method to work.
-        # TODO consider enforcing label to be numeric and class_id to be string
-        #  so portability with other packages is more uniform e.g. for use in scikit-learn
         if class_id is None:
             class_id = str(target)
 
@@ -487,7 +487,7 @@ class BaseDataset(ABC):
 
         """
         if sample_id not in self.__data:
-            warnings.warn('Sample to delete not found in the dataset - nothing to do.')
+            warn('Sample to delete not found in the dataset - nothing to do.')
         else:
             self.__data.pop(sample_id)
             self.__classes.pop(sample_id)
@@ -506,7 +506,7 @@ class BaseDataset(ABC):
 
         Returns
         -------
-        MLDataset : MLDataset
+        Dataset : Dataset
             with subset of features requested.
 
         Raises
@@ -550,7 +550,7 @@ class BaseDataset(ABC):
         Parameters
         ----------
         func : callable
-            A valid callable that takes in a single ndarray and returns a single ndarray.
+            A callable that takes in a single ndarray and returns a single ndarray.
             Ensure the transformed dimensionality must be the same for all subjects.
 
             If your function requires more than one argument,
@@ -562,7 +562,7 @@ class BaseDataset(ABC):
 
         Returns
         -------
-        xfm_ds : MLDataset
+        xfm_ds : Dataset
             with features obtained from subject-wise transform
 
         Raises
@@ -578,9 +578,9 @@ class BaseDataset(ABC):
 
         .. code-block:: python
 
-            from pyradigm import MLDataset
+            from pyradigm import Dataset
 
-            thickness = MLDataset(in_path='ADNI_thickness.csv')
+            thickness = Dataset(in_path='ADNI_thickness.csv')
             pcg_thickness = thickness.apply_xfm(func=get_pcg, description = 'applying ROI mask for PCG')
             pcg_median = pcg_thickness.apply_xfm(func=np.median, description='median per subject')
 
@@ -589,11 +589,11 @@ class BaseDataset(ABC):
 
         .. code-block:: python
 
-            from pyradigm import MLDataset
+            from pyradigm import Dataset
             from functools import partial
             import hiwenet
 
-            thickness = MLDataset(in_path='ADNI_thickness.csv')
+            thickness = Dataset(in_path='ADNI_thickness.csv')
             roi_membership = read_roi_membership()
             hw = partial(hiwenet, groups = roi_membership)
 
@@ -610,7 +610,8 @@ class BaseDataset(ABC):
             try:
                 xfm_data = func(data)
             except:
-                print('Unable to transform features for {}. Quitting.'.format(samplet))
+                print('Unable to transform features for {}. '
+                      'Quitting.'.format(samplet))
                 raise
 
             xfm_ds.add_samplet(samplet, xfm_data,
@@ -669,8 +670,9 @@ class BaseDataset(ABC):
                     'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
         else:
-            raise ValueError('Invalid or out of range selection: '
-                             'only one of count or percentage can be used to select subset.')
+            raise ValueError('Invalid, or out of range selection: '
+                             'only one of count or percentage '
+                             'can be used to select subset.')
 
         test_set = list(set(self.keys) - set(train_set))
 
@@ -692,11 +694,11 @@ class BaseDataset(ABC):
         perc : float
             Fraction of samplets to be taken
             The meaning of this varies based on the child class: for
-            classification- oriented MLDataset, this can be perc from each class.
+            classification- oriented Dataset, this can be perc from each class.
 
         Returns
         -------
-        subdataset : MLDataset
+        subdataset : Dataset
             random sub-dataset of specified size.
 
         """
@@ -714,7 +716,7 @@ class BaseDataset(ABC):
 
         Returns
         -------
-        sub-dataset : MLDataset
+        sub-dataset : Dataset
             sub-dataset containing only requested samplet IDs.
 
         """
@@ -738,7 +740,7 @@ class BaseDataset(ABC):
             subdataset.__dtype = self.dtype
             return subdataset
         else:
-            warnings.warn('subset of IDs requested do not exist in the dataset!')
+            warn('subset of IDs requested do not exist in the dataset!')
             return self.__class__()
 
 
@@ -758,7 +760,7 @@ class BaseDataset(ABC):
         """
 
         if len(subset_ids) < 1:
-            warnings.warn('subset must have atleast one ID - returning empty matrix!')
+            warn('subset must have atleast one ID - returning empty matrix!')
             return np.empty((0, 0))
 
         if isinstance(subset_ids, set):
@@ -837,13 +839,13 @@ class BaseDataset(ABC):
 
     @property
     def keys(self):
-        """Sample identifiers (strings) - the basis of MLDataset (same as sample_ids)"""
+        """Sample identifiers (strings) - the basis of Dataset (same as sample_ids)"""
         return list(self.__data)
 
 
     @property
     def sample_ids(self):
-        """Sample identifiers (strings) forming the basis of MLDataset (same as keys)."""
+        """Sample identifiers (strings) forming the basis of Dataset (same as keys)."""
         return self.keys
 
 
@@ -885,7 +887,7 @@ class BaseDataset(ABC):
                 raise TypeError('Invalid data type.')
             self.__dtype = type_val
         else:
-            warnings.warn('Data type is already inferred. Can not be set!')
+            warn('Data type is already inferred. Can not be set!')
 
 
     @property
@@ -1055,7 +1057,8 @@ class BaseDataset(ABC):
                 'encoding non-numeric features to numeric is not implemented yet! '
                 'Encode features beforing to ARFF.')
 
-        self.__description = arff_meta.name  # to enable it as a label e.g. in neuropredict
+        # to enable it as a label e.g. in neuropredict
+        self.__description = arff_meta.name
 
         # initializing the key containers, before calling self.add_samplet
         self.__data = OrderedDict()
@@ -1159,14 +1162,14 @@ class BaseDataset(ABC):
 
         Parameters
         ----------
-        other : MLDataset
+        other : Dataset
             second dataset to be combined with the current
             (different samplets, but same dimensionality)
 
         Raises
         ------
         TypeError
-            if input is not an MLDataset.
+            if input is not an Dataset.
         """
 
         if not isinstance(other, self.__class__):
@@ -1225,11 +1228,11 @@ class BaseDataset(ABC):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn('None of the samplet ids to be removed found in this dataset '
+            warn('None of the samplet ids to be removed found in this dataset '
                           '- nothing to do.')
         if len(self.keys) == num_existing_keys:
-            warnings.warn(
-                'Requested removal of all the samplets - output dataset would be empty.')
+            warn('Requested removal of all the samplets - '
+                          'output dataset would be empty.')
 
         removed = copy.deepcopy(self)
         for samplet in other.keys:
@@ -1349,18 +1352,18 @@ def check_compatibility(datasets, reqd_num_features=None):
         reqd_num_features = [None,] * num_datasets
 
     pivot = datasets[0]
-    if not isinstance(pivot, MLDataset):
-        pivot = MLDataset(pivot)
+    if not isinstance(pivot, Dataset):
+        pivot = Dataset(pivot)
 
     if check_dimensionality and pivot.num_features != reqd_num_features[0]:
-        warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+        warn('Dimensionality mismatch! Expected {} whereas current {}.'
                       ''.format(reqd_num_features[0], pivot.num_features))
         dim_mismatch = True
 
     compatible = list()
     for ds, reqd_dim in zip(datasets[1:], reqd_num_features[1:]):
-        if not isinstance(ds, MLDataset):
-            ds = MLDataset(ds)
+        if not isinstance(ds, Dataset):
+            ds = Dataset(ds)
 
         is_compatible = True
         # compound bool will short-circuit, not optim required
@@ -1370,7 +1373,7 @@ def check_compatibility(datasets, reqd_num_features=None):
             is_compatible = False
 
         if check_dimensionality and reqd_dim != ds.num_features:
-            warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+            warn('Dimensionality mismatch! Expected {} whereas current {}.'
                           ''.format(reqd_dim, ds.num_features))
             dim_mismatch = True
 
