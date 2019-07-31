@@ -28,13 +28,15 @@ class BaseDataset(ABC):
     def __init__(self, filepath=None,
                  in_dataset=None,
                  arff_path=None,
-                 data=None, targets=None, classes=None,
+                 data=None,
+                 targets=None,
+                 classes=None,
                  description='',
                  feature_names=None,
                  encode_nonnumeric=False):
         """
         Default constructor.
-        Recommended way to construct the dataset is via add_sample method, one samplet
+        Recommended way to construct the dataset is via add_samplet method, one samplet
         at a time, as it allows for unambiguous identification of each row in data matrix.
 
         This constructor can be used in 3 ways:
@@ -385,11 +387,13 @@ class BaseDataset(ABC):
         return features
 
 
-    # TODO try implementing based on pandas
-    def add_sample(self, sample_id, features, target,
-                   class_id=None,
-                   overwrite=False,
-                   feature_names=None):
+    def add_samplet(self,
+                    sample_id,
+                    features,
+                    target,
+                    class_id=None,
+                    overwrite=False,
+                    feature_names=None):
         """Adds a new samplet to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
@@ -609,9 +613,9 @@ class BaseDataset(ABC):
                 print('Unable to transform features for {}. Quitting.'.format(samplet))
                 raise
 
-            xfm_ds.add_sample(samplet, xfm_data,
-                              target=self.__targets[samplet],
-                              class_id=self.__classes[samplet])
+            xfm_ds.add_samplet(samplet, xfm_data,
+                               target=self.__targets[samplet],
+                               class_id=self.__classes[samplet])
 
         xfm_ds.description = "{}\n{}".format(func_description, self.__description)
 
@@ -766,7 +770,7 @@ class BaseDataset(ABC):
 
         num_existing_keys = sum([1 for key in subset_ids if key in self.__data])
         if num_existing_keys < len(subset_ids):
-            raise ValueError('One or more IDs from  subset do not exist in the dataset!')
+            raise ValueError('One or more IDs from subset do not exist in the dataset!')
 
         matrix = np.full((num_existing_keys, self.num_features), np.nan)
         for idx, sid in enumerate(subset_ids):
@@ -814,7 +818,7 @@ class BaseDataset(ABC):
         else:
             raise KeyError('{} not found in dataset.'
                            ' Can not replace features of a non-existing samplet.'
-                           ' Add it first via .add_sample()'.format(item))
+                           ' Add it first via .add_samplet()'.format(item))
 
     def __iter__(self):
         "Iterator over samplets"
@@ -956,7 +960,7 @@ class BaseDataset(ABC):
     @staticmethod
     def __dir__():
         """Returns the preferred list of attributes to be used with the dataset."""
-        return ['add_sample',
+        return ['add_samplet',
                 'glance',
                 'summarize_classes',
                 'sample_ids_in_class',
@@ -1053,7 +1057,7 @@ class BaseDataset(ABC):
 
         self.__description = arff_meta.name  # to enable it as a label e.g. in neuropredict
 
-        # initializing the key containers, before calling self.add_sample
+        # initializing the key containers, before calling self.add_samplet
         self.__data = OrderedDict()
         self.__targets = OrderedDict()
         self.__classes = OrderedDict()
@@ -1072,10 +1076,10 @@ class BaseDataset(ABC):
             samplet = arff_data.take([index])[0].tolist()
             sample_attrs = samplet[:-1]
             sample_class = samplet[-1].decode('utf-8')
-            self.add_sample(sample_id=make_id(index),  # ARFF rows do not have an ID
-                            features=sample_attrs,
-                            target=label_dict[sample_class],
-                            class_id=sample_class)
+            self.add_samplet(sample_id=make_id(index),  # ARFF rows do not have an ID
+                             features=sample_attrs,
+                             target=label_dict[sample_class],
+                             class_id=sample_class)
             # not necessary to set feature_names=attr_names for each samplet,
             # as we do it globally after loop
 
@@ -1169,8 +1173,8 @@ class BaseDataset(ABC):
             raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
         for samplet in other.keys:
-            self.add_sample(samplet, other.data[samplet], other.targets[samplet],
-                            other.classes[samplet])
+            self.add_samplet(samplet, other.data[samplet], other.targets[samplet],
+                             other.classes[samplet])
 
         # TODO need a mechanism add one feature at a time, and
         #   consequently update feature names for any subset of features
@@ -1195,8 +1199,8 @@ class BaseDataset(ABC):
             # populating it with the concatenated feature set
             for samplet in self.keys:
                 comb_data = np.concatenate([self.__data[samplet], other.data[samplet]])
-                combined.add_sample(samplet, comb_data,
-                                    self.__targets[samplet], self.__classes[samplet])
+                combined.add_samplet(samplet, comb_data,
+                                     self.__targets[samplet], self.__classes[samplet])
 
             comb_names = np.concatenate([self.__feature_names, other.feature_names])
             combined.feature_names = comb_names
