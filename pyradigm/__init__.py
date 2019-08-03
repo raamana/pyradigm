@@ -1,11 +1,13 @@
-__all__ = [ 'pyradigm', 'MLDataset', 'MultiDataset', 'cli_run', 'check_compatibility' ]
+__all__ = [ 'pyradigm', 'MLDataset', 'MultiDataset', 'cli_run',
+            'check_compatibility_BaseDataset']
 
 from sys import version_info
 
 if version_info.major==2:
     raise NotImplementedError()
 elif version_info.major > 2:
-    from pyradigm.base import BaseDataset, check_compatibility
+    from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
+    from pyradigm.classify import ClassificationDataset
     from pyradigm.pyradigm import MLDataset, cli_run
     from pyradigm.multiple import MultiDataset
 else:
