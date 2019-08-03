@@ -675,8 +675,8 @@ class BaseDataset(ABC):
     def __iter__(self):
         "Iterator over samplets"
 
-        for subject, data in self.data.items():
-            yield subject, data
+        for samplet, features in self.data.items():
+            yield samplet, features
 
 
     @staticmethod

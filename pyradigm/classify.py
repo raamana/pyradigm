@@ -311,7 +311,7 @@ class ClassificationDataset(BaseDataset):
             if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
                 # warning if none were selected
                 raise ValueError(
-                    'No subjects from class {} were selected.'.format(target_id))
+                    'No samplets from class {} were selected.'.format(target_id))
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -362,7 +362,7 @@ class ClassificationDataset(BaseDataset):
             subset_size_this_class = max(0, min(target_size, count_per_class))
             if subset_size_this_class < 1 or this_class is None:
                 # warning if none were selected
-                warnings.warn('No subjects from class {} were selected.'
+                warnings.warn('No samplets from class {} were selected.'
                               ''.format(target_id))
             else:
                 subsets_this_class = this_class[0:count_per_class]
