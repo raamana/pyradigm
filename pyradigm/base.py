@@ -37,8 +37,9 @@ class BaseDataset(ABC):
 
         Parameters
         -----------
-        target_type : type
+        target_type : type, callable
             Data type of the target for the child class.
+            Must be callable that takes in a datatype and converts to its own type.
 
         allow_nan_inf : bool or str
             Flag to indicate whether raise an error if NaN or Infinity values are
@@ -47,9 +48,20 @@ class BaseDataset(ABC):
             'Inf' to specify which value to allow depending on your needs.
         """
 
-        self._target_type = target_type
-        self._allow_nan_inf = allow_nan_inf
-        self._encode_nonnumeric = encode_nonnumeric
+        if not callable(target_type):
+            raise TypeError('target type must be callable, to allow for conversion!')
+        else:
+            self._target_type = target_type
+
+        if not isinstance(allow_nan_inf, (bool, str)):
+            raise TypeError('allow_nan_inf flag can only be bool or str')
+        else:
+            self._allow_nan_inf = allow_nan_inf
+
+        if not isinstance(encode_nonnumeric, bool):
+            raise TypeError('encode_nonnumeric flag can only be bool')
+        else:
+            self._encode_nonnumeric = encode_nonnumeric
 
 
     @property
