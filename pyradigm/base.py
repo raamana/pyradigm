@@ -239,8 +239,12 @@ class BaseDataset(ABC):
         """
 
         if not isinstance(target_value, self._target_type):
-            raise TypeError('Invalid type of target {} - must be of '
-                            'type {}'.format(target_value, self._target_type))
+            try:
+                target_value = self._target_type(target_value)
+            except:
+                raise TypeError('Invalid type of target {} :'
+                                ' must be of type {}, or be convertible to it'
+                                ''.format(type(target_value), self._target_type))
 
         return target_value
 
