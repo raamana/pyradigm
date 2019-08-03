@@ -52,11 +52,11 @@ class ClassificationDataset(BaseDataset):
             Dataset to be copied to create a new one.
 
         data : dict
-            dict of features (keys are treated to be samplet ids)
+            dict of features (samplet_ids are treated to be samplet ids)
 
         targets : dict
             dict of targets
-            (keys must match with data/classes, are treated to be samplet ids)
+            (samplet_ids must match with data/classes, are treated to be samplet ids)
 
         description : str
             Arbitrary string to describe the current dataset.
@@ -192,7 +192,7 @@ class ClassificationDataset(BaseDataset):
 
         """
 
-        # subset_ids = [sid for sid in self.keys if self.classes[sid] == class_id]
+        # subset_ids = [sid for sid in self.samplet_ids if self.classes[sid] == class_id]
         subset_ids = self.keys_with_value(self.classes, class_id)
         return subset_ids
 
@@ -294,7 +294,7 @@ class ClassificationDataset(BaseDataset):
             return list()
         elif perc_per_class >= 1.0:
             warnings.warn('Full or a larger dataset requested - returning a copy!')
-            return self.keys
+            return self.samplet_ids
 
         # seeding the random number generator
         # random.seed(random_seed)
@@ -347,7 +347,7 @@ class ClassificationDataset(BaseDataset):
             return list()
         elif count_per_class >= self.num_samplets:
             warnings.warn('All samples requested - returning a copy!')
-            return self.keys
+            return self.samplet_ids
 
         # seeding the random number generator
         # random.seed(random_seed)
@@ -378,7 +378,7 @@ class ClassificationDataset(BaseDataset):
     def rename_targets(self, new_targets):
         """
         Helper to rename the classes, if provided by a dict keyed in by the
-        orignal keys
+        orignal samplet_ids
 
         Parameters
         ----------
@@ -397,10 +397,10 @@ class ClassificationDataset(BaseDataset):
         if not isinstance(new_targets, dict):
             raise TypeError('Input targets is not a dict!')
         if not len(new_targets) == self.num_samplets:
-            raise ValueError('Too few items in dict - need {} keys'
+            raise ValueError('Too few items in dict - need {} samplet_ids'
                              ''.format(self.num_samplets))
-        if not all([key in self.keys for key in new_targets]):
-            raise ValueError('One or more unrecognized keys!')
+        if not all([key in self.samplet_ids for key in new_targets]):
+            raise ValueError('One or more unrecognized samplet_ids!')
         self._targets = new_targets
 
 

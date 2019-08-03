@@ -74,21 +74,21 @@ class BaseDataset(ABC):
         """
         Dataset features and targets in a matrix form for learning.
 
-        Also returns sample_ids in the same order.
+        Also returns samplet_ids in the same order.
 
         Returns
         -------
         data_matrix : ndarray
             2D array of shape [num_samplets, num_features]
-            with features corresponding row-wise to sample_ids
+            with features corresponding row-wise to samplet_ids
         targets : ndarray
-            Array of numeric targets for each samplet corresponding row-wise to sample_ids
-        sample_ids : list
+            Array of numeric targets for each samplet corresponding row-wise to samplet_ids
+        samplet_ids : list
             List of samplet ids
 
         """
 
-        sample_ids = np.array(self.keys)
+        sample_ids = np.array(self.samplet_ids)
         label_dict = self.targets
         matrix = np.full([self.num_samplets, self.num_features], np.nan)
         targets = np.empty([self.num_samplets, 1], dtype=self._target_type)
@@ -129,8 +129,8 @@ class BaseDataset(ABC):
             else:
                 self._data = values
                 # update dimensionality
-                # assuming all keys in dict have same len arrays
-                self._num_features = len(values[self.keys[0]])
+                # assuming all samplet_ids in dict have same len arrays
+                self._num_features = len(values[self.samplet_ids[0]])
 
             if feature_names is None:
                 self._feature_names = self._str_names(self.num_features)
@@ -155,7 +155,7 @@ class BaseDataset(ABC):
             if self._data is not None and len(self._data) != len(values):
                 raise ValueError(
                     'number of samplets do not match the previously assigned data')
-            elif set(self.keys) != set(list(values)):
+            elif set(self.samplet_ids) != set(list(values)):
                 raise ValueError('samplet ids do not match the previously assigned ids.')
             else:
                 self._targets = values
@@ -310,6 +310,8 @@ class BaseDataset(ABC):
             raise ValueError('{} already exists in this dataset!'.format(samplet_id))
 
         features = self._check_features(features)
+        target = self._check_target(target)
+
         if self.num_samplets <= 0:
             self._data[samplet_id] = features
             self._targets[samplet_id] = target
@@ -544,7 +546,7 @@ class BaseDataset(ABC):
                              'only one of count or percentage '
                              'can be used to select subset.')
 
-        test_set = list(set(self.keys) - set(train_set))
+        test_set = list(set(self.samplet_ids) - set(train_set))
 
         if len(train_set) < 1 or len(test_set) < 1:
             raise ValueError('Selection resulted in empty training or test set: '
@@ -649,7 +651,7 @@ class BaseDataset(ABC):
 
     def __contains__(self, item):
         "Boolean test of membership of a samplet in the dataset."
-        if item in self.keys:
+        if item in self.samplet_ids:
             return True
         else:
             return False
@@ -658,7 +660,7 @@ class BaseDataset(ABC):
     def get(self, item, not_found_value=None):
         "Method like dict.get() which can return specified value if key not found"
 
-        if item in self.keys:
+        if item in self.samplet_ids:
             return self._data[item]
         else:
             return not_found_value
@@ -667,7 +669,7 @@ class BaseDataset(ABC):
     def __getitem__(self, item):
         "Method to ease data retrieval i.e. turn dataset.data['id'] into dataset['id'] "
 
-        if item in self.keys:
+        if item in self.samplet_ids:
             return self._data[item]
         else:
             raise KeyError('{} not found in dataset.'.format(item))
@@ -704,15 +706,15 @@ class BaseDataset(ABC):
 
 
     @property
-    def keys(self):
-        """Sample identifiers (strings) - the basis of Dataset (same as sample_ids)"""
+    def samplet_ids(self):
+        """Sample identifiers (strings) - the basis of Dataset (same as samplet_ids)"""
         return list(self._data)
 
 
     @property
-    def sample_ids(self):
+    def samplet_ids(self):
         """Sample identifiers (strings) forming the basis of Dataset (same as keys)."""
-        return self.keys
+        return list(self._data)
 
 
     @property
@@ -982,7 +984,7 @@ class BaseDataset(ABC):
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
         # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
-        for samplet in other.keys:
+        for samplet in other.samplet_ids:
             self.add_samplet(samplet, other.data[samplet], other.targets[samplet])
 
         # TODO need a mechanism add one feature at a time, and
@@ -995,7 +997,7 @@ class BaseDataset(ABC):
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
 
-        if set(self.keys) == set(other.keys):
+        if set(self.samplet_ids) == set(other.samplet_ids):
             print('Identical keys found. '
                   'Trying to horizontally concatenate features for each samplet.')
 
@@ -1004,7 +1006,7 @@ class BaseDataset(ABC):
             # making an empty dataset
             combined = self.__class__()
             # populating it with the concatenated feature set
-            for samplet in self.keys:
+            for samplet in self.samplet_ids:
                 comb_data = np.concatenate([self._data[samplet], other.data[samplet]])
                 combined.add_samplet(samplet, comb_data, self._targets[samplet])
 
@@ -1013,8 +1015,8 @@ class BaseDataset(ABC):
 
             return combined
 
-        elif len(set(self.keys).intersection(
-                other.keys)) < 1 and self._num_features == other.num_features:
+        elif len(set(self.samplet_ids).intersection(
+                other.samplet_ids)) < 1 and self._num_features == other.num_features:
             # making a copy of self first
             combined = self.__class__(in_dataset=self)
             # adding the new dataset
@@ -1029,16 +1031,16 @@ class BaseDataset(ABC):
         if not isinstance(other, type(self)):
             raise TypeError('Incorrect type of dataset provided!')
 
-        num_existing_keys = len(set(self.keys).intersection(other.keys))
+        num_existing_keys = len(set(self.samplet_ids).intersection(other.samplet_ids))
         if num_existing_keys < 1:
             warn('None of the samplet ids to be removed found in this dataset '
                           '- nothing to do.')
-        if len(self.keys) == num_existing_keys:
+        if len(self.samplet_ids) == num_existing_keys:
             warn('Requested removal of all the samplets - '
                           'output dataset would be empty.')
 
         removed = copy.deepcopy(self)
-        for samplet in other.keys:
+        for samplet in other.samplet_ids:
             removed.del_samplet(samplet)
 
         return removed
@@ -1056,11 +1058,11 @@ class BaseDataset(ABC):
 
     def __eq__(self, other):
         """Equality of two datasets in samplets and their values."""
-        if set(self.keys) != set(other.keys):
+        if set(self.samplet_ids) != set(other.samplet_ids):
             print('differing samplet ids.')
             return False
         elif id(self._data) != id(other.data):
-            for key in self.keys:
+            for key in self.samplet_ids:
                 if not np.all(self.data[key] == other.data[key]):
                     print('differing data for the samplet ids.')
                     return False
@@ -1167,7 +1169,7 @@ def check_compatibility_BaseDataset(datasets, reqd_num_features=None):
         is_compatible = True
         # compound bool will short-circuit, not optim required
         if pivot.num_samplets != ds.num_samplets \
-                or pivot.keys != ds.keys:
+                or pivot.samplet_ids != ds.samplet_ids:
             is_compatible = False
 
         if check_dimensionality and reqd_dim != ds.num_features:

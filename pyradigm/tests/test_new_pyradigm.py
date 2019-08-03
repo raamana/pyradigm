@@ -33,7 +33,7 @@ test_dataset.save(out_file)
 
 # same IDs, new features
 same_ids_new_feat = ClfDataset()
-for sub_id in test_dataset.keys:
+for sub_id in test_dataset.samplet_ids:
     feat = np.random.random(num_features)
     same_ids_new_feat.add_samplet(sub_id, feat,
                                   test_dataset.targets[sub_id])
@@ -71,7 +71,6 @@ test2 = ClfDataset()
 test3 = ClfDataset()
 
 
-# TODO write tests for CLI
 
 def test_empty():
     assert not empty_dataset
@@ -113,8 +112,8 @@ def test_add():
     n2 = random_target_ds.num_samplets
     assert n1 + n2 == n
 
-    assert set(a.sample_ids) == set(
-        other_targets_ds.sample_ids + random_target_ds.sample_ids)
+    assert set(a.samplet_ids) == set(
+            other_targets_ds.samplet_ids + random_target_ds.samplet_ids)
     assert a.num_features == other_targets_ds.num_features == \
            random_target_ds.num_features
     assert all(a.feature_names == other_targets_ds.feature_names)
@@ -128,7 +127,7 @@ def test_add():
 
 
 def test_set_existing_sample():
-    sid = test_dataset.sample_ids[0]
+    sid = test_dataset.samplet_ids[0]
     new_feat = np.random.random(num_features)
 
     with raises(KeyError):
@@ -183,7 +182,7 @@ def test_init_with_dict():
 
 # def test_labels_setter():
 #     fewer_labels = test_dataset.labels
-#     label_keys = list(fewer_labels.keys())
+#     label_keys = list(fewer_labels.samplet_ids())
 #     fewer_labels.pop(label_keys[0])
 # 
 #     with raises(ValueError):
@@ -201,7 +200,7 @@ def test_init_with_dict():
 
 def test_targets_setter():
     fewer_targets = test_dataset.targets
-    targets_keys = list(fewer_targets.keys())
+    targets_keys = list(fewer_targets.samplet_ids())
     fewer_targets.pop(targets_keys[0])
 
     with raises(ValueError):
@@ -224,14 +223,14 @@ def test_feat_names_setter():
 
 
 def test_add_existing_id():
-    sid = test_dataset.sample_ids[0]
+    sid = test_dataset.samplet_ids[0]
     with raises(ValueError):
         test_dataset.add_samplet(sid, None, None)
 
 
 def test_add_new_id_diff_dim():
     new_id = 'dsfdkfslj38748937439kdshfkjhf38'
-    sid = test_dataset.sample_ids[0]
+    sid = test_dataset.samplet_ids[0]
     data_diff_dim = np.random.rand(test_dataset.num_features + 1, 1)
     with raises(ValueError):
         test_dataset.add_samplet(new_id, data_diff_dim, None, None)
@@ -288,7 +287,7 @@ def test_get_subset():
 
 def test_membership():
     rand_idx = np.random.randint(0, test_dataset.num_samplets)
-    member = test_dataset.sample_ids[rand_idx]
+    member = test_dataset.samplet_ids[rand_idx]
     not_member = u'sdfdkshfdsk34823058wdkfhd83hifnalwe8fh8t'
     assert member in test_dataset
     assert not_member not in test_dataset
