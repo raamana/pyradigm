@@ -221,6 +221,50 @@ class BaseDataset(ABC):
         """Method to summarize the sample inside in an appropriate way!"""
 
 
+    def _check_features(self, features):
+        """
+        Method to ensure features to be added are not empty and vectorized.
+
+        Parameters
+        ----------
+        features : iterable
+            Any data that can be converted to a numpy array.
+
+        Returns
+        -------
+        features : numpy array
+            Flattened non-empty numpy array.
+
+        Raises
+        ------
+        ValueError
+            If input data is empty.
+        """
+
+        if not isinstance(features, np.ndarray):
+            features = np.asarray(features)
+
+        try:
+            features = features.astype(self.dtype)
+        except:
+            raise TypeError("Input features (of dtype {}) can not be converted to "
+                            "Dataset's data type {}"
+                            "".format(features.dtype, self.dtype))
+
+        if features.size <= 0:
+            raise ValueError('provided features are empty.')
+
+        if not self._allow_nan_inf:
+            if np.isnan(features).any() or np.isinf(features).any():
+                raise ValueError('NaN or Inf values found! They are disabled.'
+                                 'Use allow_nan_inf=True if you want to allow them.')
+
+        if features.ndim > 1:
+            features = np.ravel(features)
+
+        return features
+
+
     def _check_target(self, target_value):
         """
         Method to ensure target to be added is not empty and vectorized.
@@ -250,13 +294,6 @@ class BaseDataset(ABC):
                                 ''.format(type(target_value), self._target_type))
 
         return target_value
-
-
-    @abstractmethod
-    def _check_features(self, features):
-        """
-        Method to ensure features to be added are valid (non-empty, vectorized etc)
-        """
 
 
     def _check_id(self, samplet_id):
@@ -405,7 +442,7 @@ class BaseDataset(ABC):
 
 
     @staticmethod
-    def keys_with_value(dictionary, value):
+    def _keys_with_value(dictionary, value):
         "Returns a subset of keys from the dict with the value supplied."
 
         subset = [key for key in dictionary if dictionary[key] == value]

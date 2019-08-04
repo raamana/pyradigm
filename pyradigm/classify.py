@@ -131,50 +131,6 @@ class ClassificationDataset(BaseDataset):
             raise ValueError('Incorrect way to construct the dataset.')
 
 
-    def _check_features(self, features):
-        """
-        Method to ensure features to be added are not empty and vectorized.
-
-        Parameters
-        ----------
-        features : iterable
-            Any data that can be converted to a numpy array.
-
-        Returns
-        -------
-        features : numpy array
-            Flattened non-empty numpy array.
-
-        Raises
-        ------
-        ValueError
-            If input data is empty.
-        """
-
-        if not isinstance(features, np.ndarray):
-            features = np.asarray(features)
-
-        try:
-            features = features.astype(self.dtype)
-        except:
-            raise TypeError("Input features (of dtype {}) can not be converted to "
-                            "Dataset's data type {}"
-                            "".format(features.dtype, self.dtype))
-
-        if features.size <= 0:
-            raise ValueError('provided features are empty.')
-
-        if not self._allow_nan_inf:
-            if np.isnan(features).any() or np.isinf(features).any():
-                raise ValueError('NaN or Inf values found! They are disabled.'
-                                 'Use allow_nan_inf=True if you want to allow them.')
-
-        if features.ndim > 1:
-            features = np.ravel(features)
-
-        return features
-
-
     @property
     def target_set(self):
         """Set of unique classes in the dataset."""
@@ -212,7 +168,7 @@ class ClassificationDataset(BaseDataset):
 
         # subset_ids =
         #  [ sid for sid in self.samplet_ids if self.classes[sid] == class_id ]
-        subset_ids = self.keys_with_value(self.targets, class_id)
+        subset_ids = self._keys_with_value(self.targets, class_id)
         return subset_ids
 
 
@@ -253,7 +209,7 @@ class ClassificationDataset(BaseDataset):
 
         subsets = list()
         for target_id in target_ids:
-            subsets_this_class = self.keys_with_value(self._targets, target_id)
+            subsets_this_class = self._keys_with_value(self._targets, target_id)
             subsets.extend(subsets_this_class)
 
         return self.get_subset(subsets)
@@ -321,7 +277,7 @@ class ClassificationDataset(BaseDataset):
 
         for target_id, target_size in self.target_sizes.items():
             # samples belonging to the class
-            this_class = self.keys_with_value(self.targets, target_id)
+            this_class = self._keys_with_value(self.targets, target_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
             # calculating the requested number of samples
@@ -376,7 +332,7 @@ class ClassificationDataset(BaseDataset):
 
         for target_id, target_size in self.target_sizes.items():
             # samples belonging to the class
-            this_class = self.keys_with_value(self.targets, target_id)
+            this_class = self._keys_with_value(self.targets, target_id)
             # shuffling the sample order; shuffling works in-place!
             random.shuffle(this_class)
 
