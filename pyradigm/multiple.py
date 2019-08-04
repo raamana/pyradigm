@@ -47,7 +47,7 @@ class MultiDataset(object):
         self._modality_count = 0
 
         self._ids = set()
-        self._classes = dict()
+        self._targets = dict()
         self._modalities = dict()
         self._labels = dict()
 
@@ -99,7 +99,7 @@ class MultiDataset(object):
 
         if not self._is_init:
             self._ids = set(dataset.keys)
-            self._classes = dataset.classes
+            self._targets = dataset.classes
             self._class_sizes = dataset.class_sizes
 
             self._num_samples = len(self._ids)
@@ -118,7 +118,7 @@ class MultiDataset(object):
                 raise ValueError('Differing set of IDs in two datasets.'
                                  'Unable to add this dataset to the MultiDataset.')
 
-            if dataset.classes != self._classes:
+            if dataset.targets != self._targets:
                 raise ValueError('Classes for IDs differ in the two datasets.')
 
             if identifier not in self._modalities:
