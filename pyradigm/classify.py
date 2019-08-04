@@ -152,6 +152,11 @@ class ClassificationDataset(BaseDataset):
         if features.size <= 0:
             raise ValueError('provided features are empty.')
 
+        if not self._allow_nan_inf:
+            if np.isnan(features).any() or np.isinf(features).any():
+                raise ValueError('NaN or Inf values found! They are disabled.'
+                                 'Use allow_nan_inf=True if you want to allow them.')
+
         if features.ndim > 1:
             features = np.ravel(features)
 
