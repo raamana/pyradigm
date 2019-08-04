@@ -76,6 +76,14 @@ def test_empty():
     assert not empty_dataset
 
 
+def test_target_type():
+
+    rand_id = test_dataset.samplet_ids[np.random.randint(2, num_samples)]
+    if not isinstance(test_dataset.targets[rand_id],
+                     test_dataset._target_type):
+        raise TypeError('invalid target type for samplet id {}'.format(rand_id))
+
+
 def test_num_targets():
     assert test_dataset.num_targets == num_targets
 
@@ -200,7 +208,7 @@ def test_init_with_dict():
 
 def test_targets_setter():
     fewer_targets = test_dataset.targets
-    targets_keys = list(fewer_targets.samplet_ids())
+    targets_keys = list(fewer_targets.keys())
     fewer_targets.pop(targets_keys[0])
 
     with raises(ValueError):
