@@ -28,6 +28,7 @@ class MultiDataset(object):
 
 
     def __init__(self,
+                 dataset_class=ClfDataset,
                  dataset_spec=None,
                  name='MultiDataset'):
         """
@@ -39,6 +40,12 @@ class MultiDataset(object):
             List of MLDatasets, or absolute paths to serialized MLDatasets.
 
         """
+
+        if issubclass(dataset_class, BaseDataset):
+            self._dataset_class = dataset_class
+        else:
+            raise TypeError('Input class type is not recognized!'
+                            ' Must be a child class of pyradigm.BaseDataset')
 
         self._list = list()
         self._is_init = False
