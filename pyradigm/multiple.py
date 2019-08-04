@@ -7,12 +7,11 @@ from sys import version_info
 
 import numpy as np
 
-if version_info.major == 2 and version_info.minor == 7:
-    from pyradigm import MLDataset
-elif version_info.major > 2:
-    from pyradigm.pyradigm import MLDataset
+if version_info.major > 2:
+    from pyradigm.base import BaseDataset
+    from pyradigm import MLDataset, ClassificationDataset as ClfDataset
 else:
-    raise NotImplementedError('pyradigm supports only 2.7 or 3+. '
+    raise NotImplementedError('pyradigm supports only python 3 or higher! '
                               'Upgrade to Python 3+ is recommended.')
 
 
