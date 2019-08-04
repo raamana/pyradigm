@@ -146,7 +146,7 @@ class ClassificationDataset(BaseDataset):
 
     @property
     def num_targets(self):
-        """Total number of classes in the dataset."""
+        """Total number of unique classes in the dataset."""
         return len(self.target_set)
 
 
@@ -471,8 +471,6 @@ class ClassificationDataset(BaseDataset):
 
         Returns
         -------
-        tuple : target_set, label_set, target_sizes
-
         target_set : list
             List of names of all the classes
 

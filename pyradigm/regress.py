@@ -1,10 +1,10 @@
-
 __all__ = ['RegressionDataset', ]
 
+import random
 from collections import Counter, OrderedDict
 from os.path import isfile, realpath
 from warnings import warn
-import random
+
 import numpy as np
 from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
 
@@ -13,6 +13,7 @@ class RegressionDataset(BaseDataset):
     """
     RegressionDataset where target values are numeric (such as float or int)
     """
+
 
     def __init__(self,
                  dataset_path=None,
@@ -205,13 +206,14 @@ class RegressionDataset(BaseDataset):
         if count is None and (0.0 < train_perc < 1.0):
             if train_perc < 1.0 / smallest_class_size:
                 raise ValueError('Training percentage selected too low '
-                                 'to return even one samplet from the smallest class!')
+                                 'to return even one samplet from the smallest '
+                                 'class!')
             train_set = self.random_subset_ids(train_perc)
         elif train_perc is None and count > 0:
             if count >= smallest_class_size:
                 raise ValueError(
-                    'Selections would exclude the smallest class from test set. '
-                    'Reduce samplet count per class for the training set!')
+                        'Selections would exclude the smallest class from test set. '
+                        'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count)
         else:
             raise ValueError('Invalid, or out of range selection: '
@@ -387,9 +389,8 @@ class RegressionDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError(
-                    'These classes {} do not exist in this dataset.'.format(
-                        non_existent))
+            raise ValueError('These classes {} do not exist in this dataset.'
+                             ''.format(non_existent))
 
         subsets = list()
         for target_id in target_ids:
