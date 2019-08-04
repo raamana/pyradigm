@@ -162,6 +162,15 @@ def test_nan_inf_values():
         except:
             raise
 
+def test_data_type():
+
+    for in_dtype in [np.float_, np.int, np.bool_]:
+        cds = ClfDataset(dtype=in_dtype)
+        cds.add_samplet('a', [1, 2.0, -434], 'class')
+        if cds.dtype != in_dtype or cds['a'].dtype != in_dtype:
+            raise TypeError('Dataset not maintaining the features in the requested'
+                            'dtype {}. They are in {}'.format(in_dtype, cds.dtype))
+
 
 def test_cant_read_nonexisting_file():
     with raises(IOError):
@@ -406,6 +415,4 @@ def test_load_arff():
     # print(mld)
 
 
-test_return_data_labels()
-test_load_arff()
-test_set_existing_sample()
+test_data_type()
