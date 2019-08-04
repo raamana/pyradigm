@@ -28,6 +28,7 @@ class ClassificationDataset(BaseDataset):
                  targets=None,
                  description='',
                  feature_names=None,
+                 dtype=np.float_,
                  allow_nan_inf=False,
                  ):
         """
@@ -64,6 +65,15 @@ class ClassificationDataset(BaseDataset):
         feature_names : list, ndarray
             List of names for each feature in the dataset.
 
+        dtype : np.dtype
+            Data type of the features to be stored
+
+        allow_nan_inf : bool or str
+            Flag to indicate whether raise an error if NaN or Infinity values are
+            found. If False, adding samplets with NaN or Inf features raises an error
+            If True, neither NaN nor Inf raises an error. You can pass 'NaN' or
+            'Inf' to specify which value to allow depending on your needs.
+
         Raises
         ------
         ValueError
@@ -75,6 +85,7 @@ class ClassificationDataset(BaseDataset):
         """
 
         super().__init__(target_type=str,
+                         dtype=dtype,
                          allow_nan_inf=allow_nan_inf,
                          )
 
@@ -95,7 +106,6 @@ class ClassificationDataset(BaseDataset):
             self._data = OrderedDict()
             self._targets = OrderedDict()
             self._num_features = 0
-            self._dtype = None
             self._description = ''
             self._feature_names = None
         elif data is not None and targets is not None:
@@ -114,7 +124,6 @@ class ClassificationDataset(BaseDataset):
             self._num_features = features0.size \
                     if isinstance(features0,np.ndarray) \
                     else len(features0)
-            self._dtype = type(data[sample_ids[0]])
 
             # assigning default names for each feature
             if feature_names is None:
@@ -148,6 +157,13 @@ class ClassificationDataset(BaseDataset):
 
         if not isinstance(features, np.ndarray):
             features = np.asarray(features)
+
+        try:
+            features = features.astype(self.dtype)
+        except:
+            raise TypeError("Input features (of dtype {}) can not be converted to "
+                            "Dataset's data type {}"
+                            "".format(features.dtype, self.dtype))
 
         if features.size <= 0:
             raise ValueError('provided features are empty.')

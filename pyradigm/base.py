@@ -30,6 +30,7 @@ class BaseDataset(ABC):
 
     def __init__(self,
                  target_type=float,
+                 dtype=float,
                  allow_nan_inf=False,
                  encode_nonnumeric=False,
                  ):
@@ -40,6 +41,9 @@ class BaseDataset(ABC):
         target_type : type, callable
             Data type of the target for the child class.
             Must be callable that takes in a datatype and converts to its own type.
+
+        dtype : np.dtype
+            Data type of the features to be stored
 
         allow_nan_inf : bool or str
             Flag to indicate whether raise an error if NaN or Infinity values are
@@ -52,6 +56,9 @@ class BaseDataset(ABC):
             raise TypeError('target type must be callable, to allow for conversion!')
         else:
             self._target_type = target_type
+
+        if np.issubdtype(dtype, np.generic):
+            self._dtype = dtype
 
         if not isinstance(allow_nan_inf, (bool, str)):
             raise TypeError('allow_nan_inf flag can only be bool or str')
@@ -315,7 +322,6 @@ class BaseDataset(ABC):
         if self.num_samplets <= 0:
             self._data[samplet_id] = features
             self._targets[samplet_id] = target
-            self._dtype = type(features)
             self._num_features = features.size if isinstance(features,
                                                              np.ndarray) else len(
                 features)
@@ -326,8 +332,6 @@ class BaseDataset(ABC):
                 raise ValueError('dimensionality of this samplet ({}) '
                                  'does not match existing samplets ({})'
                                  ''.format(features.size, self._num_features))
-            if not isinstance(features, self._dtype):
-                raise TypeError("Mismatched dtype. Provide {}".format(self._dtype))
 
             self._data[samplet_id] = features
             self._targets[samplet_id] = target
@@ -744,19 +748,13 @@ class BaseDataset(ABC):
 
     @property
     def dtype(self):
-        """number of features in each samplet."""
-        return self._dtype
+        """Returns the data type of the features in the Dataset"""
 
+        return self._dtype
 
     @dtype.setter
     def dtype(self, type_val):
-        if self._dtype is None:
-            if not isinstance(type_val, type):
-                raise TypeError('Invalid data type.')
-            self._dtype = type_val
-        else:
-            warn('Data type is already inferred. Can not be set!')
-
+            raise SyntaxError('Data type can only be set during initialization!')
 
     @property
     def num_samplets(self):
