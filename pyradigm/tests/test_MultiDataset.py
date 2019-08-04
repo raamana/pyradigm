@@ -30,7 +30,7 @@ def make_fully_separable_classes(max_class_size=10, max_dim=22):
 def new_dataset_with_same_ids_classes(in_ds):
     feat_dim = np.random.randint(1, max_feat_dim)
     out_ds = MLDataset()
-    for id_ in in_ds.keys:
+    for id_ in in_ds.samplet_ids:
         out_ds.add_sample(id_, np.random.rand(feat_dim),
                           class_id=in_ds.classes[id_],
                           label=in_ds.labels[id_])

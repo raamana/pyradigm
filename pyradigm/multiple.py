@@ -113,7 +113,7 @@ class MultiDataset(object):
 
             self._is_init = True
         else:
-            # this also checks for the size (num_samples)
+            # this also checks for the size (num_samplets)
             if set(dataset.keys) != self._ids:
                 raise ValueError('Differing set of IDs in two datasets.'
                                  'Unable to add this dataset to the MultiDataset.')
@@ -156,7 +156,7 @@ class MultiDataset(object):
         """
 
         ids_in_class = {cid: self._dataset.sample_ids_in_class(cid)
-                        for cid in self._class_sizes.keys()}
+                        for cid in self._class_sizes.samplet_ids()}
 
         sizes_numeric = np.array([len(ids_in_class[cid]) for cid in ids_in_class.keys()])
         size_per_class, total_test_count = compute_training_sizes(
