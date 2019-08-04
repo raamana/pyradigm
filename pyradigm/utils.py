@@ -42,7 +42,7 @@ def make_random_MLdataset(max_num_classes = 20,
     for cc, class_ in enumerate(class_ids):
         subids = [ 's{}-c{}'.format(ix,cc) for ix in range(class_sizes[cc]) ]
         for sid in subids:
-            if isinstance(class_type, MLDataset):
+            if isinstance(ds, MLDataset):
                 ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
             else:
                 ds.add_samplet(sid, feat_generator(num_features), class_)
