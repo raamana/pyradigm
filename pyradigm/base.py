@@ -532,9 +532,12 @@ class BaseDataset(ABC):
         return xfm_ds
 
 
-    def train_test_split_ids(self, train_perc=None, count_per_class=None):
+    @abstractmethod
+    def train_test_split_ids(self, train_perc=None, count=None):
         """
         Returns two disjoint sets of samplet ids for use in cross-validation.
+        The behaviour of this method differs based on the whether the child class
+        is a ClassificationDataset or RegressionDataset or something else.
 
         Offers two ways to specify the sizes: fraction or count.
         Only one access method can be used at a time.
@@ -542,9 +545,9 @@ class BaseDataset(ABC):
         Parameters
         ----------
         train_perc : float
-            fraction of samplets from each class to build the training subset.
+            fraction of samplets to build the training subset.
 
-        count_per_class : int
+        count : int
             exact count of samplets from each class to build the training subset.
 
         Returns
@@ -563,34 +566,6 @@ class BaseDataset(ABC):
             If the selection results in empty subsets for either train or test sets.
 
         """
-
-        _ignore1, target_sizes = self.summarize()
-        smallest_class_size = np.min(target_sizes)
-
-        if count_per_class is None and (0.0 < train_perc < 1.0):
-            if train_perc < 1.0 / smallest_class_size:
-                raise ValueError('Training percentage selected too low '
-                                 'to return even one samplet from the smallest class!')
-            train_set = self.random_subset_ids(perc_per_class=train_perc)
-        elif train_perc is None and count_per_class > 0:
-            if count_per_class >= smallest_class_size:
-                raise ValueError(
-                    'Selections would exclude the smallest class from test set. '
-                    'Reduce samplet count per class for the training set!')
-            train_set = self.random_subset_ids_by_count(count_per_class=count_per_class)
-        else:
-            raise ValueError('Invalid, or out of range selection: '
-                             'only one of count or percentage '
-                             'can be used to select subset.')
-
-        test_set = list(set(self.samplet_ids) - set(train_set))
-
-        if len(train_set) < 1 or len(test_set) < 1:
-            raise ValueError('Selection resulted in empty training or test set: '
-                             'check your selections or dataset!')
-
-        return train_set, test_set
-
 
 
     @abstractmethod

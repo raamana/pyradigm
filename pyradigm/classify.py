@@ -215,6 +215,70 @@ class ClassificationDataset(BaseDataset):
         return self.get_subset(subsets)
 
 
+    def train_test_split_ids(self, train_perc=None, count_per_class=None):
+        """
+        Returns two disjoint sets of samplet ids for use in cross-validation.
+
+        Offers two ways to specify the sizes: fraction or count.
+        Only one access method can be used at a time.
+
+        Parameters
+        ----------
+        train_perc : float
+            fraction of samplets from each class to build the training subset.
+
+        count_per_class : int
+            exact count of samplets from each class to build the training subset.
+
+        Returns
+        -------
+        train_set : list
+            List of ids in the training set.
+        test_set : list
+            List of ids in the test set.
+
+        Raises
+        ------
+        ValueError
+            If the fraction is outside open interval (0, 1), or
+            If counts are outside larger than the smallest class, or
+            If unrecognized format is provided for input args, or
+            If the selection results in empty subsets for either train or test sets.
+
+        """
+
+        _ignore1, target_sizes = self.summarize()
+        smallest_class_size = np.min(target_sizes)
+
+        if count_per_class is None and (0.0 < train_perc < 1.0):
+            if train_perc < 1.0 / smallest_class_size:
+                raise ValueError('Training percentage selected too low '
+                                 'to return even one samplet from the smallest class!')
+            train_set = self.random_subset_ids(train_perc)
+        elif train_perc is None and count_per_class > 0:
+            if count_per_class >= smallest_class_size:
+                raise ValueError(
+                    'Selections would exclude the smallest class from test set. '
+                    'Reduce samplet count per class for the training set!')
+            train_set = self.random_subset_ids_by_count(count_per_class)
+        else:
+            raise ValueError('Invalid, or out of range selection: '
+                             'only one of count or percentage '
+                             'can be used to select subset at a given time.')
+
+        test_set = list(set(self.samplet_ids) - set(train_set))
+
+        if len(train_set) < 1:
+            raise ValueError('Empty training set! Selection perc or count too small!'
+                             'Change selections or check your dataset.')
+
+        if len(test_set) < 1:
+            raise ValueError('Empty test set! Selection perc or count too small!'
+                             'Change selections or check your dataset.')
+
+        return train_set, test_set
+
+
     def random_subset(self, perc_in_class=0.5):
         """
         Returns a random sub-dataset (of specified size by percentage) within each
