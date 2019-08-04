@@ -8,8 +8,9 @@ def make_random_MLdataset(max_num_classes = 20,
                           min_class_size = 20,
                           max_class_size = 50,
                           max_dim = 100,
-                          stratified = True):
-    "Generates a random MLDataset for use in testing."
+                          stratified = True,
+                          class_type=MLDataset):
+    "Generates a random Dataset for use in testing."
 
     smallest = min(min_class_size, max_class_size)
     max_class_size = max(min_class_size, max_class_size)
@@ -37,11 +38,14 @@ def make_random_MLdataset(max_num_classes = 20,
         class_ids.append('class-{}'.format(cl))
         labels.append(int(cl))
 
-    ds = MLDataset()
+    ds = class_type()
     for cc, class_ in enumerate(class_ids):
         subids = [ 's{}-c{}'.format(ix,cc) for ix in range(class_sizes[cc]) ]
         for sid in subids:
-            ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
+            if isinstance(class_type, MLDataset):
+                ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
+            else:
+                ds.add_samplet(sid, feat_generator(num_features), class_)
 
     return ds
 
