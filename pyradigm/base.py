@@ -7,17 +7,13 @@ Base module to define the ABCs for all MLDatasets
 import copy
 import os
 import pickle
-import random
-import warnings
-from warnings import warn
-from collections import Counter, OrderedDict, Sequence
-from itertools import islice
-from os.path import isfile, realpath
-from sys import version_info
-import numpy as np
-import types
-
 from abc import ABC, abstractmethod
+from collections import OrderedDict, Sequence
+from itertools import islice
+from warnings import warn
+
+import numpy as np
+
 
 class BaseDataset(ABC):
     """Abstract Base class for Dataset.

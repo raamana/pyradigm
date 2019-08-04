@@ -1,17 +1,12 @@
-
 __all__ = ['ClassificationDataset', ]
 
-from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
-import numpy as np
-import os
-import pickle
 import random
-import sys
-import traceback
 import warnings
-from collections import Counter, OrderedDict, Sequence
-from itertools import islice
+from collections import Counter, OrderedDict
 from os.path import isfile, realpath
+
+import numpy as np
+from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
 
 
 class ClassificationDataset(BaseDataset):
@@ -20,6 +15,7 @@ class ClassificationDataset(BaseDataset):
 
     Note: samplet is defined  to refer to a single row in feature matrix X: N x p
     """
+
 
     def __init__(self,
                  dataset_path=None,
@@ -98,7 +94,7 @@ class ClassificationDataset(BaseDataset):
         elif in_dataset is not None:
             if not isinstance(in_dataset, self.__class__):
                 raise TypeError('Invalid Class input: {} expected!'
-                                 ''.format(self.__class__))
+                                ''.format(self.__class__))
             if in_dataset.num_samplets <= 0:
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
@@ -122,8 +118,8 @@ class ClassificationDataset(BaseDataset):
             sample_ids = list(data)
             features0 = data[sample_ids[0]]
             self._num_features = features0.size \
-                    if isinstance(features0,np.ndarray) \
-                    else len(features0)
+                if isinstance(features0, np.ndarray) \
+                else len(features0)
 
             # assigning default names for each feature
             if feature_names is None:
@@ -178,6 +174,7 @@ class ClassificationDataset(BaseDataset):
 
         return features
 
+
     @property
     def target_set(self):
         """Set of unique classes in the dataset."""
@@ -213,8 +210,9 @@ class ClassificationDataset(BaseDataset):
 
         """
 
-        # subset_ids = [sid for sid in self.samplet_ids if self.classes[sid] == class_id]
-        subset_ids = self.keys_with_value(self.classes, class_id)
+        # subset_ids =
+        #  [ sid for sid in self.samplet_ids if self.classes[sid] == class_id ]
+        subset_ids = self.keys_with_value(self.targets, class_id)
         return subset_ids
 
 
@@ -250,7 +248,8 @@ class ClassificationDataset(BaseDataset):
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
             raise ValueError(
-                'These classes {} do not exist in this dataset.'.format(non_existent))
+                    'These classes {} do not exist in this dataset.'.format(
+                        non_existent))
 
         subsets = list()
         for target_id in target_ids:
@@ -329,10 +328,12 @@ class ClassificationDataset(BaseDataset):
             subset_size_this_class = np.int64(np.floor(target_size * perc_per_class))
             # clipping the range to [1, n]
             subset_size_this_class = max(1, min(target_size, subset_size_this_class))
-            if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
+            if subset_size_this_class < 1 or \
+                    len(this_class) < 1 or \
+                    this_class is None:
                 # warning if none were selected
                 raise ValueError(
-                    'No samplets from class {} were selected.'.format(target_id))
+                        'No samplets from class {} were selected.'.format(target_id))
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -399,7 +400,7 @@ class ClassificationDataset(BaseDataset):
     def rename_targets(self, new_targets):
         """
         Helper to rename the classes, if provided by a dict keyed in by the
-        orignal samplet_ids
+        original samplet ids
 
         Parameters
         ----------
@@ -432,7 +433,7 @@ class ClassificationDataset(BaseDataset):
 
         Parameters
         ----------
-        dataset : Dataset or similar
+        another : Dataset or similar
 
         Returns
         -------
@@ -440,7 +441,7 @@ class ClassificationDataset(BaseDataset):
             Boolean flag indicating whether two datasets are compatible or not
         """
 
-        compatible, _, _, _, _ = check_compatibility_BaseDataset([self, another])
+        compatible, _, _, _, _, _ = check_compatibility_BaseDataset([self, another])
         return compatible
 
 
@@ -480,10 +481,11 @@ class ClassificationDataset(BaseDataset):
             num_digit = max([len(str(val)) for val in self.target_sizes.values()])
             for cls in class_ids:
                 full_descr.append(
-                    'Class {cls:>{clswidth}} : '
-                    '{size:>{numwidth}} samplets'.format(cls=cls, clswidth=max_width,
-                                                        size=self.target_sizes.get(cls),
-                                                        numwidth=num_digit))
+                        'Class {cls:>{clswidth}} : '
+                        '{size:>{numwidth}} samplets'
+                        ''.format(cls=cls, clswidth=max_width,
+                                  size=self.target_sizes.get(cls),
+                                  numwidth=num_digit))
         else:
             full_descr.append('Empty dataset.')
 
@@ -497,17 +499,19 @@ class ClassificationDataset(BaseDataset):
         elif fmt_str.lower() in ['f', 'full']:
             return self.__str__()
         else:
-            raise NotImplementedError("Requsted type of format not implemented.\n"
+            raise NotImplementedError("Requested type of format not implemented.\n"
                                       "It can only be 'short' (default) or 'full', "
                                       "or a shorthand: 's' or 'f' ")
+
 
     def __repr__(self):
         return self.__str__()
 
+
     # renaming the method for backwards compatibility
     def data_and_labels(self):
+
         warnings.warn(DeprecationWarning('data_and_labels() is convenient method to '
                                          'access data_and_targets() method.'
                                          'Switch to the latter ASAP.'))
         return self.data_and_targets()
-
