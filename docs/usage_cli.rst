@@ -8,7 +8,7 @@ For example, it's convenient to quickly display info about pyradigm's MLDatasets
 
 
 .. argparse::
-   :filename: pyradigm/pyradigm.py
+   :module: pyradigm.pyradigm
    :func: get_parser
    :prog: pyradigm
    :nodefault:

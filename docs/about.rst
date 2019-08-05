@@ -2,6 +2,27 @@
 About
 --------------------------------------------------------------------------------------------------
 
+
+.. |status| image:: http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2/status.svg
+   :target: http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2
+.. |travis| image:: https://travis-ci.org/raamana/pyradigm.svg?branch=master
+   :target: https://travis-ci.org/raamana/pyradigm.svg?branch=master
+.. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/cffd80f290544e2e824011bfccf35ff8
+   :target: https://www.codacy.com/app/raamana/pyradigm?utm_source=github.com&utm_medium=referral&utm_content=raamana/pyradigm&utm_campaign=Badge_Grade
+.. |PyPI version| image:: https://badge.fury.io/py/pyradigm.svg
+   :target: https://badge.fury.io/py/pyradigm
+.. |Python versions| image:: https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg
+.. |codecov| image:: https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/raamana/pyradigm
+
+
+Usage/demo notebook (no setup required):
+
+
+.. |Binder| image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb
+
+
 Background
 ----------
 
