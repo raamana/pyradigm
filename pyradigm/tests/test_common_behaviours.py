@@ -12,9 +12,9 @@ copy construction must be supported: Dataset(dataset_instance) returns a copy
 
 from pyradigm import ClassificationDataset as ClfDataset, MultiDataset, \
     RegressionDataset as RegrDataset
-from pyradigm.utils import make_random_MLdataset
-
+from pyradigm.utils import make_random_ClfDataset
 from inspect import signature
+from pytest import raises
 
 class_list = (ClfDataset, RegrDataset)
 
@@ -31,3 +31,35 @@ def test_constructor_must_offer_params():
                 raise SyntaxError('Class {} does not offer {} as an argument '
                                   'during init!'.format(cls, param))
 
+def test_attributes():
+    """Creation, access and properties"""
+
+    ds = make_random_ClfDataset()
+
+    # ensuring strings can't be added to float attributes
+    ds.add_attr('age', 's1-c1', 43)
+    for mismatched_type in ['43', 2+3j ]:
+        with raises(TypeError):
+            ds.add_attr('age', 's2-c2', mismatched_type)
+
+    # ensuring floats can't be added to string attributes
+    ds.add_attr('gender', 's1-c1', 'female')
+    for mismatched_type in [43, 2+3j ]:
+        with raises(TypeError):
+            ds.add_attr('gender', 's2-c2', mismatched_type)
+
+    # adding to multiple samplets at a time
+    # this should work
+    ds.add_attr('gender',
+                ('s5-c2', 's5-c3', 's6-c2'),
+                ('female', 'male', 'male'))
+    # but not this:
+    with raises(ValueError):
+        ds.add_attr('gender',
+                    ('s1-c1', 's1-c2', 's6-c3'),
+                    ('female', 'male', ))
+
+    pass
+
+
+test_attributes()
