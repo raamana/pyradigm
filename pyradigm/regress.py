@@ -148,19 +148,19 @@ class RegressionDataset(BaseDataset):
         return len(self.target_set)
 
 
-    def sample_ids_in_target(self, target_id):
+    def samplet_ids_with_target(self, target_id):
         """
-        Returns a list of sample ids belonging with a given target_id
+        Returns a list of samplet ids with a given target_id
 
         Parameters
         ----------
-        target_id : str
-            class id to query.
+        target_id : float
+            Value of the target to query
 
         Returns
         -------
         subset_ids : list
-            List of sample ids belonging to a given target_id.
+            List of samplet ids belonging to a given target_id.
 
         """
 
