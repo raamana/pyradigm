@@ -35,31 +35,31 @@ def test_attributes():
     """Creation, access and properties"""
 
     ds = make_random_ClfDataset()
+    id_list = ds.samplet_ids
 
     # ensuring strings can't be added to float attributes
-    ds.add_attr('age', 's1-c1', 43)
+    ds.add_attr('age', id_list[0], 43)
     for mismatched_type in ['43', 2+3j ]:
         with raises(TypeError):
-            ds.add_attr('age', 's2-c2', mismatched_type)
+            ds.add_attr('age', id_list[2], mismatched_type)
 
     # ensuring floats can't be added to string attributes
-    ds.add_attr('gender', 's1-c1', 'female')
+    ds.add_attr('gender', id_list[3], 'female')
     for mismatched_type in [43, 2+3j ]:
         with raises(TypeError):
-            ds.add_attr('gender', 's2-c2', mismatched_type)
+            ds.add_attr('gender', id_list[4], mismatched_type)
 
     # adding to multiple samplets at a time
     # this should work
     ds.add_attr('gender',
-                ('s5-c2', 's5-c3', 's6-c2'),
+                id_list[:3],
                 ('female', 'male', 'male'))
     # but not this:
     with raises(ValueError):
         ds.add_attr('gender',
-                    ('s1-c1', 's1-c2', 's6-c3'),
+                    id_list[:3],
                     ('female', 'male', ))
 
-    pass
 
 
 test_attributes()
