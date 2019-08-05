@@ -158,8 +158,7 @@ class BaseDataset(ABC):
     @property
     def targets(self):
         """Returns the array of targets for all the samplets."""
-        # TODO numeric label need to be removed,
-        # as this can be made up on the fly as needed from str to num encoders.
+
         return self._targets
 
 
@@ -741,10 +740,6 @@ class BaseDataset(ABC):
 
         num_existing_keys = sum([1 for key in subset_ids if key in self._data])
         if subset_ids is not None and num_existing_keys > 0:
-            # ensure items are added to data, targets etc in the same order of samplet IDs
-            # TODO come up with a way to do this even when not using OrderedDict()
-            # putting the access of data, targets and classes in the same loop  would
-            # ensure there is correspondence across the three attributes of the class
             data = self.__get_subset_from_dict(self._data, subset_ids)
             targets = self.__get_subset_from_dict(self._targets, subset_ids)
             subdataset = self.__class__(data=data, targets=targets)

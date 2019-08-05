@@ -354,7 +354,7 @@ class RegressionDataset(BaseDataset):
             Boolean flag indicating whether two datasets are compatible or not
         """
 
-        compatible, _, _, _, _, _ = check_compatibility_BaseDataset([self, another])
+        compatible, _, _, _, _ = check_compatibility_BaseDataset([self, another])
         return compatible
 
 

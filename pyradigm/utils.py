@@ -68,11 +68,12 @@ def make_random_ClfDataset(max_num_classes=20,
                                stratified=stratified,
                                class_type=ClassificationDataset)
 
+
 def make_random_RegrDataset(max_num_classes=20,
-                           min_class_size=20,
-                           max_class_size=50,
-                           max_dim=100,
-                           stratified=True):
+                            min_class_size=20,
+                            max_class_size=50,
+                            max_dim=100,
+                            stratified=True):
     "Generates a random ClassificationDataset for use in testing."
 
     return make_random_dataset(max_num_classes=max_num_classes,
@@ -81,6 +82,7 @@ def make_random_RegrDataset(max_num_classes=20,
                                max_dim=max_dim,
                                stratified=stratified,
                                class_type=RegressionDataset)
+
 
 def make_random_MLdataset(max_num_classes=20,
                           min_class_size=20,
