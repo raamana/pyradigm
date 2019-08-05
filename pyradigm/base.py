@@ -76,7 +76,7 @@ class BaseDataset(ABC):
         self._attr = dict()
         self._attr_dtype = dict()
         # dataset-wise attributes, common to all samplets
-        self._attr_dataset = dict()
+        self._dataset_attr = dict()
 
 
     @property
@@ -427,6 +427,27 @@ class BaseDataset(ABC):
             print('{} removed.'.format(sample_id))
 
 
+    def add_dataset_attr(self, attr_name, attr_value):
+        """
+        Adds dataset-wide attributes (common to all samplets).
+
+        This is a great way to add meta data (such as version, processing details,
+        anything else common to all samplets). This is better than encoding the info
+        into the description field, as this allow programmatic retrieval.
+
+        Parameters
+        ----------
+        attr_name : str
+            Identifier for the attribute
+
+        attr_value : object
+            Value of the attribute (any datatype)
+
+        """
+
+        self._dataset_attr[attr_name] = attr_value
+
+
     def add_attr(self, attr_name, samplet_id, attr_value):
         """
         Method to add samplet-wise attributes to the dataset.
@@ -507,6 +528,13 @@ class BaseDataset(ABC):
         """Simple summary of attributes currently stored in the dataset"""
 
         print(self._attr_repr())
+
+
+    @property
+    def dataset_attr(self):
+        """Returns dataset attributes"""
+
+        return self._dataset_attr
 
 
     def get_feature_subset(self, subset_idx):
