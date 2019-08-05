@@ -503,6 +503,12 @@ class BaseDataset(ABC):
         return self._attr
 
 
+    def attr_summary(self):
+        """Simple summary of attributes currently stored in the dataset"""
+
+        print(self._attr_repr())
+
+
     def get_feature_subset(self, subset_idx):
         """
         Returns the subset of features indexed numerically.
@@ -902,6 +908,18 @@ class BaseDataset(ABC):
     @abstractmethod
     def __repr__(self):
         """Evaluatable repr"""
+
+    def _attr_repr(self):
+        """Text summary of attributes in the dataset."""
+
+        if self._attr: # atleast one attribute exists!
+            attr_descr = '{} attributes: '.format(len(self._attr))
+            for attr_name, values in self._attr.items():
+                attr_descr += ' {} ({})'.format(attr_name, len(values))
+        else:
+            attr_descr = ''
+
+        return attr_descr
 
     def _copy(self, other):
         """Copy constructor."""
