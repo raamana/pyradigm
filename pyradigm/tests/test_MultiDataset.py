@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyradigm import ClassificationDataset as ClfDataset, MultiDataset
-from pyradigm.utils import make_random_MLdataset
+from pyradigm.utils import make_random_ClfDataset
 
 min_num_modalities = 3
 max_num_modalities = 10
@@ -22,8 +22,8 @@ def make_fully_separable_classes(max_class_size=10, max_dim=22):
 
     new_ds = ClfDataset()
     for index, row in enumerate(blobs_X):
-        new_ds.add_sample('sub{}'.format(index), row, label=blobs_y[index],
-                          class_id=class_ids[blobs_y[index]])
+        new_ds.add_samplet('sub{}'.format(index),
+                           row, class_ids[blobs_y[index]])
 
     return new_ds
 
@@ -39,7 +39,7 @@ def new_dataset_with_same_ids_classes(in_ds):
 
 
 # ds = make_fully_separable_classes()
-ds = make_random_MLdataset(5, 20, 50, 10, stratified=False, class_type=ClfDataset)
+ds = make_random_ClfDataset(5, 20, 50, 10, stratified=False)
 
 num_modalities = np.random.randint(min_num_modalities, max_num_modalities)
 
