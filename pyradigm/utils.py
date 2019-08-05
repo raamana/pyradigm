@@ -1,5 +1,5 @@
 import numpy as np
-from pyradigm import ClassificationDataset
+from pyradigm import ClassificationDataset, RegressionDataset
 from pyradigm.pyradigm import MLDataset
 
 feat_generator = np.random.randn
@@ -36,7 +36,10 @@ def make_random_dataset(max_num_classes=20,
     class_ids = list()
     labels = list()
     for cl in range(num_classes):
-        class_ids.append('class-{}'.format(cl))
+        if issubclass(class_type, RegressionDataset):
+            class_ids.append(cl)
+        else:
+            class_ids.append('class-{}'.format(cl))
         labels.append(int(cl))
 
     ds = class_type()
@@ -65,6 +68,19 @@ def make_random_ClfDataset(max_num_classes=20,
                                stratified=stratified,
                                class_type=ClassificationDataset)
 
+def make_random_RegrDataset(max_num_classes=20,
+                           min_class_size=20,
+                           max_class_size=50,
+                           max_dim=100,
+                           stratified=True):
+    "Generates a random ClassificationDataset for use in testing."
+
+    return make_random_dataset(max_num_classes=max_num_classes,
+                               min_class_size=min_class_size,
+                               max_class_size=max_class_size,
+                               max_dim=max_dim,
+                               stratified=stratified,
+                               class_type=RegressionDataset)
 
 def make_random_MLdataset(max_num_classes=20,
                           min_class_size=20,
