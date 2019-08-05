@@ -60,6 +60,11 @@ def test_attributes():
                     id_list[:3],
                     ('female', 'male', ))
 
+    try:
+        ds.add_dataset_attr('version', 2.0)
+        ds.add_dataset_attr('params', ['foo', 'bar', 20, 12, '/work/path'])
+    except:
+        raise AttributeError('Unable to add dataset attributes')
 
 
 test_attributes()
