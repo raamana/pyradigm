@@ -8,11 +8,17 @@ import copy
 import os
 import pickle
 from abc import ABC, abstractmethod
-from collections import OrderedDict, Sequence
+from collections import Iterable, OrderedDict, Sequence
 from itertools import islice
 from warnings import warn
 
 import numpy as np
+
+
+def is_iterable_but_not_str(value):
+    """Boolean check for iterables that are not strings"""
+
+    return not isinstance(value, str) and isinstance(value, Iterable)
 
 
 class BaseDataset(ABC):
