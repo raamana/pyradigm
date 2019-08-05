@@ -1,15 +1,16 @@
 
 from pyradigm.pyradigm import MLDataset
+from pyradigm import ClassificationDataset
 import numpy as np
 
 feat_generator = np.random.randn
 
-def make_random_MLdataset(max_num_classes = 20,
+def make_random_dataset(max_num_classes = 20,
                           min_class_size = 20,
                           max_class_size = 50,
                           max_dim = 100,
                           stratified = True,
-                          class_type=MLDataset):
+                          class_type=ClassificationDataset):
     "Generates a random Dataset for use in testing."
 
     smallest = min(min_class_size, max_class_size)
@@ -50,3 +51,31 @@ def make_random_MLdataset(max_num_classes = 20,
     return ds
 
 
+def make_random_ClfDataset(max_num_classes = 20,
+                          min_class_size = 20,
+                          max_class_size = 50,
+                          max_dim = 100,
+                          stratified = True):
+    "Generates a random ClassificationDataset for use in testing."
+
+    make_random_dataset(max_num_classes = max_num_classes,
+                          min_class_size = min_class_size,
+                          max_class_size = max_class_size,
+                          max_dim = max_dim,
+                          stratified = stratified,
+                          class_type=ClassificationDataset)
+
+
+def make_random_MLdataset(max_num_classes = 20,
+                          min_class_size = 20,
+                          max_class_size = 50,
+                          max_dim = 100,
+                          stratified = True):
+    "Generates a random MLDataset for use in testing."
+
+    make_random_dataset(max_num_classes = max_num_classes,
+                          min_class_size = min_class_size,
+                          max_class_size = max_class_size,
+                          max_dim = max_dim,
+                          stratified = stratified,
+                          class_type=MLDataset)
