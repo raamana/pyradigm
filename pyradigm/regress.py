@@ -429,6 +429,11 @@ class RegressionDataset(BaseDataset):
         if bool(self):
             full_descr.append('{} samplets, {} features'.format(
                     self.num_samplets, self.num_features))
+
+            attr_descr = self._attr_repr()
+            if len(attr_descr) > 0:
+                full_descr.append(attr_descr)
+
             # class_ids = list(self.target_sizes)
             # max_width = max([len(cls) for cls in class_ids])
             # num_digit = max([len(str(val)) for val in self.target_sizes.values()])
@@ -447,8 +452,14 @@ class RegressionDataset(BaseDataset):
 
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
-            return '{} samplets x {} features each'.format(
+            descr = '{} samplets x {} features each'.format(
                     self.num_samplets, self.num_features)
+
+            attr_descr = self._attr_repr()
+            if len(attr_descr) > 0:
+                descr += '\n {}'.format(attr_descr)
+
+            return descr
         elif fmt_str.lower() in ['f', 'full']:
             return self.__str__()
         else:
