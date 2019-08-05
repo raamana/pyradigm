@@ -74,6 +74,7 @@ class BaseDataset(ABC):
 
         # samplet-wise attributes
         self._attr = dict()
+        self._attr_dtype = dict()
         # dataset-wise attributes, common to all samplets
         self._attr_dataset = dict()
 
@@ -452,6 +453,7 @@ class BaseDataset(ABC):
 
             if attr_name not in self._attr:
                 self._attr[attr_name] = dict()
+                self._attr_dtype[attr_name] = None
 
             if is_iterable_but_not_str(samplet_id):
                 if not isinstance(attr_value, (Sequence, np.ndarray, np.generic)):
@@ -481,6 +483,15 @@ class BaseDataset(ABC):
         if samplet_id not in self._data:
             raise KeyError('Samplet {} does not exist in this Dataset.'
                            'Add it first via .add_samplet() method.')
+
+        if self._attr_dtype[attr_name] is not None:
+            if not np.issubdtype(type(attr_value), self._attr_dtype[attr_name]):
+                raise TypeError('Datatype of attribute {} is expected to be {}. '
+                                'Value provided is of type: {}'
+                                ''.format(attr_name, self._attr_dtype[attr_name],
+                                          type(attr_value)))
+        else:
+            self._attr_dtype[attr_name] = type(attr_value)
 
         self._attr[attr_name][samplet_id] = attr_value
 
