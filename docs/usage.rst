@@ -190,7 +190,7 @@ Let's look at what methods this dataset offers us:
      'class_sizes',
      'classes',
      'data',
-     'data_and_labels',
+     'data_and_targets',
      'del_sample',
      'description',
      'extend',
@@ -737,7 +737,7 @@ Let's make a bar plot with the just computed numbers:
 
 .. code:: python
 
-    data, lbl, keys = pcg.data_and_labels()
+    data, lbl, keys = pcg.data_and_targets()
 
 .. code:: python
 
@@ -1314,7 +1314,7 @@ there, you might ask? It is as simple as you can imagine:
 
 .. code:: python
 
-    data_matrix, target, sample_ids = binary_dataset.data_and_labels()
+    data_matrix, target, sample_ids = binary_dataset.data_and_targets()
     clf.fit(data_matrix, target)
 
 

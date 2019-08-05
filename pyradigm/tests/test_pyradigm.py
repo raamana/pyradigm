@@ -6,25 +6,15 @@ sys.dont_write_bytecode = True
 
 from pytest import raises, warns
 
-from sys import version_info
+from pyradigm import MLDataset
 
-if version_info.major==2 and version_info.minor==7:
-    from pyradigm import MLDataset
-elif version_info.major > 2:
-    try:
-        from pyradigm.pyradigm import MLDataset
-    except ImportError:
-        from pyradigm import MLDataset
-    except:
-        raise ImportError('could not import pyradigm')
-else:
-    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
 
 out_dir  = '.'
 
 num_classes  = np.random.randint( 2, 50)
 class_sizes  = np.random.randint(10, 100, num_classes)
 num_features = np.random.randint(10, 100)
+num_samples = sum(class_sizes)
 
 class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
@@ -88,6 +78,9 @@ def test_num_classes():
 
 def test_num_features():
     assert test_dataset.num_features == num_features
+
+def test_shape():
+    assert test_dataset.shape == (num_samples, num_features)
 
 def test_num_features_setter():
     with raises(AttributeError):

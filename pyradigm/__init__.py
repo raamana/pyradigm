@@ -1,17 +1,20 @@
-__all__ = [ 'pyradigm', 'MLDataset', 'MultiDataset', 'cli_run', 'check_compatibility' ]
+
+__all__ = [ 'ClassificationDataset', 'RegressionDataset', 'MultiDataset',
+            'BaseDataset', 'check_compatibility_BaseDataset',
+            'pyradigm', 'MLDataset', 'cli_run']
 
 from sys import version_info
 
-if version_info.major==2 and version_info.minor==7:
-    from pyradigm import MLDataset, cli_run, check_compatibility
-    from multiple import MultiDataset
-elif version_info.major > 2:
-    from pyradigm.pyradigm import MLDataset, cli_run, check_compatibility
+
+if version_info.major >= 3:
+    from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
+    from pyradigm.classify import ClassificationDataset
+    from pyradigm.regress import RegressionDataset
+    from pyradigm.pyradigm import MLDataset, cli_run
     from pyradigm.multiple import MultiDataset
 else:
-    raise NotImplementedError('pyradigm supports only 2.7 or 3+. '
+    raise NotImplementedError('pyradigm supports only Python 3 or higher! '
                               'Upgrade to Python 3+ is recommended.')
-
 
 
 from ._version import get_versions

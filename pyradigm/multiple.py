@@ -7,12 +7,11 @@ from sys import version_info
 
 import numpy as np
 
-if version_info.major == 2 and version_info.minor == 7:
-    from pyradigm import MLDataset
-elif version_info.major > 2:
-    from pyradigm.pyradigm import MLDataset
+if version_info.major > 2:
+    from pyradigm.base import BaseDataset
+    from pyradigm import MLDataset, ClassificationDataset as ClfDataset
 else:
-    raise NotImplementedError('pyradigm supports only 2.7 or 3+. '
+    raise NotImplementedError('pyradigm supports only python 3 or higher! '
                               'Upgrade to Python 3+ is recommended.')
 
 
@@ -28,6 +27,7 @@ class MultiDataset(object):
 
 
     def __init__(self,
+                 dataset_class=ClfDataset,
                  dataset_spec=None,
                  name='MultiDataset'):
         """
@@ -40,6 +40,12 @@ class MultiDataset(object):
 
         """
 
+        if issubclass(dataset_class, BaseDataset):
+            self._dataset_class = dataset_class
+        else:
+            raise TypeError('Input class type is not recognized!'
+                            ' Must be a child class of pyradigm.BaseDataset')
+
         self._list = list()
         self._is_init = False
 
@@ -47,7 +53,7 @@ class MultiDataset(object):
         self._modality_count = 0
 
         self._ids = set()
-        self._classes = dict()
+        self._targets = dict()
         self._modalities = dict()
         self._labels = dict()
 
@@ -95,12 +101,13 @@ class MultiDataset(object):
 
         """
 
-        dataset = dataset if isinstance(dataset, MLDataset) else MLDataset(dataset)
+        if not isinstance(dataset, BaseDataset):
+            dataset = self._dataset_class(dataset_path=dataset)
 
         if not self._is_init:
-            self._ids = set(dataset.keys)
-            self._classes = dataset.classes
-            self._class_sizes = dataset.class_sizes
+            self._ids = set(dataset.samplet_ids)
+            self._targets = dataset.targets
+            self._target_sizes = dataset.target_sizes
 
             self._num_samples = len(self._ids)
             self._modalities[identifier] = dataset.data
@@ -113,12 +120,12 @@ class MultiDataset(object):
 
             self._is_init = True
         else:
-            # this also checks for the size (num_samples)
-            if set(dataset.keys) != self._ids:
+            # this also checks for the size (num_samplets)
+            if set(dataset.samplet_ids) != self._ids:
                 raise ValueError('Differing set of IDs in two datasets.'
                                  'Unable to add this dataset to the MultiDataset.')
 
-            if dataset.classes != self._classes:
+            if dataset.targets != self._targets:
                 raise ValueError('Classes for IDs differ in the two datasets.')
 
             if identifier not in self._modalities:
@@ -136,10 +143,12 @@ class MultiDataset(object):
 
         string = "{}: {} samples, " \
                  "{} modalities, " \
-                 "dims: {}\nclass sizes: ".format(self._name, self._num_samples,
-                                                 self._modality_count, self._num_features)
+                 "dims: {}\nclass sizes: " \
+                 "".format(self._name, self._num_samples, self._modality_count,
+                           self._num_features)
 
-        string += ', '.join(['{}: {}'.format(c, n) for c, n in self._class_sizes.items()])
+        string += ', '.join(['{}: {}'.format(c, n)
+                             for c, n in self._target_sizes.items()])
 
         return string
 
@@ -156,20 +165,21 @@ class MultiDataset(object):
         """
 
         ids_in_class = {cid: self._dataset.sample_ids_in_class(cid)
-                        for cid in self._class_sizes.keys()}
+                        for cid in self._target_sizes.keys()}
 
-        sizes_numeric = np.array([len(ids_in_class[cid]) for cid in ids_in_class.keys()])
+        sizes_numeric = np.array([len(ids_in_class[cid])
+                                  for cid in ids_in_class.keys()])
         size_per_class, total_test_count = compute_training_sizes(
                 train_perc, sizes_numeric, stratified=stratified)
 
-        if len(self._class_sizes) != len(size_per_class):
+        if len(self._target_sizes) != len(size_per_class):
             raise ValueError('size spec differs in num elements with class sizes!')
 
         for rep in range(num_rep):
             print('rep {}'.format(rep))
 
             train_set = list()
-            for index, (cls_id, class_size) in enumerate(self._class_sizes.items()):
+            for index, (cls_id, class_size) in enumerate(self._target_sizes.items()):
                 # shuffling the IDs each time
                 random.shuffle(ids_in_class[cls_id])
 
@@ -217,10 +227,10 @@ class MultiDataset(object):
         return features
 
 
-def compute_training_sizes(train_perc, class_sizes, stratified=True):
+def compute_training_sizes(train_perc, target_sizes, stratified=True):
     """Computes the maximum training size that the smallest class can provide """
 
-    size_per_class = np.int64(np.around(train_perc * class_sizes))
+    size_per_class = np.int64(np.around(train_perc * target_sizes))
 
     if stratified:
         print("Different classes in training set are stratified to match smallest class!")
@@ -234,6 +244,6 @@ def compute_training_sizes(train_perc, class_sizes, stratified=True):
             raise ValueError("Error in stratification of training set based on "
                              "smallest class!")
 
-    total_test_samples = np.int64(np.sum(class_sizes) - sum(size_per_class))
+    total_test_samples = np.int64(np.sum(target_sizes) - sum(size_per_class))
 
     return size_per_class, total_test_samples
