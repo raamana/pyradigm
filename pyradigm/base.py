@@ -66,6 +66,11 @@ class BaseDataset(ABC):
         else:
             self._encode_nonnumeric = encode_nonnumeric
 
+        # samplet-wise attributes
+        self._attr = dict()
+        # dataset-wise attributes, common to all samplets
+        self._attr_dataset = dict()
+
 
     @property
     def data(self):
@@ -179,7 +184,7 @@ class BaseDataset(ABC):
 
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
-        if not isinstance(names, (Sequence, np.ndarray, np.generic)):
+        if not is_iterable_but_not_str(names):
             raise ValueError("Input is not a sequence. "
                              "Ensure names are in the same order "
                              "and length as features.")
@@ -312,7 +317,9 @@ class BaseDataset(ABC):
                     features,
                     target,
                     overwrite=False,
-                    feature_names=None):
+                    feature_names=None,
+                    attr_name=None,
+                    attr_value=None):
         """Adds a new samplet to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
@@ -331,6 +338,13 @@ class BaseDataset(ABC):
             Default : False.
         feature_names : list
             The names for each feature. Assumed to be in the same order as `features`
+
+        attr_name : str
+            Name of the attribute to be added for this samplet
+
+        attr_value : generic
+            Value of the attribute. Any data type allowed as long as they are
+            compatible across all the samplets in this dataset.
 
         Raises
         ------
@@ -379,6 +393,9 @@ class BaseDataset(ABC):
                         raise ValueError(
                             "supplied feature names do not match the existing names!")
 
+            if attr_name is not None:
+                self.add_attr(samplet_id, attr_name, attr_value)
+
 
     def del_samplet(self, sample_id):
         """
@@ -401,6 +418,72 @@ class BaseDataset(ABC):
             self._data.pop(sample_id)
             self._targets.pop(sample_id)
             print('{} removed.'.format(sample_id))
+
+
+    def add_attr(self, attr_name, samplet_id, attr_value):
+        """
+        Method to add samplet-wise attributes to the dataset.
+
+        Note: attribute values get overwritten by default, if they already exist
+        for a given samplet
+
+        Parameters
+        ----------
+        attr_name : str
+            Name of the attribute to be added.
+
+        samplet_id : str or list of str
+            Identifier(s) for the samplet
+
+        attr_value : generic or list of generic
+            Value(s) of the attribute. Any data type allowed, although it is
+            strongly recommended to keep the data type the same, or compatible,
+            across all the samplets in this dataset.
+
+        """
+
+        if attr_name is not None:
+
+            if attr_name not in self._attr:
+                self._attr[attr_name] = dict()
+
+            if is_iterable_but_not_str(samplet_id):
+                if not isinstance(attr_value, (Sequence, np.ndarray, np.generic)):
+                    raise TypeError('When samplet_id is a list, attr_value must '
+                                    'also be a list')
+                if len(samplet_id) != len(attr_value):
+                    raise ValueError('Number of attribute values provided do not '
+                                     'match the number of samplet IDs')
+
+                for sid, val in zip(samplet_id, attr_value):
+                    self.__add_single_attr(attr_name, sid, val)
+
+            else:
+                if is_iterable_but_not_str(attr_value):
+                    raise TypeError('When samplet_id is not a list, attr_value also '
+                                    'must not be a list')
+
+                self.__add_single_attr(attr_name, samplet_id, attr_value)
+
+        else:
+            raise ValueError('Attribute name can not be None!')
+
+
+    def __add_single_attr(self, attr_name, samplet_id, attr_value):
+        """Actual attr adder."""
+
+        if samplet_id not in self._data:
+            raise KeyError('Samplet {} does not exist in this Dataset.'
+                           'Add it first via .add_samplet() method.')
+
+        self._attr[attr_name][samplet_id] = attr_value
+
+
+    @property
+    def attr(self):
+        """Returns attributes dictionary, keyed-in by [attr_name][samplet_id]"""
+
+        return self._attr
 
 
     def get_feature_subset(self, subset_idx):
