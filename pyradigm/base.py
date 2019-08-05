@@ -938,16 +938,32 @@ class BaseDataset(ABC):
         """Evaluatable repr"""
 
     def _attr_repr(self):
-        """Text summary of attributes in the dataset."""
+        """Text summary of attributes, samplet- and dataset-wise, in the dataset."""
+
+        # newline appended already if this is not empty
+        attr_descr = self._dataset_attr_repr()
 
         if self._attr: # atleast one attribute exists!
-            attr_descr = '{} attributes: '.format(len(self._attr))
-            for attr_name, values in self._attr.items():
-                attr_descr += ' {} ({})'.format(attr_name, len(values))
+            attr_counts = ('{} ({})'.format(attr_name, len(values))
+                            for attr_name, values in self._attr.items())
+            attr_descr += '{} samplet attributes: {}'.format(len(self._attr),
+                                                             ', '.join(attr_counts))
+
+        return attr_descr
+
+
+    def _dataset_attr_repr(self):
+        """Text summary of attributes in the dataset."""
+
+        if self._dataset_attr: # atleast one attribute exists!
+            attr_descr = '{} dataset attributes: {}\n' \
+                         ''.format(len(self._dataset_attr),
+                                   ', '.join(self._dataset_attr.keys()))
         else:
             attr_descr = ''
 
         return attr_descr
+
 
     def _copy(self, other):
         """Copy constructor."""
