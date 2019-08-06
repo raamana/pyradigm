@@ -324,8 +324,8 @@ class BaseDataset(ABC):
                     target,
                     overwrite=False,
                     feature_names=None,
-                    attr_name=None,
-                    attr_value=None):
+                    attr_names=None,
+                    attr_values=None):
         """Adds a new samplet to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
@@ -345,10 +345,10 @@ class BaseDataset(ABC):
         feature_names : list
             The names for each feature. Assumed to be in the same order as `features`
 
-        attr_name : str
+        attr_names : str or list of str
             Name of the attribute to be added for this samplet
 
-        attr_value : generic
+        attr_values : generic or list of generic
             Value of the attribute. Any data type allowed as long as they are
             compatible across all the samplets in this dataset.
 
@@ -399,8 +399,17 @@ class BaseDataset(ABC):
                         raise ValueError(
                             "supplied feature names do not match the existing names!")
 
-            if attr_name is not None:
-                self.add_attr(samplet_id, attr_name, attr_value)
+            if attr_names is not None:
+                if is_iterable_but_not_str(attr_names):
+                    if len(attr_names) != attr_values or \
+                            (not is_iterable_but_not_str(attr_values)):
+                        raise ValueError('When you supply a list for attr_names, '
+                                         'attr_values also must be a list of same '
+                                         'length')
+                    for name, value in zip(attr_names, attr_values):
+                        self.add_attr(samplet_id, name, value)
+                else:
+                    self.add_attr(samplet_id, attr_names, attr_values)
 
 
     def del_samplet(self, sample_id):
