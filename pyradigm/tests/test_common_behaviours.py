@@ -13,7 +13,7 @@ from inspect import signature
 from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
-from pytest import raises
+from pytest import raises, warns
 import numpy as np
 import random
 
@@ -83,6 +83,14 @@ def test_attributes():
     with raises(KeyError):
         # existing but not all of them are set
         ds.get_attr('random_float', ds.samplet_ids)
+
+    with warns(UserWarning):
+        ds.del_attr('non_existing_attr')
+
+    try:
+        ds.del_attr('random_float')
+    except:
+        raise AttributeError('Attr deletion failed!')
 
 
 test_attributes()
