@@ -523,6 +523,54 @@ class BaseDataset(ABC):
         return self._attr
 
 
+    def get_attr(self, attr_name, samplet_ids='all'):
+        """
+        Method to retrieve specified attribute for a list of samplet IDs
+
+        Parameters
+        ----------
+        attr_name : str
+            Name of the attribute
+
+        samplet_ids : str or list
+            One or more samplet IDs whose attribute is being queried.
+            Default: 'all', all the existing samplet IDs will be used.
+
+        Returns
+        -------
+        attr_values : ndarray
+            Attribute values for the list of samplet IDs
+
+        Raises
+        -------
+        KeyError
+            If attr_name was never set for dataset, or any of the samplets requested
+
+        """
+
+        if attr_name not in self._attr:
+            raise KeyError('Attribute {} is not set for this dataset'
+                           ''.format(attr_name))
+
+        if not is_iterable_but_not_str(samplet_ids):
+            if samplet_ids.lower() == 'all':
+                samplet_ids = self.samplet_ids
+            else:
+                samplet_ids = [samplet_ids, ]
+
+        samplet_ids = np.array(samplet_ids)
+
+        sid_not_exist = np.array([sid not in self._attr[attr_name]
+                                  for sid in samplet_ids])
+        if sid_not_exist.any():
+            raise KeyError('Attr {} for {} samplets was not set:\n\t{}'
+                           ''.format(attr_name, sid_not_exist.sum(),
+                                     samplet_ids[sid_not_exist]))
+
+        return np.array([self._attr[attr_name][sid] for sid in samplet_ids],
+                        dtype=self._attr_dtype[attr_name])
+
+
     def attr_summary(self):
         """Simple summary of attributes currently stored in the dataset"""
 
