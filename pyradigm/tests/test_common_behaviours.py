@@ -14,6 +14,8 @@ from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
 from pytest import raises
+import numpy as np
+import random
 
 class_list = (ClfDataset, RegrDataset)
 
@@ -35,7 +37,7 @@ def test_attributes():
     """Creation, access and properties"""
 
     ds = make_random_ClfDataset()
-    id_list = ds.samplet_ids
+    id_list = np.array(ds.samplet_ids)
 
     # ensuring strings can't be added to float attributes
     ds.add_attr('age', id_list[0], 43)
@@ -60,11 +62,27 @@ def test_attributes():
                     id_list[:3],
                     ('female', 'male',))
 
+    # dataset attributes
     try:
         ds.add_dataset_attr('version', 2.0)
         ds.add_dataset_attr('params', ['foo', 'bar', 20, 12, '/work/path'])
     except:
         raise AttributeError('Unable to add dataset attributes')
+
+    # retrieval
+    random_ids = id_list[random.sample(range(50), 5)]
+    values_set = np.random.rand(5)
+    ds.add_attr('random_float', random_ids, values_set)
+    retrieved = ds.get_attr('random_float', random_ids)
+    if not all(np.isclose(retrieved, values_set)):
+        raise ValueError('Retrieved attribute values do not match the originals!')
+
+    with raises(KeyError):
+        ds.get_attr('non_existing_attr')
+
+    with raises(KeyError):
+        # existing but not all of them are set
+        ds.get_attr('random_float', ds.samplet_ids)
 
 
 test_attributes()
