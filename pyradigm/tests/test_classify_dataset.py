@@ -281,7 +281,7 @@ def test_get_nonexisting_class():
 def test_rand_feat_subset():
     nf = copy_dataset.num_features
     subset_len = np.random.randint(1, nf)
-    subset = np.random.random_integers(1, nf - 1, size=subset_len)
+    subset = np.random.randint(1, nf, size=subset_len)
     subds = copy_dataset.get_feature_subset(subset)
     assert subds.num_features == subset_len
 
@@ -324,7 +324,7 @@ def test_membership():
 
 
 def rand_ints_range(n, k):
-    return np.random.random_integers(1, n, min(n, k))
+    return np.random.randint(1, n, size=min(n, k))
 
 
 def test_glance():

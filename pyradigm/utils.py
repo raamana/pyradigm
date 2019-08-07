@@ -26,7 +26,7 @@ def make_random_dataset(max_num_classes=20,
     if type(num_classes) == np.ndarray:
         num_classes = num_classes[0]
     if not stratified:
-        class_sizes = np.random.random_integers(smallest, largest, num_classes)
+        class_sizes = np.random.randint(smallest, largest+1, num_classes)
     else:
         class_sizes = np.repeat(np.random.randint(smallest, largest), num_classes)
 
