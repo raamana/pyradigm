@@ -753,8 +753,7 @@ class BaseDataset(ABC):
                 raise
 
             xfm_ds.add_samplet(samplet, xfm_data,
-                               target=self._targets[samplet],
-                               class_id=self._targets[samplet])
+                               target=self._targets[samplet])
 
         xfm_ds.description = "{}\n{}".format(func_description, self._description)
 
