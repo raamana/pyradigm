@@ -6,25 +6,15 @@ sys.dont_write_bytecode = True
 
 from pytest import raises, warns
 
-from sys import version_info
+from pyradigm import MLDataset
 
-if version_info.major==2 and version_info.minor==7:
-    from pyradigm import MLDataset
-elif version_info.major > 2:
-    try:
-        from pyradigm.pyradigm import MLDataset
-    except ImportError:
-        from pyradigm import MLDataset
-    except:
-        raise ImportError('could not import pyradigm')
-else:
-    raise NotImplementedError('pyradigm supports only 2.7.13 or 3+. Upgrade to Python 3+ is recommended.')
 
 out_dir  = '.'
 
 num_classes  = np.random.randint( 2, 50)
-class_sizes  = np.random.randint(10, 1000, num_classes)
-num_features = np.random.randint(10, 500)
+class_sizes  = np.random.randint(10, 100, num_classes)
+num_features = np.random.randint(10, 100)
+num_samples = sum(class_sizes)
 
 class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
@@ -38,6 +28,17 @@ for class_index, class_id in enumerate(class_set):
 
 out_file = os.path.join(out_dir,'random_example_dataset.pkl')
 test_dataset.save(out_file)
+
+# same IDs, new features
+same_ids_new_feat = MLDataset()
+for sub_id in test_dataset.keys:
+    feat = np.random.random(num_features)
+    same_ids_new_feat.add_sample(sub_id, feat,
+                                 test_dataset.labels[sub_id],
+                                 test_dataset.classes[sub_id])
+
+same_ids_new_feat.feature_names = np.array([ 'new_f{}'.format(x) for x in range(
+        num_features) ])
 
 test_dataset.description = 'test dataset'
 print(test_dataset)
@@ -78,6 +79,9 @@ def test_num_classes():
 def test_num_features():
     assert test_dataset.num_features == num_features
 
+def test_shape():
+    assert test_dataset.shape == (num_samples, num_features)
+
 def test_num_features_setter():
     with raises(AttributeError):
         test_dataset.num_features = 0
@@ -97,6 +101,33 @@ def test_add():
     n1 = other_classes_ds.num_samples
     n2 = random_class_ds.num_samples
     assert n1 + n2 == n
+
+    assert set(a.sample_ids) == set(other_classes_ds.sample_ids+random_class_ds.sample_ids)
+    assert a.num_features == other_classes_ds.num_features == random_class_ds.num_features
+    assert all(a.feature_names == other_classes_ds.feature_names)
+
+    comb_ds = test_dataset + same_ids_new_feat
+    comb_names = np.concatenate([ test_dataset.feature_names,
+                            same_ids_new_feat.feature_names])
+    if not all(comb_ds.feature_names == comb_names):
+        raise ValueError('feature names were not carried forward in combining two '
+                         'datasets with same IDs and different feature names!')
+
+def test_set_existing_sample():
+
+    sid = test_dataset.sample_ids[0]
+    new_feat = np.random.random(num_features)
+
+    with raises(KeyError):
+        test_dataset[sid+'nonexisting'] = new_feat
+
+    with raises(ValueError):
+        test_dataset[sid] = new_feat[:-2] # diff dimensionality
+
+    test_dataset[sid] = new_feat
+    if not np.all(test_dataset[sid]==new_feat):
+        raise ValueError('Bug in replacing features for an existing sample!'
+                         'Retrieved features do not match previously set features.')
 
 def test_cant_read_nonexisting_file():
     with raises(IOError):
@@ -292,7 +323,8 @@ def test_train_test_split_ids_perc():
 # ------------------------------------------------
 
 def test_load_arff():
-    arff_path = realpath(pjoin(dirname(__file__),'../example_datasets/iris.arff'))
+    arff_path = realpath(pjoin(dirname(__file__),
+                               '..', '..', 'example_datasets', 'iris.arff'))
     mld = MLDataset(arff_path=arff_path)
 
     if mld.num_samples != 150:
@@ -309,4 +341,6 @@ def test_load_arff():
 
     # print(mld)
 
-test_load_arff()
+# test_load_arff()
+# test_add()
+test_set_existing_sample()
