@@ -6,7 +6,7 @@ from os.path import isfile, realpath
 from warnings import warn
 
 import numpy as np
-from pyradigm.base import BaseDataset, check_compatibility_BaseDataset
+from pyradigm.base import BaseDataset
 
 
 class RegressionDataset(BaseDataset):
@@ -337,25 +337,6 @@ class RegressionDataset(BaseDataset):
         else:
             warn('Zero samples were selected. Returning an empty list!')
             return list()
-
-
-    def compatible(self, another):
-        """
-        Checks whether the input dataset is compatible with the current instance:
-        i.e. with same set of subjects, each belonging to the same class.
-
-        Parameters
-        ----------
-        another : Dataset or similar
-
-        Returns
-        -------
-        compatible : bool
-            Boolean flag indicating whether two datasets are compatible or not
-        """
-
-        compatible, _, _, _, _ = check_compatibility_BaseDataset([self, another])
-        return compatible
 
 
     def get_target(self, target_id):
