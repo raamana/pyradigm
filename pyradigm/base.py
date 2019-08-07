@@ -943,12 +943,6 @@ class BaseDataset(ABC):
 
     @property
     def samplet_ids(self):
-        """Sample identifiers (strings) - the basis of Dataset (same as samplet_ids)"""
-        return list(self._data)
-
-
-    @property
-    def samplet_ids(self):
         """Sample identifiers (strings) forming the basis of Dataset (same as keys)."""
         return list(self._data)
 
