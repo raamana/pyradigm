@@ -1149,10 +1149,10 @@ class BaseDataset(ABC):
         try:
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
-                # loaded_dataset = pickle.load(df)
                 self._data, self._targets, \
                 self._dtype, self._description, \
-                self._num_features, self._feature_names = pickle.load(df)
+                self._num_features, self._feature_names, \
+                self._attr, self._attr_dtype, self._dataset_attr = pickle.load(df)
 
             # ensure the loaded dataset is valid
             self._validate(self._data, self._targets)
@@ -1187,10 +1187,10 @@ class BaseDataset(ABC):
         try:
             file_path = os.path.abspath(file_path)
             with open(file_path, 'wb') as df:
-                # pickle.dump(self, df)
                 pickle.dump((self._data, self._targets,
                              self._dtype, self._description,
-                             self._num_features, self._feature_names),
+                             self._num_features, self._feature_names,
+                             self._attr, self._attr_dtype, self._dataset_attr),
                             df)
             return
         except IOError as ioe:
