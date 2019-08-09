@@ -15,6 +15,11 @@ from warnings import warn
 import numpy as np
 
 
+class PyradigmException(Exception):
+    """Custom exception to highlight pyradigm-specific issues."""
+    pass
+
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
