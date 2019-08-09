@@ -20,6 +20,11 @@ class PyradigmException(Exception):
     pass
 
 
+class InfiniteOrNaNValuesException(PyradigmException):
+    """Customized exception to identify the error more precisely."""
+    pass
+
+
 class ConstantValuesException(PyradigmException):
     """Customized exception to identify the error more precisely."""
     pass
@@ -277,8 +282,10 @@ class BaseDataset(ABC):
 
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():
-                raise ValueError('NaN or Inf values found! They are disabled.'
-                                 'Use allow_nan_inf=True if you want to allow them.')
+                raise InfiniteOrNaNValuesException('NaN or Inf values found! '
+                                                   'They are disabled. '
+                                                   'Use allow_nan_inf=True '
+                                                   'if you want to allow them.')
 
         if features.ndim > 1:
             features = np.ravel(features)

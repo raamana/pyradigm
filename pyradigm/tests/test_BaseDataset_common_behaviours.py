@@ -14,7 +14,7 @@ from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
 from pyradigm.base import is_iterable_but_not_str, PyradigmException, \
-    ConstantValuesException
+    ConstantValuesException, InfiniteOrNaNValuesException
 from pytest import raises, warns
 import numpy as np
 import random
@@ -170,10 +170,26 @@ def test_save_load():
                                  ' and the original datasets'.format(attr))
 
 
+def test_nan_inf_values():
+
+    target_val = 3
+    for cls_type in (RegrDataset, ClfDataset):
+
+        cds_clean = cls_type(allow_nan_inf=False)
+        for invalid_value in [np.NaN, np.Inf]:
+            with raises(InfiniteOrNaNValuesException):
+                cds_clean.add_samplet('a', [1, invalid_value, 3], target_val)
+
+        cds_dirty = cls_type(allow_nan_inf=True)
+        for sid, valid_value in zip(('a', 'b'), [np.NaN, np.Inf]):
+            try:
+                cds_dirty.add_samplet(sid, [1, valid_value, 3], target_val)
+            except:
+                raise
+
+
 def test_sanity_checks():
     """Ensure that sanity checks are performed, and as expected."""
-
-
 
 
     ### -------------- as you save them to disk --------------
@@ -205,5 +221,6 @@ def test_sanity_checks():
         const_ds.save(out_file)
 
 # test_attributes()
-# test_save_load()
-test_sanity_checks()
+test_save_load()
+# test_sanity_checks()
+# test_nan_inf_values()
