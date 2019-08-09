@@ -20,6 +20,11 @@ class PyradigmException(Exception):
     pass
 
 
+class ConstantValuesException(PyradigmException):
+    """Customized exception to identify the error more precisely."""
+    pass
+
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
@@ -1258,9 +1263,11 @@ class BaseDataset(ABC):
 
         for samplet, features in data.items():
             # when there is only one unique value, among n features
+            # Note: NaN != NaN, so when its all NaN, num. of uniq elements > 1
             if np.unique(features).size < 2:
-                raise PyradigmException('Constant values detected for {} - double '
-                                        'check the process'.format(samplet))
+                raise ConstantValuesException('Constant values detected for {} '
+                                              '- double check the process'
+                                              ''.format(samplet))
 
 
     def _check_for_constant_features_across_samplets(self, data_matrix):
@@ -1271,9 +1278,10 @@ class BaseDataset(ABC):
         # notice the transpose, which makes it a column
         for col_ix, col in enumerate(data_matrix.T):
             if np.unique(col).size < 2:
-                raise PyradigmException('Constant values detected for feature {}'
-                                        ' (index {}) - double check the process'
-                                        ''.format(self._feature_names[col_ix],
+                raise ConstantValuesException('Constant values detected '
+                                              'for feature {} (index {}) - '
+                                              'double check the process'
+                                              ''.format(self._feature_names[col_ix],
                                                   col_ix))
 
 
