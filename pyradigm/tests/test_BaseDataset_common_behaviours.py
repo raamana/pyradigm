@@ -38,8 +38,20 @@ ds = make_random_ClfDataset()
 
 def _not_equal(array_one, array_two):
 
-    if is_iterable_but_not_str(array_one):
-        not_equal = any(np.not_equal(array_one, array_two))
+    if isinstance(array_one, dict):
+        not_equal = False
+        for key, val in array_one.items():
+            if _not_equal(val, array_two[key]):
+                not_equal = True
+                break
+    elif is_iterable_but_not_str(array_one):
+        try:
+            not_equal = any(np.not_equal(np.array(array_one),
+                                         np.array(array_two)))
+        except:
+            print('not_equal type of array_one {},'
+                  'array_two {}'.format(type(array_one), type(array_two)))
+            raise
     else:
         not_equal = array_one != array_two
 
