@@ -13,7 +13,8 @@ from inspect import signature
 from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
-from pyradigm.base import is_iterable_but_not_str
+from pyradigm.base import is_iterable_but_not_str, PyradigmException, \
+    ConstantValuesException
 from pytest import raises, warns
 import numpy as np
 import random
@@ -169,6 +170,40 @@ def test_save_load():
                                  ' and the original datasets'.format(attr))
 
 
+def test_sanity_checks():
+    """Ensure that sanity checks are performed, and as expected."""
+
+
+
+
+    ### -------------- as you save them to disk --------------
+
+    ds.add_samplet('all_zeros', np.zeros((ds.num_features,1)), 'target')
+    with raises(ConstantValuesException):
+        ds.save(out_file)
+
+    ds.del_samplet('all_zeros')
+
+    # checking for random constant value!
+    const_value = np.random.randint(10, 100)
+    const_feat_set =  np.full((ds.num_features, 1), const_value)
+    ds.add_samplet('all_constant', const_feat_set, 'target')
+    with raises(ConstantValuesException):
+        ds.save(out_file)
+
+
+    # now checking for constants across samplets
+    #   this is easily achieved by adding different samplets with same features
+    #   such a bug is possible, when user made a mistake querying
+    #   the right files for the right samplet ID
+    const_ds = ClfDataset()
+    rand_feat_same_across_samplets = np.random.randn(10)
+    for index in range(np.random.randint(10, 100)):
+        const_ds.add_samplet(str(index), rand_feat_same_across_samplets, index)
+
+    with raises(ConstantValuesException):
+        const_ds.save(out_file)
+
 # test_attributes()
-test_save_load()
-# os.rmdir(out_dir)
+# test_save_load()
+test_sanity_checks()
