@@ -1168,7 +1168,9 @@ class BaseDataset(ABC):
             raise
 
 
-    def save(self, file_path):
+    def save(self, file_path,
+             allow_constant_features=False,
+             allow_constant_features_across_samplets=False):
         """
         Method to save the dataset to disk.
 
@@ -1176,6 +1178,23 @@ class BaseDataset(ABC):
         ----------
         file_path : str
             File path to save the current dataset to
+
+        allow_constant_features : bool
+            Flag indicating whether to allow all the values for features for a
+            samplet to be identical (e.g. all zeros). This flag (when False)
+            intends to catch unusual, and likely incorrect, situations when all
+            features for a  given samplet are all zeros or are all some other
+            constant value. In normal, natural, and real-world scenarios,
+            different features will have different values. So when they are 0s or
+            some other constant value, it is indicative of a bug somewhere. When
+            constant values is intended, pass True for this flag.
+
+        allow_constant_features_across_samplets : bool
+            While the previous flag allow_constant_features looks at one samplet
+            at a time (across features; along rows in feature matrix X: N x p),
+            this flag checks for constant values across all samplets for a given
+            feature (along the columns). When similar values are expected across
+            all samplets, pass True to this flag.
 
         Raises
         ------
@@ -1188,6 +1207,18 @@ class BaseDataset(ABC):
         #   1) being able to read just meta info without having to load the ENTIRE dataset
         #       i.e. use case: compatibility check with #subjects, ids and their classes
         #   2) random access layout: being able to read features for a single subject!
+
+
+        # sanity check #1 : per samplet
+        if not allow_constant_features:
+            if self._num_features > 1:
+                self._check_for_constant_features_in_samplets(self._data)
+
+        # sanity check # 2 : per feature across samplets
+        if not allow_constant_features_across_samplets:
+            if self.num_samplets > 1:
+                data_matrix, targets, id_list = self.data_and_targets()
+                self._check_for_constant_features_across_samplets(data_matrix)
 
         try:
             file_path = os.path.abspath(file_path)
@@ -1226,6 +1257,30 @@ class BaseDataset(ABC):
                               'invalid!')
 
         return True
+
+    @staticmethod
+    def _check_for_constant_features_in_samplets(data):
+        """Helper to catch constant values in the samplets."""
+
+        for samplet, features in data.items():
+            # when there is only one unique value, among n features
+            if np.unique(features).size < 2:
+                raise PyradigmException('Constant values detected for {} - double '
+                                        'check the process'.format(samplet))
+
+
+    def _check_for_constant_features_across_samplets(self, data_matrix):
+        """Sanity check to identify identical values for all samplets for a given
+        feature
+         """
+
+        # notice the transpose, which makes it a column
+        for col_ix, col in enumerate(data_matrix.T):
+            if np.unique(col).size < 2:
+                raise PyradigmException('Constant values detected for feature {}'
+                                        ' (index {}) - double check the process'
+                                        ''.format(self._feature_names[col_ix],
+                                                  col_ix))
 
 
     def extend(self, other):
