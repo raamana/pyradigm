@@ -13,7 +13,8 @@ from inspect import signature
 from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
-from pyradigm.base import is_iterable_but_not_str
+from pyradigm.base import is_iterable_but_not_str, PyradigmException, \
+    ConstantValuesException
 from pytest import raises, warns
 import numpy as np
 import random
@@ -169,6 +170,35 @@ def test_save_load():
                                  ' and the original datasets'.format(attr))
 
 
+def test_sanity_checks_constant_values():
+
+    out_file = pjoin(out_dir, 'const_value_random_example_dataset.pkl')
+
+    ds = ClfDataset()
+    ds.add_samplet('s1', [1, 1, 1], 'target')
+    # constant values for any samplet should trigger an exception by default
+    with raises(ConstantValuesException):
+        ds.save(out_file)
+
+    # whereas disabling it shouldn't
+    ds.save(out_file, allow_constant_features=True)
+
+    ds = ClfDataset()
+    ds.add_samplet('s1', [1, 22, 8], 'target')
+    ds.add_samplet('s2', [7, 22, 0], 'target')
+    # constant values for same feature (second feature here) across all samplets
+    # should trigger an exception by default
+    with raises(ConstantValuesException):
+        ds.save(out_file)
+
+    # whereas disabling it shouldn't
+    ds.save(out_file, allow_constant_features_across_samplets=True)
+
+
+
+
 # test_attributes()
-test_save_load()
+# test_save_load()
+test_sanity_checks_constant_values()
+
 # os.rmdir(out_dir)
