@@ -68,7 +68,6 @@ empty_dataset = MLDataset()
 test2 = MLDataset()
 test3 = MLDataset()
 
-# TODO write tests for CLI
 
 def test_empty():
     assert not empty_dataset
