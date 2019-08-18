@@ -20,6 +20,10 @@ class PyradigmException(Exception):
     pass
 
 
+class EmptyFeatureSetException(PyradigmException):
+    """Custom exception to catch empty feature set"""
+
+
 class ConstantValuesException(PyradigmException):
     """Custom exception to indicate the exception of catching all constant values
     for a given samplet, for a specific feature across the samplets"""
@@ -277,7 +281,7 @@ class BaseDataset(ABC):
                             "".format(features.dtype, self.dtype))
 
         if features.size <= 0:
-            raise ValueError('provided features are empty.')
+            raise EmptyFeatureSetException('Provided features are empty.')
 
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():

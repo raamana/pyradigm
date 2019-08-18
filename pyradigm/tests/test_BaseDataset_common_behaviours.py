@@ -14,7 +14,7 @@ from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
 from pyradigm.base import is_iterable_but_not_str, PyradigmException, \
-    ConstantValuesException, InfiniteOrNaNValuesException
+    ConstantValuesException, InfiniteOrNaNValuesException, EmptyFeatureSetException
 from pytest import raises, warns
 import numpy as np
 import random
@@ -209,6 +209,10 @@ def test_nan_inf_values():
 def test_sanity_checks():
     """Ensure that sanity checks are performed, and as expected."""
 
+
+    ### -------------- as you add them to dataset --------------
+    with raises(EmptyFeatureSetException):
+        ds.add_samplet('empty_features', [], 'target')
 
     ### -------------- as you save them to disk --------------
 
