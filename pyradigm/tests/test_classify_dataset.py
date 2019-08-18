@@ -148,19 +148,6 @@ def test_set_existing_sample():
         raise ValueError('Bug in replacing features for an existing sample!'
                          'Retrieved features do not match previously set features.')
 
-def test_nan_inf_values():
-
-    cds_clean = ClfDataset(allow_nan_inf=False)
-    for invalid_value in [np.NaN, np.Inf]:
-        with raises(ValueError):
-            cds_clean.add_samplet('a', [1, invalid_value, 3], 'class1')
-
-    cds_dirty = ClfDataset(allow_nan_inf=True)
-    for sid, valid_value in zip( ('a', 'b'),  [np.NaN, np.Inf]):
-        try:
-            cds_dirty.add_samplet(sid, [1, valid_value, 3], 'class1')
-        except:
-            raise
 
 def test_data_type():
 

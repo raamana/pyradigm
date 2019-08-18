@@ -1,0 +1,3 @@
+numpy
+scipy
+pytest>=5.0.1
