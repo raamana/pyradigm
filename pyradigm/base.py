@@ -8,7 +8,8 @@ import copy
 import os
 import pickle
 from abc import ABC, abstractmethod
-from collections import Iterable, OrderedDict, Sequence
+from collections.abc import Iterable, Sequence
+from collections import OrderedDict
 from itertools import islice
 from warnings import warn
 

@@ -10,7 +10,8 @@ import random
 import sys
 import traceback
 import warnings
-from collections import Counter, OrderedDict, Sequence
+from collections.abc import Sequence
+from collections import Counter, OrderedDict
 from itertools import islice
 from os.path import basename, dirname, exists as pexists, isfile, join as pjoin, realpath
 
