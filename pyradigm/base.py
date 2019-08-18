@@ -1262,10 +1262,13 @@ class BaseDataset(ABC):
         """Helper to catch constant values in the samplets."""
 
         for samplet, features in data.items():
+            uniq_values = np.unique(features)
             # when there is only one unique value, among n features
-            if np.unique(features).size < 2:
-                raise PyradigmException('Constant values detected for {} - double '
-                                        'check the process'.format(samplet))
+            if uniq_values.size < 2:
+                raise ConstantValuesException(
+                    'Constant values ({}) detected for {} '
+                    '- double check the process, '
+                    'or disable this check!'.format(uniq_values, samplet))
 
 
     def _check_for_constant_features_across_samplets(self, data_matrix):
@@ -1275,11 +1278,13 @@ class BaseDataset(ABC):
 
         # notice the transpose, which makes it a column
         for col_ix, col in enumerate(data_matrix.T):
-            if np.unique(col).size < 2:
-                raise PyradigmException('Constant values detected for feature {}'
-                                        ' (index {}) - double check the process'
-                                        ''.format(self._feature_names[col_ix],
-                                                  col_ix))
+            uniq_values = np.unique(col)
+            if uniq_values.size < 2:
+                raise ConstantValuesException(
+                    'Constant values ({}) detected for feature {} (index {}) - '
+                    'double check the process, '
+                    'or disable this check (strongly discouraged)!'.format(
+                        uniq_values, self._feature_names[col_ix], col_ix))
 
 
     def extend(self, other):
