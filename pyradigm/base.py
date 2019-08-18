@@ -20,6 +20,11 @@ class PyradigmException(Exception):
     pass
 
 
+class ConstantValuesException(PyradigmException):
+    """Custom exception to indicate the exception of catching all constant values
+    for a given samplet, for a specific feature across the samplets"""
+
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
