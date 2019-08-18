@@ -239,6 +239,6 @@ def test_sanity_checks():
         const_ds.save(out_file)
 
 # test_attributes()
-test_save_load()
+# test_save_load()
 # test_sanity_checks()
-# test_nan_inf_values()
+test_nan_inf_values()

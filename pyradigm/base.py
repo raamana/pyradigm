@@ -25,6 +25,10 @@ class ConstantValuesException(PyradigmException):
     for a given samplet, for a specific feature across the samplets"""
 
 
+class InfiniteOrNaNValuesException(PyradigmException):
+    """Custom exception to catch NaN or Inf values."""
+
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
@@ -277,8 +281,9 @@ class BaseDataset(ABC):
 
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():
-                raise ValueError('NaN or Inf values found! They are disabled.'
-                                 'Use allow_nan_inf=True if you want to allow them.')
+                raise InfiniteOrNaNValuesException('NaN or Inf values found!'
+                                 ' They are not allowed and disabled by default.'
+                                 ' Use allow_nan_inf=True if you need to use them.')
 
         if features.ndim > 1:
             features = np.ravel(features)
