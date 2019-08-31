@@ -8,11 +8,30 @@ import copy
 import os
 import pickle
 from abc import ABC, abstractmethod
-from collections import Iterable, OrderedDict, Sequence
+from collections.abc import Iterable, Sequence
+from collections import OrderedDict
 from itertools import islice
 from warnings import warn
 
 import numpy as np
+
+
+class PyradigmException(Exception):
+    """Custom exception to highlight pyradigm-specific issues."""
+    pass
+
+
+class EmptyFeatureSetException(PyradigmException):
+    """Custom exception to catch empty feature set"""
+
+
+class ConstantValuesException(PyradigmException):
+    """Custom exception to indicate the exception of catching all constant values
+    for a given samplet, for a specific feature across the samplets"""
+
+
+class InfiniteOrNaNValuesException(PyradigmException):
+    """Custom exception to catch NaN or Inf values."""
 
 
 def is_iterable_but_not_str(value):
@@ -263,12 +282,13 @@ class BaseDataset(ABC):
                             "".format(features.dtype, self.dtype))
 
         if features.size <= 0:
-            raise ValueError('provided features are empty.')
+            raise EmptyFeatureSetException('Provided features are empty.')
 
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():
-                raise ValueError('NaN or Inf values found! They are disabled.'
-                                 'Use allow_nan_inf=True if you want to allow them.')
+                raise InfiniteOrNaNValuesException('NaN or Inf values found!'
+                                 ' They are not allowed and disabled by default.'
+                                 ' Use allow_nan_inf=True if you need to use them.')
 
         if features.ndim > 1:
             features = np.ravel(features)
@@ -324,8 +344,8 @@ class BaseDataset(ABC):
                     target,
                     overwrite=False,
                     feature_names=None,
-                    attr_name=None,
-                    attr_value=None):
+                    attr_names=None,
+                    attr_values=None):
         """Adds a new samplet to the dataset with its features, label and class ID.
 
         This is the preferred way to construct the dataset.
@@ -345,10 +365,10 @@ class BaseDataset(ABC):
         feature_names : list
             The names for each feature. Assumed to be in the same order as `features`
 
-        attr_name : str
+        attr_names : str or list of str
             Name of the attribute to be added for this samplet
 
-        attr_value : generic
+        attr_values : generic or list of generic
             Value of the attribute. Any data type allowed as long as they are
             compatible across all the samplets in this dataset.
 
@@ -399,8 +419,17 @@ class BaseDataset(ABC):
                         raise ValueError(
                             "supplied feature names do not match the existing names!")
 
-            if attr_name is not None:
-                self.add_attr(samplet_id, attr_name, attr_value)
+            if attr_names is not None:
+                if is_iterable_but_not_str(attr_names):
+                    if len(attr_names) != attr_values or \
+                            (not is_iterable_but_not_str(attr_values)):
+                        raise ValueError('When you supply a list for attr_names, '
+                                         'attr_values also must be a list of same '
+                                         'length')
+                    for name, value in zip(attr_names, attr_values):
+                        self.add_attr(samplet_id, name, value)
+                else:
+                    self.add_attr(samplet_id, attr_names, attr_values)
 
 
     def del_samplet(self, sample_id):
@@ -521,6 +550,93 @@ class BaseDataset(ABC):
         """Returns attributes dictionary, keyed-in by [attr_name][samplet_id]"""
 
         return self._attr
+
+
+    def get_attr(self, attr_name, samplet_ids='all'):
+        """
+        Method to retrieve specified attribute for a list of samplet IDs
+
+        Parameters
+        ----------
+        attr_name : str
+            Name of the attribute
+
+        samplet_ids : str or list
+            One or more samplet IDs whose attribute is being queried.
+            Default: 'all', all the existing samplet IDs will be used.
+
+        Returns
+        -------
+        attr_values : ndarray
+            Attribute values for the list of samplet IDs
+
+        Raises
+        -------
+        KeyError
+            If attr_name was never set for dataset, or any of the samplets requested
+
+        """
+
+        if attr_name not in self._attr:
+            raise KeyError('Attribute {} is not set for this dataset'
+                           ''.format(attr_name))
+
+        if not is_iterable_but_not_str(samplet_ids):
+            if samplet_ids.lower() == 'all':
+                samplet_ids = self.samplet_ids
+            else:
+                samplet_ids = [samplet_ids, ]
+
+        samplet_ids = np.array(samplet_ids)
+
+        sid_not_exist = np.array([sid not in self._attr[attr_name]
+                                  for sid in samplet_ids])
+        if sid_not_exist.any():
+            raise KeyError('Attr {} for {} samplets was not set:\n\t{}'
+                           ''.format(attr_name, sid_not_exist.sum(),
+                                     samplet_ids[sid_not_exist]))
+
+        return np.array([self._attr[attr_name][sid] for sid in samplet_ids],
+                        dtype=self._attr_dtype[attr_name])
+
+
+    def del_attr(self, attr_name, samplet_ids='all'):
+        """
+        Method to retrieve specified attribute for a list of samplet IDs
+
+        Parameters
+        ----------
+        attr_name : str
+            Name of the attribute
+
+        samplet_ids : str or list
+            One or more samplet IDs whose attribute is being queried.
+            Default: 'all', all the existing samplet IDs will be used.
+
+        Returns
+        -------
+        None
+
+        Raises
+        -------
+        Warning
+            If attr_name was never set for this dataset
+        """
+
+        if attr_name not in self._attr:
+            warn('Attribute {} is not set for this dataset'.format(attr_name),
+                 UserWarning)
+            return
+
+        if not is_iterable_but_not_str(samplet_ids):
+            if samplet_ids.lower() == 'all':
+                samplet_ids = self.samplet_ids
+            else:
+                samplet_ids = [samplet_ids, ]
+
+        for sid in samplet_ids:
+            # None helps avoid error if sid does not exist
+            self._attr[attr_name].pop(sid, None)
 
 
     def attr_summary(self):
@@ -657,8 +773,7 @@ class BaseDataset(ABC):
                 raise
 
             xfm_ds.add_samplet(samplet, xfm_data,
-                               target=self._targets[samplet],
-                               class_id=self._targets[samplet])
+                               target=self._targets[samplet])
 
         xfm_ds.description = "{}\n{}".format(func_description, self._description)
 
@@ -848,13 +963,7 @@ class BaseDataset(ABC):
 
     @property
     def samplet_ids(self):
-        """Sample identifiers (strings) - the basis of Dataset (same as samplet_ids)"""
-        return list(self._data)
-
-
-    @property
-    def samplet_ids(self):
-        """Sample identifiers (strings) forming the basis of Dataset (same as keys)."""
+        """Sample identifiers (strings) forming the basis of Dataset"""
         return list(self._data)
 
 
@@ -1054,10 +1163,10 @@ class BaseDataset(ABC):
         try:
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
-                # loaded_dataset = pickle.load(df)
                 self._data, self._targets, \
-                self._dtype, self._description, \
-                self._num_features, self._feature_names = pickle.load(df)
+                self._dtype, self._target_type, self._description, \
+                self._num_features, self._feature_names, \
+                self._attr, self._attr_dtype, self._dataset_attr = pickle.load(df)
 
             # ensure the loaded dataset is valid
             self._validate(self._data, self._targets)
@@ -1068,7 +1177,9 @@ class BaseDataset(ABC):
             raise
 
 
-    def save(self, file_path):
+    def save(self, file_path,
+             allow_constant_features=False,
+             allow_constant_features_across_samplets=False):
         """
         Method to save the dataset to disk.
 
@@ -1076,6 +1187,23 @@ class BaseDataset(ABC):
         ----------
         file_path : str
             File path to save the current dataset to
+
+        allow_constant_features : bool
+            Flag indicating whether to allow all the values for features for a
+            samplet to be identical (e.g. all zeros). This flag (when False)
+            intends to catch unusual, and likely incorrect, situations when all
+            features for a  given samplet are all zeros or are all some other
+            constant value. In normal, natural, and real-world scenarios,
+            different features will have different values. So when they are 0s or
+            some other constant value, it is indicative of a bug somewhere. When
+            constant values is intended, pass True for this flag.
+
+        allow_constant_features_across_samplets : bool
+            While the previous flag allow_constant_features looks at one samplet
+            at a time (across features; along rows in feature matrix X: N x p),
+            this flag checks for constant values across all samplets for a given
+            feature (along the columns). When similar values are expected across
+            all samplets, pass True to this flag.
 
         Raises
         ------
@@ -1089,13 +1217,25 @@ class BaseDataset(ABC):
         #       i.e. use case: compatibility check with #subjects, ids and their classes
         #   2) random access layout: being able to read features for a single subject!
 
+
+        # sanity check #1 : per samplet
+        if not allow_constant_features:
+            if self._num_features > 1:
+                self._check_for_constant_features_in_samplets(self._data)
+
+        # sanity check # 2 : per feature across samplets
+        if not allow_constant_features_across_samplets:
+            if self.num_samplets > 1:
+                data_matrix, targets, id_list = self.data_and_targets()
+                self._check_for_constant_features_across_samplets(data_matrix)
+
         try:
             file_path = os.path.abspath(file_path)
             with open(file_path, 'wb') as df:
-                # pickle.dump(self, df)
                 pickle.dump((self._data, self._targets,
-                             self._dtype, self._description,
-                             self._num_features, self._feature_names),
+                             self._dtype, self._target_type, self._description,
+                             self._num_features, self._feature_names,
+                             self._attr, self._attr_dtype, self._dataset_attr),
                             df)
             return
         except IOError as ioe:
@@ -1126,6 +1266,35 @@ class BaseDataset(ABC):
                               'invalid!')
 
         return True
+
+    @staticmethod
+    def _check_for_constant_features_in_samplets(data):
+        """Helper to catch constant values in the samplets."""
+
+        for samplet, features in data.items():
+            uniq_values = np.unique(features)
+            # when there is only one unique value, among n features
+            if uniq_values.size < 2:
+                raise ConstantValuesException(
+                    'Constant values ({}) detected for {} '
+                    '- double check the process, '
+                    'or disable this check!'.format(uniq_values, samplet))
+
+
+    def _check_for_constant_features_across_samplets(self, data_matrix):
+        """Sanity check to identify identical values for all samplets for a given
+        feature
+         """
+
+        # notice the transpose, which makes it a column
+        for col_ix, col in enumerate(data_matrix.T):
+            uniq_values = np.unique(col)
+            if uniq_values.size < 2:
+                raise ConstantValuesException(
+                    'Constant values ({}) detected for feature {} (index {}) - '
+                    'double check the process, '
+                    'or disable this check (strongly discouraged)!'.format(
+                        uniq_values, self._feature_names[col_ix], col_ix))
 
 
     def extend(self, other):
@@ -1234,113 +1403,5 @@ class BaseDataset(ABC):
             return True
 
 
-    @abstractmethod
-    def compatible(self, another):
-        """
-        Checks whether the input dataset is compatible with the current instance:
-        i.e. with same set of subjects, each beloning to the same class.
-
-        Parameters
-        ----------
-        dataset : MLdataset or similar
-
-        Returns
-        -------
-        compatible : bool
-            Boolean flag indicating whether two datasets are compatible or not
-        """
 
 
-def check_compatibility_BaseDataset(datasets, reqd_num_features=None):
-    """
-    Checks whether the given MLdataset instances are compatible
-
-    i.e. with same set of subjects, each beloning to the same class in all instances.
-
-    Checks the first dataset in the list against the rest, and returns a boolean array.
-
-    Parameters
-    ----------
-    datasets : Iterable
-        A list of n datasets
-
-    reqd_num_features : int
-        The required number of features in each dataset.
-        Helpful to ensure test sets are compatible with training set,
-            as well as within themselves.
-
-    Returns
-    -------
-    all_are_compatible : bool
-        Boolean flag indicating whether all datasets are compatible or not
-
-    compatibility : list
-        List indicating whether first dataset is compatible with the rest individually.
-        This could be useful to select a subset of mutually compatible datasets.
-        Length : n-1
-
-    dim_mismatch : bool
-        Boolean flag indicating mismatch in dimensionality from that specified
-
-    size_descriptor : tuple
-        A tuple with values for (num_samplets, reqd_num_features)
-        - num_samplets must be common for all datasets that are evaluated for compatibility
-        - reqd_num_features is None (when no check on dimensionality is perfomed), or
-            list of corresponding dimensionalities for each input dataset
-
-    """
-
-    from collections import Iterable
-    if not isinstance(datasets, Iterable):
-        raise TypeError('Input must be an iterable '
-                        'i.e. (list/tuple) of MLdataset/similar instances')
-
-    datasets = list(datasets)  # to make it indexable if coming from a set
-    num_datasets = len(datasets)
-
-    check_dimensionality = False
-    dim_mismatch = False
-    if reqd_num_features is not None:
-        if isinstance(reqd_num_features, Iterable):
-            if len(reqd_num_features) != num_datasets:
-                raise ValueError('Specify dimensionality for exactly {} datasets.'
-                                 ' Given for a different number {}'
-                                 ''.format(num_datasets, len(reqd_num_features)))
-            reqd_num_features = list(map(int, reqd_num_features))
-        else:  # same dimensionality for all
-            reqd_num_features = [int(reqd_num_features)] * num_datasets
-
-        check_dimensionality = True
-    else:
-        # to enable iteration
-        reqd_num_features = [None,] * num_datasets
-
-    pivot = datasets[0]
-    if not isinstance(pivot, Dataset):
-        pivot = Dataset(pivot)
-
-    if check_dimensionality and pivot.num_features != reqd_num_features[0]:
-        warn('Dimensionality mismatch! Expected {} whereas current {}.'
-                      ''.format(reqd_num_features[0], pivot.num_features))
-        dim_mismatch = True
-
-    compatible = list()
-    for ds, reqd_dim in zip(datasets[1:], reqd_num_features[1:]):
-        if not isinstance(ds, Dataset):
-            ds = Dataset(ds)
-
-        is_compatible = True
-        # compound bool will short-circuit, not optim required
-        if pivot.num_samplets != ds.num_samplets \
-                or pivot.samplet_ids != ds.samplet_ids:
-            is_compatible = False
-
-        if check_dimensionality and reqd_dim != ds.num_features:
-            warn('Dimensionality mismatch! Expected {} whereas current {}.'
-                          ''.format(reqd_dim, ds.num_features))
-            dim_mismatch = True
-
-        compatible.append(is_compatible)
-
-    return all(compatible), compatible, dim_mismatch, \
-           (pivot.num_samplets, reqd_num_features)
