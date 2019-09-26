@@ -7,6 +7,45 @@ feat_generator = np.random.randn
 from pyradigm.base import is_iterable_but_not_str, BaseDataset
 from warnings import warn
 
+def load_dataset(ds_path):
+    """Convenience utility to quickly load any type of pyradigm dataset"""
+
+    try:
+        ds = ClassificationDataset(dataset_path=ds_path)
+    except:
+        try:
+            ds = RegressionDataset(dataset_path=ds_path)
+        except:
+            try:
+                ds = MLDataset(filepath=ds_path)
+            except:
+                raise TypeError('Dataset class @ path below not recognized!'
+                                ' Must be a valid instance of one of '
+                                'ClassificationDataset or'
+                                'RegressionDataset or MLDataset.\n'
+                                ' Ignoring {}'.format(ds_path))
+
+    return ds
+
+
+def load_arff_dataset(ds_path):
+    """Convenience utility to quickly load ARFF files into pyradigm format"""
+
+    try:
+        ds = ClassificationDataset.from_arff(ds_path)
+    except:
+        try:
+            ds = RegressionDataset.from_arff(ds_path)
+        except:
+            try:
+                ds = MLDataset(arff_path=ds_path)
+            except:
+                raise TypeError('Error in loading the ARFF dataset @ path below!'
+                                ' Ignoring {}'.format(ds_path))
+
+    return ds
+
+
 def check_compatibility(datasets,
                         class_type,
                         reqd_num_features=None,

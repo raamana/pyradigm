@@ -1610,12 +1610,14 @@ def cli_run():
 
     """
 
+    from pyradigm.utils import load_dataset
+
     path_list, meta_requested, summary_requested, add_path_list, out_path = parse_args()
 
     # printing info if requested
     if path_list:
         for ds_path in path_list:
-            ds = MLDataset(ds_path)
+            ds = load_dataset(ds_path)
             if summary_requested:
                 print_info(ds, ds_path)
             if meta_requested:
