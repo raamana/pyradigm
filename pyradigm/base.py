@@ -421,15 +421,15 @@ class BaseDataset(ABC):
 
             if attr_names is not None:
                 if is_iterable_but_not_str(attr_names):
-                    if len(attr_names) != attr_values or \
+                    if len(attr_names) != len(attr_values) or \
                             (not is_iterable_but_not_str(attr_values)):
                         raise ValueError('When you supply a list for attr_names, '
                                          'attr_values also must be a list of same '
                                          'length')
                     for name, value in zip(attr_names, attr_values):
-                        self.add_attr(samplet_id, name, value)
+                        self.add_attr(name, samplet_id, value)
                 else:
-                    self.add_attr(samplet_id, attr_names, attr_values)
+                    self.add_attr(attr_names, samplet_id, attr_values)
 
 
     def del_samplet(self, sample_id):
