@@ -120,6 +120,17 @@ def test_attributes():
     if not all(np.isclose(retrieved, values_set)):
         raise ValueError('Retrieved attribute values do not match the originals!')
 
+    # ensuring ds.get_subset() returns subset for each attribute
+    for index, id_ in enumerate(id_list):
+        ds.add_attr('sid', id_, id_)
+        ds.add_attr('index', id_, index)
+
+    id_subset = id_list[:3]
+    sub = ds.get_subset(id_subset)
+    if set(sub.attr['sid']) != set(id_subset) or \
+            set(sub.attr['index']) != set(id_subset):
+        raise ValueError('attrs are not being propagated during .get_subset()')
+
     with raises(KeyError):
         ds.get_attr('non_existing_attr')
 
@@ -242,7 +253,7 @@ def test_sanity_checks():
     with raises(ConstantValuesException):
         const_ds.save(out_file)
 
-# test_attributes()
+test_attributes()
 # test_save_load()
 # test_sanity_checks()
 test_nan_inf_values()
