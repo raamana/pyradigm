@@ -123,14 +123,14 @@ class BaseDataset(ABC):
         """
 
         sample_ids = np.array(self.samplet_ids)
-        label_dict = self.targets
         matrix = np.full([self.num_samplets, self.num_features], np.nan)
-        targets = np.empty([self.num_samplets, 1], dtype=self._target_type)
+        # dtype=object allows for variable length strings!
+        targets = np.empty([self.num_samplets, 1], dtype=object)
         for ix, samplet in enumerate(sample_ids):
             matrix[ix, :] = self._data[samplet]
-            targets[ix] = label_dict[samplet]
+            targets[ix] = self.targets[samplet]
 
-        return matrix, np.ravel(targets), sample_ids
+        return matrix, np.ravel(targets).astype(self._target_type), sample_ids
 
 
     @data.setter
