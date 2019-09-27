@@ -884,12 +884,20 @@ class BaseDataset(ABC):
         if subset_ids is not None and num_existing_keys > 0:
             data = self.__get_subset_from_dict(self._data, subset_ids)
             targets = self.__get_subset_from_dict(self._targets, subset_ids)
-            subdataset = self.__class__(data=data, targets=targets)
+            sub_ds = self.__class__(data=data, targets=targets)
             # Appending the history
-            subdataset.description += '\n Subset derived from: ' + self.description
-            subdataset.feature_names = self._feature_names
-            subdataset._dtype = self.dtype
-            return subdataset
+            sub_ds.description += '\n Subset derived from: ' + self.description
+            sub_ds.feature_names = self._feature_names
+            sub_ds._dtype = self.dtype
+
+            # propagating attributes
+            attr_subset = dict()
+            for attr in self._attr.keys():
+                attr_subset[attr] = self.__get_subset_from_dict(self._attr[attr],
+                                                         subset_ids)
+            sub_ds.attr = attr_subset
+
+            return sub_ds
         else:
             warn('subset of IDs requested do not exist in the dataset!')
             return self.__class__()
