@@ -552,6 +552,33 @@ class BaseDataset(ABC):
         return self._attr
 
 
+    @attr.setter
+    def attr(self, values):
+        """Batch setter of attributes via dict of dicts"""
+
+        if isinstance(values, dict):
+            for attr_name in values.keys():
+                this_attr = values[attr_name]
+                if not isinstance(this_attr, dict):
+                    raise TypeError('Value of attr {} must be a dict keyed in by '
+                                    'samplet ids.'.format(attr_name))
+                if len(this_attr) < 1:
+                    warn('Attribute {} is empty. Ignoring it'.format(attr_name))
+                    continue
+
+                existing_ids = set(self.samplet_ids).intersection(set(list(this_attr)))
+                if len(existing_ids) < 1:
+                    raise ValueError('None of the samplets set for attr {} exist '
+                                     'in dataset!'.format(attr_name))
+
+                self._attr[attr_name] = self.__get_subset_from_dict(
+                        this_attr, existing_ids)
+        else:
+            raise ValueError('attrs input must be a non-empty dict of dicts! '
+                             'Top level key must be names of attributes. '
+                             'Inner dicts must be keyed in by samplet ids.')
+
+
     def get_attr(self, attr_name, samplet_ids='all'):
         """
         Method to retrieve specified attribute for a list of samplet IDs
