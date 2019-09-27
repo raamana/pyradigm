@@ -17,11 +17,14 @@ def load_dataset(ds_path):
             ds = RegressionDataset(dataset_path=ds_path)
         except:
             try:
+                warn('MLDtaset is deprecated. Switch to the latest pyradigm data '
+                     'structures such as ClassificationDataset or '
+                     'RegressionDataset as soon as possible.')
                 ds = MLDataset(filepath=ds_path)
             except:
                 raise TypeError('Dataset class @ path below not recognized!'
                                 ' Must be a valid instance of one of '
-                                'ClassificationDataset or'
+                                'ClassificationDataset or '
                                 'RegressionDataset or MLDataset.\n'
                                 ' Ignoring {}'.format(ds_path))
 
