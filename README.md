@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-Usage/demo notebook (no setup required): 
+Usage/demo notebook (no setup required):
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb)
 
@@ -20,5 +20,9 @@ Installation : http://pyradigm.readthedocs.io/docs/installation.html
 Usage and examples: http://pyradigm.readthedocs.io/docs/usage.html
 
 Note: requires Python 3 or higher. Python 2 is not supported.
+
+
+![flyer.png](docs/flyer.png)
+
 
 [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/raamana)
