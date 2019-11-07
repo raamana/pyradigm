@@ -8,7 +8,13 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-Usage/demo notebook (no setup required):
+**Upcoming release**: The illustration below describes the full functionality of `pyradigm` in the development version. To access them, clone this repo and install it in a `dev` mode with `pip install -e <cloned_path>`
+
+![flyer.png](docs/flyer.png)
+
+## DOCS FOR THE CURRENTLY RELEASED VERSION ON PIP, WHICH IS TO BE DEPRECATED SHORTLY 
+
+Usage/demo notebook (no setup required) :
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb)
 
@@ -20,9 +26,6 @@ Installation : http://pyradigm.readthedocs.io/docs/installation.html
 Usage and examples: http://pyradigm.readthedocs.io/docs/usage.html
 
 Note: requires Python 3 or higher. Python 2 is not supported.
-
-
-![flyer.png](docs/flyer.png)
 
 
 [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/raamana)
