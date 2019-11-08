@@ -448,7 +448,7 @@ class ClassificationDataset(BaseDataset):
 
     def summarize(self):
         """
-        Summary of classes: names, numeric labels and sizes
+        Summary of classes: names and sizes
 
         Returns
         -------
