@@ -8,11 +8,11 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-**Upcoming release**: The illustration below describes the full functionality of `pyradigm` in the development version. To access them, clone this repo and install it in a `dev` mode with `pip install -e <cloned_path>`
+The illustration below describes the full functionality of `pyradigm` in the latest version `0.6`, for which docs will be updated shortly (see below illustration for docs on previous versions):
 
 ![flyer.png](docs/flyer.png)
 
-## DOCS FOR THE CURRENTLY RELEASED VERSION ON PIP, WHICH IS TO BE DEPRECATED SHORTLY 
+## DOCS FOR THE DEPRECATED VERSION 
 
 Usage/demo notebook (no setup required) :
 
