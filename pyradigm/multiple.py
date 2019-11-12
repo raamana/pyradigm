@@ -8,7 +8,7 @@ from sys import version_info
 import numpy as np
 
 if version_info.major > 2:
-    from pyradigm.base import BaseDataset
+    from pyradigm.base import BaseDataset, CompatibilityException
     from pyradigm import MLDataset, ClassificationDataset as ClfDataset
 else:
     raise NotImplementedError('pyradigm supports only python 3 or higher! '
@@ -122,11 +122,14 @@ class MultiDataset(object):
         else:
             # this also checks for the size (num_samplets)
             if set(dataset.samplet_ids) != self._ids:
-                raise ValueError('Differing set of IDs in two datasets.'
-                                 'Unable to add this dataset to the MultiDataset.')
+                raise CompatibilityException(
+                        'Differing set of IDs in two datasets.'
+                        ' Unable to add this dataset to the MultiDataset.')
 
             if dataset.targets != self._targets:
-                raise ValueError('Classes for IDs differ in the two datasets.')
+                raise CompatibilityException(
+                        'Targets for some IDs differ in the two datasets.'
+                        ' Unable to add this dataset to the MultiDataset.')
 
             if identifier not in self._modalities:
                 self._modalities[identifier] = dataset.data
@@ -220,7 +223,7 @@ class MultiDataset(object):
                 subset.data = { id_: data[id_] for id_ in id_list }
             else:
                 raise ValueError('Invalid output format - choose only one of '
-                                 'MLDataset or data_matrix')
+                                 'pyradigm or data_matrix')
 
             features.append(subset)
 

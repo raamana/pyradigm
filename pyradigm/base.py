@@ -34,6 +34,12 @@ class InfiniteOrNaNValuesException(PyradigmException):
     """Custom exception to catch NaN or Inf values."""
 
 
+class CompatibilityException(PyradigmException):
+    """
+    Exception to indicate two datasets are not compatible in some way
+        i.e. differing set of samplet IDs, or their target values.
+    """
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
