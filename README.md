@@ -12,6 +12,10 @@ The illustration below describes the full functionality of `pyradigm` in the lat
 
 ![flyer.png](docs/flyer.png)
 
+The value of pyradigm is even more appreciated in the management of multi-modal feature sets, which becomes more efficient and easier to manage.
+
+![multimodalflyer.png](docs/flyer_multimodal.png)
+
 ## DOCS FOR THE DEPRECATED VERSION 
 
 Usage/demo notebook (no setup required) :
