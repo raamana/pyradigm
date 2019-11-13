@@ -1,12 +1,15 @@
 import numpy as np
 
-from pyradigm import ClassificationDataset as ClfDataset, MultiDataset
-from pyradigm.utils import make_random_ClfDataset
+from pyradigm import MultiDatasetClassify, \
+    ClassificationDataset as ClfDataset, \
+    RegressionDataset as RegrDataset
+from pyradigm.utils import make_random_ClfDataset, make_random_dataset
 
 min_num_modalities = 3
 max_num_modalities = 10
 max_feat_dim = 10
 
+ds_class = RegrDataset
 
 def make_fully_separable_classes(max_class_size=10, max_dim=22):
     from sklearn.datasets import make_blobs
@@ -39,11 +42,11 @@ def new_dataset_with_same_ids_classes(in_ds):
 
 
 # ds = make_fully_separable_classes()
-ds = make_random_ClfDataset(5, 20, 50, 10, stratified=False)
+ds = make_random_dataset(5, 20, 50, 10, stratified=False, class_type=ds_class)
 
 num_modalities = np.random.randint(min_num_modalities, max_num_modalities)
 
-multi = MultiDataset()
+multi = MultiDatasetClassify()
 for ii in range(num_modalities):
     multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
 
