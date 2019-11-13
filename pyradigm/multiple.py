@@ -199,6 +199,16 @@ class MultiDatasetClassify(BaseMultiDataset):
         return string
 
 
+    def __repr__(self):
+
+        return self.__str__()
+
+
+    def __format__(self, format_spec):
+
+        return self.__str__()
+
+
     def holdout(self,
                 train_perc=0.7,
                 num_rep=50,
@@ -265,6 +275,16 @@ class MultiDatasetRegress(BaseMultiDataset):
                            self._num_features)
 
         return string
+
+
+    def __repr__(self):
+
+        return self.__str__()
+
+
+    def __format__(self, format_spec):
+
+        return self.__str__()
 
 
     def holdout(self,
