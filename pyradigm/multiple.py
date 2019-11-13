@@ -9,7 +9,8 @@ import numpy as np
 
 if version_info.major > 2:
     from pyradigm.base import BaseDataset, CompatibilityException
-    from pyradigm import MLDataset, ClassificationDataset as ClfDataset
+    from pyradigm import MLDataset, ClassificationDataset as ClfDataset, \
+        RegressionDataset as RegrDataset
 else:
     raise NotImplementedError('pyradigm supports only python 3 or higher! '
                               'Upgrade to Python 3+ is recommended.')
@@ -27,7 +28,7 @@ class BaseMultiDataset(object):
 
 
     def __init__(self,
-                 dataset_class=ClfDataset,
+                 dataset_class=BaseDataset,
                  dataset_spec=None,
                  name='MultiDataset'):
         """
@@ -184,6 +185,28 @@ class BaseMultiDataset(object):
 class MultiDatasetClassify(BaseMultiDataset):
     """Container class to manage multimodal classification datasets."""
 
+
+    def __init__(self,
+                 dataset_spec=None,
+                 name='MultiDatasetRegress'):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        dataset_spec : Iterable or None
+            List of pyradigms, or absolute paths to serialized pyradigm Datasets.
+
+        name : str
+            human readable name for printing purposes
+
+        """
+
+        super().__init__(dataset_class=ClfDataset,
+                         dataset_spec=dataset_spec,
+                         name=name)
+
+
     def __str__(self):
         """human readable repr"""
 
@@ -265,6 +288,27 @@ class MultiDatasetClassify(BaseMultiDataset):
 
 class MultiDatasetRegress(BaseMultiDataset):
     """Container class to manage multimodal classification datasets."""
+
+
+    def __init__(self,
+                 dataset_spec=None,
+                 name='MultiDatasetRegress'):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        dataset_spec : Iterable or None
+            List of pyradigms, or absolute paths to serialized pyradigm Datasets.
+
+        name : str
+            human readable name for printing purposes
+
+        """
+
+        super().__init__(dataset_class=RegrDataset,
+                         dataset_spec=dataset_spec,
+                         name=name)
 
 
     def __str__(self):
