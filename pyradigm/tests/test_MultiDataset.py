@@ -1,9 +1,16 @@
+
 import numpy as np
+from os.path import join as pjoin, exists as pexists, realpath, dirname
+from os import makedirs
 
 from pyradigm import MultiDatasetClassify, MultiDatasetRegress, \
     ClassificationDataset as ClfDataset, \
     RegressionDataset as RegrDataset
 from pyradigm.utils import make_random_ClfDataset, make_random_dataset
+
+test_dir = dirname(__file__)
+out_dir = realpath(pjoin(test_dir, 'tmp'))
+makedirs(out_dir, exist_ok=True)
 
 min_num_modalities = 3
 max_num_modalities = 10
@@ -43,31 +50,57 @@ def new_dataset_with_same_ids_classes(in_ds):
 
 num_modalities = np.random.randint(min_num_modalities, max_num_modalities)
 
-for multi_class, ds_class in zip((MultiDatasetClassify, MultiDatasetRegress),
-                                 (ClfDataset, RegrDataset)):
+def test_holdout():
+    """"""
 
-    # ds = make_fully_separable_classes()
-    ds = make_random_dataset(5, 20, 50, 10, stratified=False, class_type=ds_class)
-    multi = multi_class()
+    for multi_class, ds_class in zip((MultiDatasetClassify, MultiDatasetRegress),
+                                     (ClfDataset, RegrDataset)):
 
-    for ii in range(num_modalities):
-        multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
+        # ds = make_fully_separable_classes()
+        ds = make_random_dataset(5, 20, 50, 10, stratified=False, class_type=ds_class)
+        multi = multi_class()
 
-    # for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
-    #     print('train: {}\ntest: {}\n'.format(trn, tst))
+        for ii in range(num_modalities):
+            multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
 
-    print(multi)
+        # for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
+        #     print('train: {}\ntest: {}\n'.format(trn, tst))
 
-    return_ids_only = False
-    for trn, tst in multi.holdout(num_rep=5, train_perc=0.51,
-                                  return_ids_only=return_ids_only):
-        if return_ids_only:
-            print('train: {}\ttest: {}\n'.format(len(trn), len(tst)))
-        else:
-            for aa, bb in zip(trn, tst):
-                if aa.num_features != bb.num_features:
-                    raise ValueError('train and test dimensionality do not match!')
+        print(multi)
 
-                print('train: {}\ntest : {}\n'.format(aa.shape, bb.shape))
+        return_ids_only = False
+        for trn, tst in multi.holdout(num_rep=5, train_perc=0.51,
+                                      return_ids_only=return_ids_only):
+            if return_ids_only:
+                print('train: {}\ttest: {}\n'.format(len(trn), len(tst)))
+            else:
+                for aa, bb in zip(trn, tst):
+                    if aa.num_features != bb.num_features:
+                        raise ValueError('train and test dimensionality do not match!')
 
-    print()
+                    print('train: {}\ntest : {}\n'.format(aa.shape, bb.shape))
+
+        print()
+
+
+def test_init_list_of_paths():
+    """main use case for neuropredict"""
+
+    for multi_class, ds_class in zip((MultiDatasetClassify, MultiDatasetRegress),
+                                     (ClfDataset, RegrDataset)):
+
+        ds = make_random_dataset(5, 20, 50, 10, stratified=False,
+                                 class_type=ds_class)
+
+        paths = list()
+        for ii in range(num_modalities):
+            new_ds = new_dataset_with_same_ids_classes(ds)
+            path = pjoin(out_dir, 'ds{}.pkl'.format(ii))
+            new_ds.save(path)
+            paths.append(path)
+
+        try:
+            multi = multi_class(dataset_spec=paths)
+        except:
+            raise ValueError('MultiDataset constructor via list of paths does not '
+                             'work!')
