@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyradigm import MultiDatasetClassify, \
+from pyradigm import MultiDatasetClassify, MultiDatasetRegress, \
     ClassificationDataset as ClfDataset, \
     RegressionDataset as RegrDataset
 from pyradigm.utils import make_random_ClfDataset, make_random_dataset
@@ -41,30 +41,33 @@ def new_dataset_with_same_ids_classes(in_ds):
     return out_ds
 
 
-# ds = make_fully_separable_classes()
-ds = make_random_dataset(5, 20, 50, 10, stratified=False, class_type=ds_class)
-
 num_modalities = np.random.randint(min_num_modalities, max_num_modalities)
 
-multi = MultiDatasetClassify()
-for ii in range(num_modalities):
-    multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
+for multi_class, ds_class in zip((MultiDatasetClassify, MultiDatasetRegress),
+                                 (ClfDataset, RegrDataset)):
 
-# for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
-#     print('train: {}\ntest: {}\n'.format(trn, tst))
+    # ds = make_fully_separable_classes()
+    ds = make_random_dataset(5, 20, 50, 10, stratified=False, class_type=ds_class)
+    multi = multi_class()
 
-print(multi)
+    for ii in range(num_modalities):
+        multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
 
-return_ids_only = False
-for trn, tst in multi.holdout(num_rep=5, train_perc=0.51, stratified=True,
-                              return_ids_only=return_ids_only):
-    if return_ids_only:
-        print('train: {}\ttest: {}\n'.format(len(trn), len(tst)))
-    else:
-        for aa, bb in zip(trn, tst):
-            if aa.num_features != bb.num_features:
-                raise ValueError('train and test dimensionality do not match!')
+    # for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
+    #     print('train: {}\ntest: {}\n'.format(trn, tst))
 
-            print('train: {}\ntest : {}\n'.format(aa.shape, bb.shape))
+    print(multi)
 
-print()
+    return_ids_only = False
+    for trn, tst in multi.holdout(num_rep=5, train_perc=0.51,
+                                  return_ids_only=return_ids_only):
+        if return_ids_only:
+            print('train: {}\ttest: {}\n'.format(len(trn), len(tst)))
+        else:
+            for aa, bb in zip(trn, tst):
+                if aa.num_features != bb.num_features:
+                    raise ValueError('train and test dimensionality do not match!')
+
+                print('train: {}\ntest : {}\n'.format(aa.shape, bb.shape))
+
+    print()
