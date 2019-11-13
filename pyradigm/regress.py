@@ -200,25 +200,14 @@ class RegressionDataset(BaseDataset):
 
         """
 
-        _ignore1, target_sizes = self.summarize()
-        smallest_class_size = np.min(target_sizes)
-
         if count is None and (0.0 < train_perc < 1.0):
-            if train_perc < 1.0 / smallest_class_size:
-                raise ValueError('Training percentage selected too low '
-                                 'to return even one samplet from the smallest '
-                                 'class!')
             train_set = self.random_subset_ids(train_perc)
         elif train_perc is None and count > 0:
-            if count >= smallest_class_size:
-                raise ValueError(
-                        'Selections would exclude the smallest class from test set. '
-                        'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count)
         else:
             raise ValueError('Invalid, or out of range selection: '
                              'only one of count or percentage '
-                             'can be used to select subset at a given time.')
+                             'can be specified for subset selection.')
 
         test_set = list(set(self.samplet_ids) - set(train_set))
 
