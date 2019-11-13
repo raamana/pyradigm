@@ -253,6 +253,57 @@ class MultiDatasetClassify(BaseMultiDataset):
                       self._get_data(test_set, format)
 
 
+class MultiDatasetRegress(BaseMultiDataset):
+    """Container class to manage multimodal classification datasets."""
+
+
+    def __str__(self):
+        """human readable repr"""
+
+        string = "{}: {} samples, {} modalities, dims: {}" \
+                 "".format(self._name, self._num_samples, self._modality_count,
+                           self._num_features)
+
+        return string
+
+
+    def holdout(self,
+                train_perc=0.7,
+                num_rep=50,
+                return_ids_only=False,
+                format='MLDataset'):
+        """
+        Builds a holdout generator for train and test sets for cross-validation.
+
+        """
+
+        if train_perc <= 0.0 or train_perc >= 1.0:
+            raise ValueError('Train perc > 0.0 and < 1.0')
+
+        subset_size = np.int64(np.floor(self._num_samples * train_perc))
+
+        # clipping the range to [1, n]
+        subset_size = max(1, min(self._num_samples, subset_size))
+
+        # making it indexible with a local copy
+        id_list = list(self._ids)
+
+        for rep in range(num_rep):
+
+            random.shuffle(id_list)
+            train_set = id_list[:subset_size]
+            # this ensures both are mutually exclusive!
+            test_set = list(self._ids - set(train_set))
+
+            if return_ids_only:
+                # when only IDs are required, without associated features
+                # returning tuples to prevent accidental changes
+                yield tuple(train_set), tuple(test_set)
+            else:
+                yield self._get_data(train_set, format), \
+                      self._get_data(test_set, format)
+
+
 def compute_training_sizes(train_perc, target_sizes, stratified=True):
     """Computes the maximum training size that the smallest class can provide """
 
