@@ -1,10 +1,10 @@
 import random
-import warnings
+from warnings import warn
 from collections import Iterable
 from copy import copy
 from operator import itemgetter
 from sys import version_info
-
+from abc import abstractmethod
 import numpy as np
 
 if version_info.major > 2:
@@ -15,7 +15,7 @@ else:
                               'Upgrade to Python 3+ is recommended.')
 
 
-class MultiDataset(object):
+class BaseMultiDataset(object):
     """
     Container data structure to hold and manage multiple MLDataset instances.
 
@@ -141,68 +141,19 @@ class MultiDataset(object):
         self._modality_count += 1
 
 
+    @abstractmethod
     def __str__(self):
         """human readable repr"""
 
-        string = "{}: {} samples, " \
-                 "{} modalities, " \
-                 "dims: {}\nclass sizes: " \
-                 "".format(self._name, self._num_samples, self._modality_count,
-                           self._num_features)
-
-        string += ', '.join(['{}: {}'.format(c, n)
-                             for c, n in self._target_sizes.items()])
-
-        return string
-
-
+    @abstractmethod
     def holdout(self,
                 train_perc=0.7,
                 num_rep=50,
-                stratified=True,
                 return_ids_only=False,
                 format='MLDataset'):
         """
         Builds a generator for train and test sets for cross-validation.
-
         """
-
-        ids_in_class = {cid: self._dataset.sample_ids_in_class(cid)
-                        for cid in self._target_sizes.keys()}
-
-        sizes_numeric = np.array([len(ids_in_class[cid])
-                                  for cid in ids_in_class.keys()])
-        size_per_class, total_test_count = compute_training_sizes(
-                train_perc, sizes_numeric, stratified=stratified)
-
-        if len(self._target_sizes) != len(size_per_class):
-            raise ValueError('size spec differs in num elements with class sizes!')
-
-        for rep in range(num_rep):
-            print('rep {}'.format(rep))
-
-            train_set = list()
-            for index, (cls_id, class_size) in enumerate(self._target_sizes.items()):
-                # shuffling the IDs each time
-                random.shuffle(ids_in_class[cls_id])
-
-                subset_size = max(0, min(class_size, size_per_class[index]))
-                if subset_size < 1 or class_size < 1:
-                    warnings.warn('No subjects from class {} were selected.'
-                                  ''.format(cls_id))
-                else:
-                    subsets_this_class = ids_in_class[cls_id][0:size_per_class[index]]
-                    train_set.extend(subsets_this_class)
-
-            # this ensures both are mutually exclusive!
-            test_set = list(self._ids - set(train_set))
-
-            if return_ids_only:
-                # when only IDs are required, without associated features
-                # returning tuples to prevent accidental changes
-                yield tuple(train_set), tuple(test_set)
-            else:
-                yield self._get_data(train_set, format), self._get_data(test_set, format)
 
 
     def _get_data(self, id_list, format='MLDataset'):
