@@ -1,4 +1,5 @@
 import numpy as np
+from pyradigm.base import missing_value_indicator
 from pyradigm import ClassificationDataset, RegressionDataset
 from pyradigm.pyradigm import MLDataset
 
@@ -166,6 +167,7 @@ def make_random_dataset(max_num_classes=20,
                         max_class_size=50,
                         max_dim=100,
                         stratified=True,
+                        with_missing_data=False,
                         class_type=ClassificationDataset):
     "Generates a random Dataset for use in testing."
 
@@ -202,10 +204,14 @@ def make_random_dataset(max_num_classes=20,
     for cc, class_ in enumerate(class_ids):
         subids = ['s{}-c{}'.format(ix, cc) for ix in range(class_sizes[cc])]
         for sid in subids:
+            features = feat_generator(num_features)
+            if with_missing_data:
+                rand_loc = np.random.randint(num_features)
+                features[rand_loc] = missing_value_indicator
             if isinstance(ds, MLDataset):
-                ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
+                ds.add_sample(sid, features, int(cc), class_)
             else:
-                ds.add_samplet(sid, feat_generator(num_features), class_)
+                ds.add_samplet(sid, features, class_)
 
     return ds
 

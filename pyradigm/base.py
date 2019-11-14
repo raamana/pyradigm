@@ -46,6 +46,8 @@ def is_iterable_but_not_str(value):
     return not isinstance(value, str) and isinstance(value, Iterable)
 
 
+missing_value_indicator = np.NaN
+
 class BaseDataset(ABC):
     """Abstract Base class for Dataset.
 
