@@ -182,6 +182,13 @@ class BaseMultiDataset(object):
         return features
 
 
+    def __iter__(self):
+        """Iterable mechanism"""
+
+        for modality, data in self._modalities.items():
+                yield modality, np.fromiter(data.values())
+
+
 class MultiDatasetClassify(BaseMultiDataset):
     """Container class to manage multimodal classification datasets."""
 
