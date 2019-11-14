@@ -119,6 +119,8 @@ class BaseMultiDataset(object):
             # replacing its data with zeros
             self._dataset.data = {id_: np.zeros(1) for id_ in self._ids}
 
+            self._attr = dict()
+
             self._is_init = True
         else:
             # this also checks for the size (num_samplets)
@@ -187,6 +189,37 @@ class BaseMultiDataset(object):
 
         for modality, data in self._modalities.items():
                 yield modality, np.fromiter(data.values())
+
+
+    def set_attr(self, id_, attr_name, attr_value):
+        """Method to set modality-/dataset-specific attributes"""
+
+        if id_ not in self._modalities:
+            raise KeyError('Dataset {} not in this {} multi_dataset'
+                           ''.format(id_, self._name))
+
+        if id_ not in self._attr:
+            self._attr[id_] = dict()
+
+        self._attr[id_][attr_name] = attr_value
+
+
+    def get_attr(self, id_, attr_name, not_found_value='raise'):
+        """Method to retrieve modality-/dataset-specific attributes"""
+
+        if id_ not in self._modalities:
+            raise KeyError('Dataset {} not in this {} multi_dataset'
+                           ''.format(id_, self._name))
+
+        try:
+            return self._attr[id_][attr_name]
+        except KeyError:
+            msg = 'attribute {} not set for dataset {}'.format(attr_name, id_)
+            if not_found_value.lower() in ('raise', ):
+                raise KeyError(msg)
+            else:
+                warn(msg)
+                return not_found_value
 
 
 class MultiDatasetClassify(BaseMultiDataset):
