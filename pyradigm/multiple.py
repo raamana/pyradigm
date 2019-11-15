@@ -144,6 +144,12 @@ class BaseMultiDataset(object):
         self._modality_count += 1
 
 
+    @property
+    def samplet_ids(self):
+        """List of samplet IDs in the multi-dataset"""
+
+        return list(self._ids)
+
     @abstractmethod
     def __str__(self):
         """human readable repr"""
