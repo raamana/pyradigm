@@ -150,6 +150,12 @@ class BaseMultiDataset(object):
 
         return list(self._ids)
 
+    @property
+    def targets(self):
+        """Target values"""
+
+        return self._targets
+
     @abstractmethod
     def __str__(self):
         """human readable repr"""
