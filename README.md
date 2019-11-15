@@ -8,6 +8,8 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
+## CSVs suck. Upgrade your life with pyradigm
+
 The illustration below describes the full functionality of `pyradigm` in the latest version `0.6`, for which docs will be updated shortly (see below illustration for docs on previous versions):
 
 ![flyer.png](docs/flyer.png)
