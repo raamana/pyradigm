@@ -197,6 +197,23 @@ class BaseMultiDataset(object):
                 yield modality, np.fromiter(data.values())
 
 
+    def get_subsets(self, subset_list):
+        """
+        Returns the requested subsets of data while iterating over modalities
+
+        if subset_list were to contain two sets of IDs e.g. (train, test)
+
+        return data would be this tuple:
+            (modality, (train_data, train_targets), (test_data, test_targets))
+
+        """
+
+        for modality, data in self._modalities.items():
+            yield modality, ( (np.array(itemgetter(*subset)(data)),
+                               np.array(itemgetter(*subset)(self._targets)))
+                              for subset in subset_list )
+
+
     def set_attr(self, id_, attr_name, attr_value):
         """Method to set modality-/dataset-specific attributes"""
 
