@@ -231,19 +231,37 @@ def make_random_ClfDataset(max_num_classes=20,
                                class_type=ClassificationDataset)
 
 
-def make_random_RegrDataset(max_num_classes=20,
-                            min_class_size=20,
-                            max_class_size=50,
+def make_random_RegrDataset(min_size=20,
+                            max_size=50,
                             max_dim=100,
+                            with_missing_data=False,
                             stratified=True):
     "Generates a random ClassificationDataset for use in testing."
 
-    return make_random_dataset(max_num_classes=max_num_classes,
-                               min_class_size=min_class_size,
-                               max_class_size=max_class_size,
-                               max_dim=max_dim,
-                               stratified=stratified,
-                               class_type=RegressionDataset)
+    smallest = min(min_size, max_size)
+    max_size = max(min_size, max_size)
+    largest = max(50, max_size)
+    largest = max(smallest + 3, largest)
+
+    sample_size = np.random.randint(smallest, largest+1)
+
+    num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
+
+    ds = RegressionDataset()
+
+    subids = ['s{}'.format(ix) for ix in range(sample_size)]
+    for counter, sid in enumerate(subids):
+        features = feat_generator(num_features)
+        target = np.random.randint(sample_size)
+        if with_missing_data:
+            rand_loc = np.random.randint(num_features)
+            features[rand_loc] = missing_value_indicator
+        if isinstance(ds, MLDataset):
+            ds.add_sample(sid, features, int(counter), target)
+        else:
+            ds.add_samplet(sid, features, target)
+
+    return ds
 
 
 def make_random_MLdataset(max_num_classes=20,
