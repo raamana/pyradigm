@@ -146,8 +146,12 @@ class BaseMultiDataset(object):
     @property
     def samplet_ids(self):
         """List of samplet IDs in the multi-dataset"""
-
         return list(self._ids)
+
+    @property
+    def modality_ids(self):
+        """List of identifiers for all modalities"""
+        return list(self._modalities.keys())
 
     @abstractmethod
     def __str__(self):
@@ -193,7 +197,7 @@ class BaseMultiDataset(object):
         """Iterable mechanism"""
 
         for modality, data in self._modalities.items():
-                yield modality, np.fromiter(data.values())
+                yield modality, np.fromiter(data.values(), dtype=np.float_)
 
 
     def get_subsets(self, subset_list):
@@ -376,9 +380,10 @@ class MultiDatasetRegress(BaseMultiDataset):
     def __str__(self):
         """human readable repr"""
 
-        string = "{}: {} samples, {} modalities, dims: {}" \
+        string = "{}:\n\t{} samples, {} modalities, dims: {}\n\tIdentifiers: {}" \
                  "".format(self.name, self.num_samplets, self.modality_count,
-                           self.num_features)
+                           self.num_features,
+                           ', '.join([str(k) for k in self.modality_ids]))
 
         return string
 
