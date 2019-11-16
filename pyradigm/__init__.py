@@ -1,5 +1,5 @@
 
-__all__ = [ 'ClassificationDataset', 'RegressionDataset', 'MultiDataset',
+__all__ = [ 'ClassificationDataset', 'RegressionDataset',
             'BaseDataset', 'check_compatibility',
             'pyradigm', 'MLDataset', 'cli_run']
 

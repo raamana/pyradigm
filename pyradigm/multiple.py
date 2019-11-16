@@ -47,18 +47,19 @@ class BaseMultiDataset(object):
             raise TypeError('Input class type is not recognized!'
                             ' Must be a child class of pyradigm.BaseDataset')
 
+        self.name = name
         self._list = list()
         self._is_init = False
 
         # number of modalities for each sample id
-        self._modality_count = 0
+        self.modality_count = 0
 
         self._ids = set()
-        self._targets = dict()
+        self.targets = dict()
         self._modalities = dict()
         self._labels = dict()
 
-        self._num_features = list()
+        self.num_features = list()
 
         # TODO more efficient internal repr is possible as ids/classes do not need be
         # stored redundantly for each dataset
@@ -69,8 +70,6 @@ class BaseMultiDataset(object):
                 raise ValueError('Input must be a list of atleast two datasets.')
 
             self._load(dataset_spec)
-
-        self._name = name
 
 
     def _load(self, dataset_spec):
@@ -83,9 +82,9 @@ class BaseMultiDataset(object):
     def _get_id(self):
         """Returns an ID for a new dataset that's different from existing ones."""
 
-        self._modality_count += 1
+        self.modality_count += 1
 
-        return self._modality_count
+        return self.modality_count
 
 
     def append(self, dataset, identifier):
@@ -107,12 +106,12 @@ class BaseMultiDataset(object):
 
         if not self._is_init:
             self._ids = set(dataset.samplet_ids)
-            self._targets = dataset.targets
+            self.targets = dataset.targets
             self._target_sizes = dataset.target_sizes
 
-            self._num_samples = len(self._ids)
+            self.num_samplets = len(self._ids)
             self._modalities[identifier] = dataset.data
-            self._num_features.append(dataset.num_features)
+            self.num_features.append(dataset.num_features)
 
             # maintaining a no-data MLDataset internally for reuse its methods
             self._dataset = copy(dataset)
@@ -129,19 +128,19 @@ class BaseMultiDataset(object):
                         'Differing set of IDs in two datasets.'
                         ' Unable to add this dataset to the MultiDataset.')
 
-            if dataset.targets != self._targets:
+            if dataset.targets != self.targets:
                 raise CompatibilityException(
                         'Targets for some IDs differ in the two datasets.'
                         ' Unable to add this dataset to the MultiDataset.')
 
             if identifier not in self._modalities:
                 self._modalities[identifier] = dataset.data
-                self._num_features.append(dataset.num_features)
+                self.num_features.append(dataset.num_features)
             else:
                 raise KeyError('{} already exists in MultiDataset'.format(identifier))
 
         # each addition should be counted, if successful
-        self._modality_count += 1
+        self.modality_count += 1
 
 
     @property
@@ -149,12 +148,6 @@ class BaseMultiDataset(object):
         """List of samplet IDs in the multi-dataset"""
 
         return list(self._ids)
-
-    @property
-    def targets(self):
-        """Target values"""
-
-        return self._targets
 
     @abstractmethod
     def __str__(self):
@@ -216,7 +209,7 @@ class BaseMultiDataset(object):
 
         for modality, data in self._modalities.items():
             yield modality, ( (np.array(itemgetter(*subset)(data)),
-                               np.array(itemgetter(*subset)(self._targets)))
+                               np.array(itemgetter(*subset)(self.targets)))
                               for subset in subset_list )
 
 
@@ -282,8 +275,8 @@ class MultiDatasetClassify(BaseMultiDataset):
         string = "{}: {} samples, " \
                  "{} modalities, " \
                  "dims: {}\nclass sizes: " \
-                 "".format(self._name, self._num_samples, self._modality_count,
-                           self._num_features)
+                 "".format(self.name, self.num_samplets, self.modality_count,
+                           self.num_features)
 
         string += ', '.join(['{}: {}'.format(c, n)
                              for c, n in self._target_sizes.items()])
@@ -384,8 +377,8 @@ class MultiDatasetRegress(BaseMultiDataset):
         """human readable repr"""
 
         string = "{}: {} samples, {} modalities, dims: {}" \
-                 "".format(self._name, self._num_samples, self._modality_count,
-                           self._num_features)
+                 "".format(self.name, self.num_samplets, self.modality_count,
+                           self.num_features)
 
         return string
 
@@ -413,10 +406,10 @@ class MultiDatasetRegress(BaseMultiDataset):
         if train_perc <= 0.0 or train_perc >= 1.0:
             raise ValueError('Train perc > 0.0 and < 1.0')
 
-        subset_size = np.int64(np.floor(self._num_samples * train_perc))
+        subset_size = np.int64(np.floor(self.num_samplets * train_perc))
 
         # clipping the range to [1, n]
-        subset_size = max(1, min(self._num_samples, subset_size))
+        subset_size = max(1, min(self.num_samplets, subset_size))
 
         # making it indexible with a local copy
         id_list = list(self._ids)
