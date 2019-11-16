@@ -2,7 +2,7 @@ __all__ = ['ClassificationDataset', ]
 
 import random
 import warnings
-from collections import Counter, OrderedDict
+from collections import Counter
 from os.path import isfile, realpath
 
 import numpy as np
@@ -99,8 +99,8 @@ class ClassificationDataset(BaseDataset):
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
         elif data is None and targets is None:
-            self._data = OrderedDict()
-            self._targets = OrderedDict()
+            self._data = dict()
+            self._targets = dict()
             self._num_features = 0
             self._description = ''
             self._feature_names = None
@@ -109,10 +109,8 @@ class ClassificationDataset(BaseDataset):
             # but only in data and targets, not feature names
             self._validate(data, targets)
 
-            # OrderedDict to ensure the order is maintained when
-            # data/targets are returned in a matrix/array form
-            self._data = OrderedDict(data)
-            self._targets = OrderedDict(targets)
+            self._data = dict(data)
+            self._targets = dict(targets)
             self._description = description
 
             sample_ids = list(data)
