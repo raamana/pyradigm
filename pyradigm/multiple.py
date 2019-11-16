@@ -197,7 +197,7 @@ class BaseMultiDataset(object):
         """Iterable mechanism"""
 
         for modality, data in self._modalities.items():
-                yield modality, np.fromiter(data.values(), dtype=np.float_)
+                yield modality, np.array([np.array(item) for item in data.values()])
 
 
     def get_subsets(self, subset_list):
