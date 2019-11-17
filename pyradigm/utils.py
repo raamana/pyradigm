@@ -168,7 +168,8 @@ def make_random_dataset(max_num_classes=20,
                         max_dim=100,
                         stratified=True,
                         with_missing_data=False,
-                        class_type=ClassificationDataset):
+                        class_type=ClassificationDataset,
+                        min_num_classes=2):
     "Generates a random Dataset for use in testing."
 
     smallest = min(min_class_size, max_class_size)
@@ -176,10 +177,13 @@ def make_random_dataset(max_num_classes=20,
     largest = max(50, max_class_size)
     largest = max(smallest + 3, largest)
 
-    if max_num_classes != 2:
-        num_classes = np.random.randint(2, max_num_classes, 1)
-    else:
-        num_classes = 2
+    if min_num_classes < 2:
+        min_num_classes = 2
+
+    if max_num_classes <= min_num_classes:
+        max_num_classes = min_num_classes
+
+    num_classes = np.random.randint(min_num_classes, max_num_classes, 1)
 
     if type(num_classes) == np.ndarray:
         num_classes = num_classes[0]
@@ -220,7 +224,8 @@ def make_random_ClfDataset(max_num_classes=20,
                            min_class_size=20,
                            max_class_size=50,
                            max_dim=100,
-                           stratified=True):
+                           stratified=True,
+                           min_num_classes=2):
     "Generates a random ClassificationDataset for use in testing."
 
     return make_random_dataset(max_num_classes=max_num_classes,
@@ -228,7 +233,8 @@ def make_random_ClfDataset(max_num_classes=20,
                                max_class_size=max_class_size,
                                max_dim=max_dim,
                                stratified=stratified,
-                               class_type=ClassificationDataset)
+                               class_type=ClassificationDataset,
+                               min_num_classes=min_num_classes)
 
 
 def make_random_RegrDataset(min_size=20,
