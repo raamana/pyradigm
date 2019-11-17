@@ -93,16 +93,19 @@ class BaseMultiDataset(object):
 
         Parameters
         ----------
-
-        dataset : MLDataset or compatible
+        dataset : pyradigm dataset or compatible
 
         identifier : hashable
             String or integer or another hashable to uniquely identify this dataset
-
         """
 
-        if not isinstance(dataset, BaseDataset):
+        if isinstance(dataset, str):
             dataset = self._dataset_class(dataset_path=dataset)
+
+        if not isinstance(dataset, self._dataset_class):
+            raise CompatibilityException('Incompatible dataset. '
+                                         'You can only add instances of '
+                                         'type {}'.format(self._dataset_class))
 
         if not self._is_init:
             self._ids = set(dataset.samplet_ids)
@@ -113,7 +116,7 @@ class BaseMultiDataset(object):
             self._modalities[identifier] = dataset.data
             self.num_features.append(dataset.num_features)
 
-            # maintaining a no-data MLDataset internally for reuse its methods
+            # maintaining a no-data pyradigm Dataset internally to reuse its methods
             self._dataset = copy(dataset)
             # replacing its data with zeros
             self._dataset.data = {id_: np.zeros(1) for id_ in self._ids}
@@ -254,7 +257,8 @@ class MultiDatasetClassify(BaseMultiDataset):
 
     def __init__(self,
                  dataset_spec=None,
-                 name='MultiDatasetRegress'):
+                 name='MultiDatasetRegress',
+                 subgroup=None):
         """
         Constructor.
 
@@ -308,11 +312,9 @@ class MultiDatasetClassify(BaseMultiDataset):
     def __str__(self):
         """human readable repr"""
 
-        string = "{}: {} samples, " \
-                 "{} modalities, " \
-                 "dims: {}\nclass sizes: " \
+        string = "{}: {} samples, {} modalities, dims: {}\n {} classes of sizes: " \
                  "".format(self.name, self.num_samplets, self.modality_count,
-                           self.num_features)
+                           self.num_features, len(self._target_sizes))
 
         string += ', '.join(['{}: {}'.format(c, n)
                              for c, n in self._target_sizes.items()])
