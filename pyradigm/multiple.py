@@ -268,9 +268,36 @@ class MultiDatasetClassify(BaseMultiDataset):
 
         """
 
-        super().__init__(dataset_class=ClfDataset,
-                         dataset_spec=dataset_spec,
-                         name=name)
+        self._sub_groups = subgroup
+        if subgroup is None:
+            super().__init__(dataset_class=ClfDataset,
+                             dataset_spec=dataset_spec,
+                             name=name)
+        else:
+            super().__init__(dataset_class=ClfDataset, dataset_spec=None, name=name)
+            for idx, ds in enumerate(dataset_spec):
+                self.append_subgroup(ds, idx, subgroup)
+
+
+    def append_subgroup(self, dataset, identifier, subgroup):
+        """Custom add method"""
+
+        if isinstance(dataset, str):
+            dataset = self._dataset_class(dataset_path=dataset)
+
+        target_set = set(dataset.target_set)
+        subgroup = set(subgroup)
+        if subgroup is None or subgroup == target_set:
+            ds_out = dataset
+        elif subgroup < target_set: # < on sets is an issubset operation
+            ds_out = dataset.get_class(subgroup)
+        else:
+            raise ValueError('One or more classes in {} does not exist in\n{}'
+                             ''.format(sub_group, fp))
+
+        self.append(ds_out, identifier=identifier)
+
+
 
 
     def __str__(self):
