@@ -298,6 +298,11 @@ class MultiDatasetClassify(BaseMultiDataset):
         self.append(ds_out, identifier=identifier)
 
 
+    @property
+    def target_set(self):
+        """Set of targets/classes in this multi-dataset"""
+
+        return set(self.targets.values())
 
 
     def __str__(self):
