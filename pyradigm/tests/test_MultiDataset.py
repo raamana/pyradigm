@@ -38,7 +38,7 @@ def make_fully_separable_classes(max_class_size=10, max_dim=22):
     return new_ds
 
 
-def new_dataset_with_same_ids_classes(in_ds):
+def new_dataset_with_same_ids_targets(in_ds):
     feat_dim = np.random.randint(1, max_feat_dim)
     out_ds = ClfDataset()
     for id_ in in_ds.samplet_ids:
@@ -61,7 +61,7 @@ def test_holdout():
         multi = multi_class()
 
         for ii in range(num_modalities):
-            multi.append(new_dataset_with_same_ids_classes(ds), identifier=ii)
+            multi.append(new_dataset_with_same_ids_targets(ds), identifier=ii)
 
         # for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
         #     print('train: {}\ntest: {}\n'.format(trn, tst))
@@ -94,7 +94,7 @@ def test_init_list_of_paths():
 
         paths = list()
         for ii in range(num_modalities):
-            new_ds = new_dataset_with_same_ids_classes(ds)
+            new_ds = new_dataset_with_same_ids_targets(ds)
             path = pjoin(out_dir, 'ds{}.pkl'.format(ii))
             new_ds.save(path)
             paths.append(path)
