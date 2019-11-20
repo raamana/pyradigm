@@ -1,6 +1,6 @@
 import random
 from warnings import warn
-from collections import Iterable
+from collections import Iterable, Counter
 from copy import copy
 from operator import itemgetter
 from sys import version_info
@@ -308,6 +308,13 @@ class MultiDatasetClassify(BaseMultiDataset):
 
         return set(self.targets.values())
 
+    @property
+    def target_sizes(self):
+        """
+        Sizes of targets in this classification dataset.
+        Useful for summary and to compute chance accuracy.
+        """
+        return Counter(self.targets.values())
 
     def __str__(self):
         """human readable repr"""
