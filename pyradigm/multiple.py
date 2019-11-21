@@ -76,7 +76,7 @@ class BaseMultiDataset(object):
         """Actual loading of datasets"""
 
         for idx, ds in enumerate(dataset_spec):
-            self.append(ds, idx)
+            self.append(ds, None)
 
 
     def _get_id(self):
@@ -87,7 +87,7 @@ class BaseMultiDataset(object):
         return self.modality_count
 
 
-    def append(self, dataset, identifier):
+    def append(self, dataset, identifier=None):
         """
         Adds a dataset, if compatible with the existing ones.
 
@@ -106,6 +106,9 @@ class BaseMultiDataset(object):
             raise CompatibilityException('Incompatible dataset. '
                                          'You can only add instances of '
                                          'type {}'.format(self._dataset_class))
+
+        if identifier is None and len(dataset.description)>0:
+            identifier = dataset.description
 
         if not self._is_init:
             self._ids = set(dataset.samplet_ids)
@@ -140,7 +143,8 @@ class BaseMultiDataset(object):
                 self._modalities[identifier] = dataset.data
                 self.num_features.append(dataset.num_features)
             else:
-                raise KeyError('{} already exists in MultiDataset'.format(identifier))
+                raise KeyError('{} already exists in MultiDataset'
+                               ''.format(identifier))
 
         # each addition should be counted, if successful
         self.modality_count += 1
