@@ -124,6 +124,11 @@ class BaseMultiDataset(object):
             # replacing its data with zeros
             self._dataset.data = {id_: np.zeros(1) for id_ in self._ids}
 
+            if hasattr(dataset, 'attr'):
+                self._common_attr = dataset.attr
+            else:
+                self._common_attr = dict()
+
             self._attr = dict()
 
             self._is_init = True
@@ -145,6 +150,21 @@ class BaseMultiDataset(object):
             else:
                 raise KeyError('{} already exists in MultiDataset'
                                ''.format(identifier))
+
+            if hasattr(dataset, 'attr'):
+                if len(self._common_attr) < 1:
+                    # no attributes were set at all - simple copy sufficient
+                    self._common_attr = dataset.attr.copy()
+                else:
+                    for attr_name in dataset.attr:
+                        if attr_name not in self._common_attr:
+                            self._common_attr[attr_name] = dataset.attr[attr_name]
+                        elif self._common_attr[attr_name] != dataset.attr[attr_name]:
+                            raise ValueError(
+                                    'Values and/or IDs differ for attribute {}. '
+                                    'Ensure all datasets have common attributes '
+                                    'with the same values'.format(attr_name))
+
 
         # each addition should be counted, if successful
         self.modality_count += 1
@@ -222,6 +242,14 @@ class BaseMultiDataset(object):
             yield modality, ( (np.array(itemgetter(*subset)(data)),
                                np.array(itemgetter(*subset)(self.targets)))
                               for subset in subset_list )
+
+
+    @property
+    def common_attr(self):
+        """Attributes common to all subjects/datasets, such as covariates, in this
+        MultiDataset"""
+
+        return self._common_attr
 
 
     def set_attr(self, ds_id, attr_name, attr_value):
