@@ -224,30 +224,30 @@ class BaseMultiDataset(object):
                               for subset in subset_list )
 
 
-    def set_attr(self, id_, attr_name, attr_value):
+    def set_attr(self, ds_id, attr_name, attr_value):
         """Method to set modality-/dataset-specific attributes"""
 
-        if id_ not in self._modalities:
+        if ds_id not in self._modalities:
             raise KeyError('Dataset {} not in this {} multi_dataset'
-                           ''.format(id_, self._name))
+                           ''.format(ds_id, self._name))
 
-        if id_ not in self._attr:
-            self._attr[id_] = dict()
+        if ds_id not in self._attr:
+            self._attr[ds_id] = dict()
 
-        self._attr[id_][attr_name] = attr_value
+        self._attr[ds_id][attr_name] = attr_value
 
 
-    def get_attr(self, id_, attr_name, not_found_value='raise'):
+    def get_attr(self, ds_id, attr_name, not_found_value='raise'):
         """Method to retrieve modality-/dataset-specific attributes"""
 
-        if id_ not in self._modalities:
+        if ds_id not in self._modalities:
             raise KeyError('Dataset {} not in this {} multi_dataset'
-                           ''.format(id_, self._name))
+                           ''.format(ds_id, self._name))
 
         try:
-            return self._attr[id_][attr_name]
+            return self._attr[ds_id][attr_name]
         except KeyError:
-            msg = 'attribute {} not set for dataset {}'.format(attr_name, id_)
+            msg = 'attribute {} not set for dataset {}'.format(attr_name, ds_id)
             if not_found_value.lower() in ('raise', ):
                 raise KeyError(msg)
             else:
