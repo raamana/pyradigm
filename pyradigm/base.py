@@ -1116,6 +1116,8 @@ class BaseDataset(ABC):
         """Copy constructor."""
         self._data = copy.deepcopy(other.data)
         self._targets = copy.deepcopy(other.targets)
+        self._attr = copy.deepcopy(other.attr)
+        self._dataset_attr = copy.deepcopy(other.dataset_attr)
         self._dtype = copy.deepcopy(other.dtype)
         self._description = copy.deepcopy(other.description)
         self._feature_names = copy.deepcopy(other.feature_names)
