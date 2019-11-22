@@ -686,6 +686,21 @@ class BaseDataset(ABC):
 
         return self._dataset_attr
 
+    @dataset_attr.setter
+    def dataset_attr(self, values):
+        """
+        Batch setter of dataset-wide attributes.
+        Existing attrs/values will be replaced.
+        """
+
+        if isinstance(values, dict):
+            # the following code will not affect attrs that already exist in the
+            # current but not in the new dict
+            for name, val in values.items():
+                self._dataset_attr[name] = val
+        else:
+            raise ValueError('dataset_attr input must be a non-empty dict!')
+
 
     def get_feature_subset(self, subset_idx):
         """
