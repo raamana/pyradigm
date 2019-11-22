@@ -184,6 +184,17 @@ class BaseMultiDataset(object):
     def __str__(self):
         """human readable repr"""
 
+    def _common_str(self):
+        """basic str() with common elements"""
+
+        return "{}:\n\t{} samples, {} modalities, dims: {}" \
+               "\n\tIdentifiers: {}" \
+               "\n\tAttributes: {}" \
+               "".format(self.name, self.num_samplets, self.modality_count,
+                         self.num_features,
+                         ', '.join([str(k) for k in self.modality_ids]),
+                         ', '.join([str(k) for k in self._common_attr.keys()]))
+
     @abstractmethod
     def holdout(self,
                 train_perc=0.7,
@@ -289,7 +300,7 @@ class MultiDatasetClassify(BaseMultiDataset):
 
     def __init__(self,
                  dataset_spec=None,
-                 name='MultiDatasetRegress',
+                 name='MultiDatasetClassify',
                  subgroup=None):
         """
         Constructor.
@@ -351,10 +362,8 @@ class MultiDatasetClassify(BaseMultiDataset):
     def __str__(self):
         """human readable repr"""
 
-        string = "{}: {} samples, {} modalities, dims: {}\n {} classes of sizes: " \
-                 "".format(self.name, self.num_samplets, self.modality_count,
-                           self.num_features, len(self._target_sizes))
-
+        string = "{}\n\tClasses n={}, sizes " \
+                 "".format(self._common_str(), len(self._target_sizes))
         string += ', '.join(['{}: {}'.format(c, n)
                              for c, n in self._target_sizes.items()])
 
@@ -453,12 +462,7 @@ class MultiDatasetRegress(BaseMultiDataset):
     def __str__(self):
         """human readable repr"""
 
-        string = "{}:\n\t{} samples, {} modalities, dims: {}\n\tIdentifiers: {}" \
-                 "".format(self.name, self.num_samplets, self.modality_count,
-                           self.num_features,
-                           ', '.join([str(k) for k in self.modality_ids]))
-
-        return string
+        return self._common_str()
 
 
     def __repr__(self):
