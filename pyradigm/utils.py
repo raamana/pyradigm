@@ -1,3 +1,5 @@
+
+from collections import Iterable
 import numpy as np
 from pyradigm.base import missing_value_indicator
 from pyradigm import ClassificationDataset, RegressionDataset
@@ -162,6 +164,27 @@ def check_compatibility(datasets,
     return all(compatible), compatible, dim_mismatch, \
            (pivot.num_samplets, reqd_num_features)
 
+def attr_generator(attr_type, count):
+    """Generates distributions of a given type"""
+
+    attr_type = attr_type.lower()
+    if attr_type in ('int', 'age'):
+        return np.random.randint(100, size=count)
+    elif attr_type in ('float', 'weight'):
+        return 100*np.abs(np.random.rand(count))
+    elif attr_type in ('sex', 'gender'):
+        return np.random.choice(['male', 'female', 'other'], count, replace=True)
+    elif attr_type in ('site', ):
+        return np.random.choice(['site{}'.format(ss) for ss in range(6)],
+                                count, replace=True)
+    elif isinstance(attr_type, Iterable):
+        return np.random.choice(attr_type, count, replace=True)
+    else:
+        raise ValueError('Invalid type: must be int or float.'
+                         ' Or an array of values to sample from.'
+                         ' Type can also be age, sex, gender, weight, or site.')
+
+
 def make_random_dataset(max_num_classes=20,
                         min_class_size=20,
                         max_class_size=50,
@@ -169,7 +192,9 @@ def make_random_dataset(max_num_classes=20,
                         stratified=True,
                         with_missing_data=False,
                         class_type=ClassificationDataset,
-                        min_num_classes=2):
+                        min_num_classes=2,
+                        attr_names=None,
+                        attr_types=None):
     "Generates a random Dataset for use in testing."
 
     smallest = min(min_class_size, max_class_size)
@@ -192,6 +217,7 @@ def make_random_dataset(max_num_classes=20,
     else:
         class_sizes = np.repeat(np.random.randint(smallest, largest), num_classes)
 
+    num_samplets = class_sizes.sum()
     num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
     # feat_names = [ str(x) for x in range(num_features)]
 
@@ -204,7 +230,16 @@ def make_random_dataset(max_num_classes=20,
             class_ids.append('class-{}'.format(cl))
         labels.append(int(cl))
 
+    # attributes
+    if attr_names is not None:
+        if len(attr_names) != len(attr_types):
+            raise ValueError('Differing number of names and types for attributes!')
+        attrs = dict()
+        for name, typ in zip(attr_names, attr_types):
+            attrs[name] = attr_generator(typ, num_samplets)
+
     ds = class_type()
+    s_index = 0
     for cc, class_ in enumerate(class_ids):
         subids = ['s{}-c{}'.format(ix, cc) for ix in range(class_sizes[cc])]
         for sid in subids:
@@ -215,7 +250,14 @@ def make_random_dataset(max_num_classes=20,
             if isinstance(ds, MLDataset):
                 ds.add_sample(sid, features, int(cc), class_)
             else:
-                ds.add_samplet(sid, features, class_)
+                if attr_names is not None:
+                    a_values = [ attrs[a_name][s_index] for a_name in attr_names]
+                    ds.add_samplet(sid, features, class_,
+                                   attr_names=attr_names, attr_values=a_values)
+                else:
+                    ds.add_samplet(sid, features, class_)
+
+            s_index += 1
 
     return ds
 
@@ -225,7 +267,10 @@ def make_random_ClfDataset(max_num_classes=20,
                            max_class_size=50,
                            max_dim=100,
                            stratified=True,
-                           min_num_classes=2):
+                           min_num_classes=2,
+                           attr_names=None,
+                           attr_types=None
+                           ):
     "Generates a random ClassificationDataset for use in testing."
 
     return make_random_dataset(max_num_classes=max_num_classes,
@@ -234,14 +279,17 @@ def make_random_ClfDataset(max_num_classes=20,
                                max_dim=max_dim,
                                stratified=stratified,
                                class_type=ClassificationDataset,
-                               min_num_classes=min_num_classes)
+                               min_num_classes=min_num_classes,
+                               attr_names=attr_names, attr_types=attr_types)
 
 
 def make_random_RegrDataset(min_size=20,
                             max_size=50,
                             max_dim=100,
                             with_missing_data=False,
-                            stratified=True):
+                            attr_names=None,
+                            attr_types=None
+                            ):
     "Generates a random ClassificationDataset for use in testing."
 
     smallest = min(min_size, max_size)
@@ -253,6 +301,14 @@ def make_random_RegrDataset(min_size=20,
 
     num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
 
+    # attributes
+    if attr_names is not None:
+        if len(attr_names) != len(attr_types):
+            raise ValueError('Differing number of names and types for attributes!')
+        attrs = dict()
+        for name, typ in zip(attr_names, attr_types):
+            attrs[name] = attr_generator(typ, sample_size)
+
     ds = RegressionDataset()
 
     subids = ['s{}'.format(ix) for ix in range(sample_size)]
@@ -262,8 +318,11 @@ def make_random_RegrDataset(min_size=20,
         if with_missing_data:
             rand_loc = np.random.randint(num_features)
             features[rand_loc] = missing_value_indicator
-        if isinstance(ds, MLDataset):
-            ds.add_sample(sid, features, int(counter), target)
+
+        if attr_names is not None:
+            a_values = [attrs[a_name][counter] for a_name in attr_names]
+            ds.add_samplet(sid, features, target,
+                           attr_names=attr_names, attr_values=a_values)
         else:
             ds.add_samplet(sid, features, target)
 
