@@ -76,7 +76,7 @@ class BaseMultiDataset(object):
         """Actual loading of datasets"""
 
         for idx, ds in enumerate(dataset_spec):
-            self.append(ds, None)
+            self.append(ds, idx)
 
 
     def _get_id(self):
@@ -87,7 +87,7 @@ class BaseMultiDataset(object):
         return self.modality_count
 
 
-    def append(self, dataset, identifier=None):
+    def append(self, dataset, identifier):
         """
         Adds a dataset, if compatible with the existing ones.
 
@@ -107,7 +107,7 @@ class BaseMultiDataset(object):
                                          'You can only add instances of '
                                          'type {}'.format(self._dataset_class))
 
-        if identifier is None and len(dataset.description)>0:
+        if len(dataset.description)>0:
             identifier = dataset.description
 
         if not self._is_init:
