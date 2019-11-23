@@ -6,7 +6,8 @@ from pyradigm import (MultiDatasetClassify, MultiDatasetRegress,
                       ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import (make_random_ClfDataset, make_random_RegrDataset,
-                            make_random_dataset)
+                            make_random_dataset,
+                            dataset_with_new_features_same_everything_else)
 
 test_dir = dirname(__file__)
 out_dir = realpath(pjoin(test_dir, 'tmp'))
@@ -39,20 +40,6 @@ def make_fully_separable_classes(max_class_size=10, max_dim=22):
     return new_ds
 
 
-def new_dataset_with_same_ids_targets(in_ds):
-    feat_dim = np.random.randint(1, max_feat_dim)
-    out_ds = in_ds.__class__()
-    for id_ in in_ds.samplet_ids:
-        out_ds.add_samplet(id_,
-                           np.random.rand(feat_dim),
-                           target=in_ds.targets[id_])
-    # copying attr
-    out_ds.attr = in_ds.attr
-    out_ds.dataset_attr = in_ds.dataset_attr
-
-    return out_ds
-
-
 num_modalities = np.random.randint(min_num_modalities, max_num_modalities)
 
 
@@ -68,7 +55,8 @@ def test_holdout():
         multi = multi_class()
 
         for ii in range(num_modalities):
-            multi.append(new_dataset_with_same_ids_targets(ds), identifier=ii)
+            multi.append(dataset_with_new_features_same_everything_else(ds, max_feat_dim),
+                         identifier=ii)
 
         # for trn, tst in multi.holdout(num_rep=5, return_ids_only=True):
         #     print('train: {}\ntest: {}\n'.format(trn, tst))
@@ -102,7 +90,7 @@ def test_init_list_of_paths():
 
         paths = list()
         for ii in range(num_modalities):
-            new_ds = new_dataset_with_same_ids_targets(ds)
+            new_ds = dataset_with_new_features_same_everything_else(ds, max_feat_dim)
             path = pjoin(out_dir, 'ds{}.pkl'.format(ii))
             new_ds.save(path)
             paths.append(path)
@@ -126,7 +114,7 @@ def test_attributes():
         multi_ds = multi_cls()
         multi_ds.append(ds, 0)
         for ii in range(num_modalities - 1):
-            new_ds = new_dataset_with_same_ids_targets(ds)
+            new_ds = dataset_with_new_features_same_everything_else(ds, max_feat_dim)
             multi_ds.append(new_ds, ii + 1)
 
         if multi_ds.common_attr != ds.attr:

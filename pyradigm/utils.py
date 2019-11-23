@@ -342,3 +342,19 @@ def make_random_MLdataset(max_num_classes=20,
                                max_dim=max_dim,
                                stratified=stratified,
                                class_type=MLDataset)
+
+
+def dataset_with_new_features_same_everything_else(in_ds, max_feat_dim):
+    """Helper utility for MultiDataset purposes."""
+
+    feat_dim = np.random.randint(1, max_feat_dim)
+    out_ds = in_ds.__class__()
+    for id_ in in_ds.samplet_ids:
+        out_ds.add_samplet(id_,
+                           np.random.rand(feat_dim),
+                           target=in_ds.targets[id_])
+    # copying attr
+    out_ds.attr = in_ds.attr
+    out_ds.dataset_attr = in_ds.dataset_attr
+
+    return out_ds
