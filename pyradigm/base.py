@@ -587,6 +587,27 @@ class BaseDataset(ABC):
                              'Inner dicts must be keyed in by samplet ids.')
 
 
+    @property
+    def attr_dtype(self):
+        """Direct access to attr dtype"""
+
+        return self._attr_dtype
+
+
+    @attr_dtype.setter
+    def attr_dtype(self, values):
+        """Direct access to attr dtype"""
+
+        if not isinstance(values, dict):
+            raise ValueError('Attr dtype must be a dict')
+
+        if values.keys() != self._attr.keys():
+            raise ValueError('Differing set of attributes.'
+                             ' Current: {}'.format(self._attr.keys()))
+
+        self._attr_dtype = values
+
+
     def get_attr(self, attr_name, samplet_ids='all'):
         """
         Method to retrieve specified attribute for a list of samplet IDs
@@ -1132,6 +1153,7 @@ class BaseDataset(ABC):
         self._data = copy.deepcopy(other.data)
         self._targets = copy.deepcopy(other.targets)
         self._attr = copy.deepcopy(other.attr)
+        self._attr_dtype = copy.deepcopy(other.attr_dtype)
         self._dataset_attr = copy.deepcopy(other.dataset_attr)
         self._dtype = copy.deepcopy(other.dtype)
         self._description = copy.deepcopy(other.description)

@@ -356,5 +356,6 @@ def dataset_with_new_features_same_everything_else(in_ds, max_feat_dim):
     # copying attr
     out_ds.attr = in_ds.attr
     out_ds.dataset_attr = in_ds.dataset_attr
+    out_ds.attr_dtype = in_ds.attr_dtype
 
     return out_ds
