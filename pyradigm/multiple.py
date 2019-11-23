@@ -126,8 +126,10 @@ class BaseMultiDataset(object):
 
             if hasattr(dataset, 'attr'):
                 self._common_attr = dataset.attr
+                self._common_attr_dtype = dataset.attr_dtype
             else:
                 self._common_attr = dict()
+                self._common_attr_dtype = dict()
 
             self._attr = dict()
 
@@ -155,15 +157,18 @@ class BaseMultiDataset(object):
                 if len(self._common_attr) < 1:
                     # no attributes were set at all - simple copy sufficient
                     self._common_attr = dataset.attr.copy()
+                    self._common_attr_dtype = dataset.attr_dtype.copy()
                 else:
-                    for attr_name in dataset.attr:
-                        if attr_name not in self._common_attr:
-                            self._common_attr[attr_name] = dataset.attr[attr_name]
-                        elif self._common_attr[attr_name] != dataset.attr[attr_name]:
+                    for a_name in dataset.attr:
+                        if a_name not in self._common_attr:
+                            self._common_attr[a_name] = dataset.attr[a_name]
+                            self._common_attr_dtype[a_name] = \
+                                dataset.attr_dtype[a_name]
+                        elif self._common_attr[a_name] != dataset.attr[a_name]:
                             raise ValueError(
                                     'Values and/or IDs differ for attribute {}. '
                                     'Ensure all datasets have common attributes '
-                                    'with the same values'.format(attr_name))
+                                    'with the same values'.format(a_name))
 
 
         # each addition should be counted, if successful
