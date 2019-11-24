@@ -268,6 +268,25 @@ class BaseMultiDataset(object):
         return self._common_attr
 
 
+    def get_common_attr(self, names, subset, not_found_value=None):
+        """Helper to retrieve the requested attributes common to all datasets."""
+
+        data, dtypes = list(), list()
+        for name in names:
+            if name not in self._common_attr:
+                raise AttributeError('Attr {} not set for this MultiDataset'
+                                     ''.format(name))
+
+            this_data = np.array([self._common_attr[name].get(sid, not_found_value)
+                                  for sid in subset],
+                                 dtype=self._common_attr_dtype[name])
+
+            data.append(this_data)
+            dtypes.append(self._common_attr_dtype[name])
+
+        return data, dtypes
+
+
     def set_attr(self, ds_id, attr_name, attr_value):
         """Method to set modality-/dataset-specific attributes"""
 
