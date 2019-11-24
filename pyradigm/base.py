@@ -940,6 +940,7 @@ class BaseDataset(ABC):
                 attr_subset[attr] = self.__get_subset_from_dict(self._attr[attr],
                                                          subset_ids)
             sub_ds.attr = attr_subset
+            sub_ds.attr_dtype = self._attr_dtype.copy()
 
             return sub_ds
         else:
