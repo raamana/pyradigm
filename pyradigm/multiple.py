@@ -361,7 +361,12 @@ class MultiDatasetClassify(BaseMultiDataset):
         if subgroup is None or subgroup == target_set:
             ds_out = dataset
         elif subgroup < target_set: # < on sets is an issubset operation
+            new_id = '{}({}) {}'.format(dataset.description,
+                                        ','.join(subgroup),
+                                        identifier)
             ds_out = dataset.get_class(subgroup)
+            # overriding the "Subset derived from ... "
+            ds_out.description = new_id
         else:
             raise ValueError('One or more classes in {} does not exist in\n{}'
                              ''.format(sub_group, fp))
