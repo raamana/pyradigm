@@ -936,12 +936,13 @@ class BaseDataset(ABC):
             sub_ds._dtype = self.dtype
 
             # propagating attributes
-            attr_subset = dict()
+            attr_subset, attr_dtype_subset = dict(), dict()
             for attr in self._attr.keys():
                 attr_subset[attr] = self.__get_subset_from_dict(self._attr[attr],
                                                          subset_ids)
+                attr_dtype_subset[attr] = self._attr_dtype[attr]
             sub_ds.attr = attr_subset
-            sub_ds.attr_dtype = self._attr_dtype.copy()
+            sub_ds.attr_dtype = attr_dtype_subset
 
             return sub_ds
         else:
