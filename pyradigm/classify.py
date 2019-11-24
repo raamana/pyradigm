@@ -201,9 +201,8 @@ class ClassificationDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError(
-                    'These classes {} do not exist in this dataset.'.format(
-                        non_existent))
+            raise ValueError('Classes {} do not exist in this dataset.'
+                             ''.format(non_existent))
 
         subsets = list()
         for target_id in target_ids:
