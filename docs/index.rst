@@ -1,0 +1,36 @@
+
+pyradigm documentation
+========================================
+
+.. image:: https://travis-ci.org/raamana/pyradigm.svg?branch=master
+   :target: https://travis-ci.org/raamana/pyradigm
+.. image:: https://landscape.io/github/raamana/pyradigm/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/raamana/pyradigm/master
+   :alt: Code Health
+.. image:: https://api.codacy.com/project/badge/Grade/cffd80f290544e2e824011bfccf35ff8
+   :target: https://www.codacy.com/app/raamana/pyradigm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=raamana/pyradigm&amp;utm_campaign=Badge_Grade
+.. image:: https://img.shields.io/badge/python-3.5%2C%203.6-blue.svg
+   :alt: Python versions
+.. image:: https://badge.fury.io/py/pyradigm.svg
+   :target: https://badge.fury.io/py/pyradigm
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   about
+   installation
+   usage
+   usage_cli
+   API
+   API_classify
+   API_regress
+   citation
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
