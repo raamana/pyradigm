@@ -34,11 +34,19 @@ class InfiniteOrNaNValuesException(PyradigmException):
     """Custom exception to catch NaN or Inf values."""
 
 
+class CompatibilityException(PyradigmException):
+    """
+    Exception to indicate two datasets are not compatible in some way
+        i.e. differing set of samplet IDs, or their target values.
+    """
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
     return not isinstance(value, str) and isinstance(value, Iterable)
 
+
+missing_value_indicator = np.NaN
 
 class BaseDataset(ABC):
     """Abstract Base class for Dataset.
@@ -123,14 +131,14 @@ class BaseDataset(ABC):
         """
 
         sample_ids = np.array(self.samplet_ids)
-        label_dict = self.targets
         matrix = np.full([self.num_samplets, self.num_features], np.nan)
-        targets = np.empty([self.num_samplets, 1], dtype=self._target_type)
+        # dtype=object allows for variable length strings!
+        targets = np.empty([self.num_samplets, 1], dtype=object)
         for ix, samplet in enumerate(sample_ids):
             matrix[ix, :] = self._data[samplet]
-            targets[ix] = label_dict[samplet]
+            targets[ix] = self.targets[samplet]
 
-        return matrix, np.ravel(targets), sample_ids
+        return matrix, np.ravel(targets).astype(self._target_type), sample_ids
 
 
     @data.setter
@@ -419,17 +427,17 @@ class BaseDataset(ABC):
                         raise ValueError(
                             "supplied feature names do not match the existing names!")
 
-            if attr_names is not None:
-                if is_iterable_but_not_str(attr_names):
-                    if len(attr_names) != attr_values or \
-                            (not is_iterable_but_not_str(attr_values)):
-                        raise ValueError('When you supply a list for attr_names, '
-                                         'attr_values also must be a list of same '
-                                         'length')
-                    for name, value in zip(attr_names, attr_values):
-                        self.add_attr(samplet_id, name, value)
-                else:
-                    self.add_attr(samplet_id, attr_names, attr_values)
+        if attr_names is not None:
+            if is_iterable_but_not_str(attr_names):
+                if len(attr_names) != len(attr_values) or \
+                        (not is_iterable_but_not_str(attr_values)):
+                    raise ValueError('When you supply a list for attr_names, '
+                                     'attr_values also must be a list of same '
+                                     'length')
+                for name, value in zip(attr_names, attr_values):
+                    self.add_attr(name, samplet_id, value)
+            else:
+                self.add_attr(attr_names, samplet_id, attr_values)
 
 
     def del_samplet(self, sample_id):
@@ -552,6 +560,55 @@ class BaseDataset(ABC):
         return self._attr
 
 
+    @attr.setter
+    def attr(self, values):
+        """Batch setter of attributes via dict of dicts"""
+
+        if isinstance(values, dict):
+            for attr_name in values.keys():
+                this_attr = values[attr_name]
+                if not isinstance(this_attr, dict):
+                    raise TypeError('Value of attr {} must be a dict keyed in by '
+                                    'samplet ids.'.format(attr_name))
+                if len(this_attr) < 1:
+                    warn('Attribute {} is empty.'.format(attr_name))
+                    self._attr[attr_name] = dict()
+                else:
+                    existing_ids = set(self.samplet_ids).intersection(
+                            set(list(this_attr)))
+                    if len(existing_ids) < 1:
+                        raise ValueError('None of the samplets set for attr {}'
+                                         ' exist in dataset!'.format(attr_name))
+
+                    self._attr[attr_name] = self.__get_subset_from_dict(
+                            this_attr, existing_ids)
+        else:
+            raise ValueError('attrs input must be a non-empty dict of dicts! '
+                             'Top level key must be names of attributes. '
+                             'Inner dicts must be keyed in by samplet ids.')
+
+
+    @property
+    def attr_dtype(self):
+        """Direct access to attr dtype"""
+
+        return self._attr_dtype
+
+
+    @attr_dtype.setter
+    def attr_dtype(self, values):
+        """Direct access to attr dtype"""
+
+        if not isinstance(values, dict):
+            raise ValueError('Attr dtype must be a dict')
+
+        if values.keys() != self._attr.keys():
+            raise ValueError('Differing set of attributes.'
+                             ' Current: {}'.format(self._attr.keys()))
+
+        self._attr_dtype = values
+
+
     def get_attr(self, attr_name, samplet_ids='all'):
         """
         Method to retrieve specified attribute for a list of samplet IDs
@@ -650,6 +707,21 @@ class BaseDataset(ABC):
         """Returns dataset attributes"""
 
         return self._dataset_attr
+
+    @dataset_attr.setter
+    def dataset_attr(self, values):
+        """
+        Batch setter of dataset-wide attributes.
+        Existing attrs/values will be replaced.
+        """
+
+        if isinstance(values, dict):
+            # the following code will not affect attrs that already exist in the
+            # current but not in the new dict
+            for name, val in values.items():
+                self._dataset_attr[name] = val
+        else:
+            raise ValueError('dataset_attr input must be a non-empty dict!')
 
 
     def get_feature_subset(self, subset_idx):
@@ -857,12 +929,22 @@ class BaseDataset(ABC):
         if subset_ids is not None and num_existing_keys > 0:
             data = self.__get_subset_from_dict(self._data, subset_ids)
             targets = self.__get_subset_from_dict(self._targets, subset_ids)
-            subdataset = self.__class__(data=data, targets=targets)
+            sub_ds = self.__class__(data=data, targets=targets)
             # Appending the history
-            subdataset.description += '\n Subset derived from: ' + self.description
-            subdataset.feature_names = self._feature_names
-            subdataset._dtype = self.dtype
-            return subdataset
+            sub_ds.description += '\n Subset derived from: ' + self.description
+            sub_ds.feature_names = self._feature_names
+            sub_ds._dtype = self.dtype
+
+            # propagating attributes
+            attr_subset, attr_dtype_subset = dict(), dict()
+            for attr in self._attr.keys():
+                attr_subset[attr] = self.__get_subset_from_dict(self._attr[attr],
+                                                         subset_ids)
+                attr_dtype_subset[attr] = self._attr_dtype[attr]
+            sub_ds.attr = attr_subset
+            sub_ds.attr_dtype = attr_dtype_subset
+
+            return sub_ds
         else:
             warn('subset of IDs requested do not exist in the dataset!')
             return self.__class__()
@@ -1073,6 +1155,9 @@ class BaseDataset(ABC):
         """Copy constructor."""
         self._data = copy.deepcopy(other.data)
         self._targets = copy.deepcopy(other.targets)
+        self._attr = copy.deepcopy(other.attr)
+        self._attr_dtype = copy.deepcopy(other.attr_dtype)
+        self._dataset_attr = copy.deepcopy(other.dataset_attr)
         self._dtype = copy.deepcopy(other.dtype)
         self._description = copy.deepcopy(other.description)
         self._feature_names = copy.deepcopy(other.feature_names)

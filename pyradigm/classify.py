@@ -2,7 +2,7 @@ __all__ = ['ClassificationDataset', ]
 
 import random
 import warnings
-from collections import Counter, OrderedDict
+from collections import Counter
 from os.path import isfile, realpath
 
 import numpy as np
@@ -99,8 +99,8 @@ class ClassificationDataset(BaseDataset):
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
         elif data is None and targets is None:
-            self._data = OrderedDict()
-            self._targets = OrderedDict()
+            self._data = dict()
+            self._targets = dict()
             self._num_features = 0
             self._description = ''
             self._feature_names = None
@@ -109,10 +109,8 @@ class ClassificationDataset(BaseDataset):
             # but only in data and targets, not feature names
             self._validate(data, targets)
 
-            # OrderedDict to ensure the order is maintained when
-            # data/targets are returned in a matrix/array form
-            self._data = OrderedDict(data)
-            self._targets = OrderedDict(targets)
+            self._data = dict(data)
+            self._targets = dict(targets)
             self._description = description
 
             sample_ids = list(data)
@@ -203,9 +201,8 @@ class ClassificationDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError(
-                    'These classes {} do not exist in this dataset.'.format(
-                        non_existent))
+            raise ValueError('Classes {} do not exist in this dataset.'
+                             ''.format(non_existent))
 
         subsets = list()
         for target_id in target_ids:
@@ -448,7 +445,7 @@ class ClassificationDataset(BaseDataset):
 
     def summarize(self):
         """
-        Summary of classes: names, numeric labels and sizes
+        Summary of classes: names and sizes
 
         Returns
         -------
@@ -526,45 +523,3 @@ class ClassificationDataset(BaseDataset):
                                          'Switch to the latter ASAP.'))
         return self.data_and_targets()
 
-
-    def __dir__(self):
-        """"""
-
-        return ['add_attr',
-                'add_dataset_attr',
-                'add_samplet',
-                'attr',
-                'attr_summary',
-                'compatible',
-                'data',
-                'data_and_targets',
-                'dataset_attr',
-                'del_samplet',
-                'description',
-                'dtype',
-                'extend',
-                'feature_names',
-                'from_arff',
-                'get',
-                'get_class',
-                'get_data_matrix_in_order',
-                'get_feature_subset',
-                'get_subset',
-                'glance',
-                'num_features',
-                'num_samplets',
-                'num_targets',
-                'random_subset',
-                'random_subset_ids',
-                'random_subset_ids_by_count',
-                'rename_targets',
-                'sample_ids_in_class',
-                'samplet_ids',
-                'save',
-                'shape',
-                'summarize',
-                'target_set',
-                'target_sizes',
-                'targets',
-                'train_test_split_ids',
-                'transform']

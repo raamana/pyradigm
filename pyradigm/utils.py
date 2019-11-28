@@ -1,4 +1,7 @@
+
+from collections import Iterable
 import numpy as np
+from pyradigm.base import missing_value_indicator
 from pyradigm import ClassificationDataset, RegressionDataset
 from pyradigm.pyradigm import MLDataset
 
@@ -6,6 +9,48 @@ feat_generator = np.random.randn
 
 from pyradigm.base import is_iterable_but_not_str, BaseDataset
 from warnings import warn
+
+def load_dataset(ds_path):
+    """Convenience utility to quickly load any type of pyradigm dataset"""
+
+    try:
+        ds = ClassificationDataset(dataset_path=ds_path)
+    except:
+        try:
+            ds = RegressionDataset(dataset_path=ds_path)
+        except:
+            try:
+                warn('MLDtaset is deprecated. Switch to the latest pyradigm data '
+                     'structures such as ClassificationDataset or '
+                     'RegressionDataset as soon as possible.')
+                ds = MLDataset(filepath=ds_path)
+            except:
+                raise TypeError('Dataset class @ path below not recognized!'
+                                ' Must be a valid instance of one of '
+                                'ClassificationDataset or '
+                                'RegressionDataset or MLDataset.\n'
+                                ' Ignoring {}'.format(ds_path))
+
+    return ds
+
+
+def load_arff_dataset(ds_path):
+    """Convenience utility to quickly load ARFF files into pyradigm format"""
+
+    try:
+        ds = ClassificationDataset.from_arff(ds_path)
+    except:
+        try:
+            ds = RegressionDataset.from_arff(ds_path)
+        except:
+            try:
+                ds = MLDataset(arff_path=ds_path)
+            except:
+                raise TypeError('Error in loading the ARFF dataset @ path below!'
+                                ' Ignoring {}'.format(ds_path))
+
+    return ds
+
 
 def check_compatibility(datasets,
                         class_type,
@@ -119,12 +164,37 @@ def check_compatibility(datasets,
     return all(compatible), compatible, dim_mismatch, \
            (pivot.num_samplets, reqd_num_features)
 
+def attr_generator(attr_type, count):
+    """Generates distributions of a given type"""
+
+    attr_type = attr_type.lower()
+    if attr_type in ('int', 'age'):
+        return np.random.randint(100, size=count)
+    elif attr_type in ('float', 'weight'):
+        return 100*np.abs(np.random.rand(count))
+    elif attr_type in ('sex', 'gender'):
+        return np.random.choice(['male', 'female', 'other'], count, replace=True)
+    elif attr_type in ('site', ):
+        return np.random.choice(['site{}'.format(ss) for ss in range(6)],
+                                count, replace=True)
+    elif isinstance(attr_type, Iterable):
+        return np.random.choice(attr_type, count, replace=True)
+    else:
+        raise ValueError('Invalid type: must be int or float.'
+                         ' Or an array of values to sample from.'
+                         ' Type can also be age, sex, gender, weight, or site.')
+
+
 def make_random_dataset(max_num_classes=20,
                         min_class_size=20,
                         max_class_size=50,
                         max_dim=100,
                         stratified=True,
-                        class_type=ClassificationDataset):
+                        with_missing_data=False,
+                        class_type=ClassificationDataset,
+                        min_num_classes=2,
+                        attr_names=None,
+                        attr_types=None):
     "Generates a random Dataset for use in testing."
 
     smallest = min(min_class_size, max_class_size)
@@ -132,10 +202,13 @@ def make_random_dataset(max_num_classes=20,
     largest = max(50, max_class_size)
     largest = max(smallest + 3, largest)
 
-    if max_num_classes != 2:
-        num_classes = np.random.randint(2, max_num_classes, 1)
-    else:
-        num_classes = 2
+    if min_num_classes < 2:
+        min_num_classes = 2
+
+    if max_num_classes <= min_num_classes:
+        max_num_classes = min_num_classes
+
+    num_classes = np.random.randint(min_num_classes, max_num_classes, 1)
 
     if type(num_classes) == np.ndarray:
         num_classes = num_classes[0]
@@ -144,6 +217,7 @@ def make_random_dataset(max_num_classes=20,
     else:
         class_sizes = np.repeat(np.random.randint(smallest, largest), num_classes)
 
+    num_samplets = class_sizes.sum()
     num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
     # feat_names = [ str(x) for x in range(num_features)]
 
@@ -156,14 +230,34 @@ def make_random_dataset(max_num_classes=20,
             class_ids.append('class-{}'.format(cl))
         labels.append(int(cl))
 
+    # attributes
+    if attr_names is not None:
+        if len(attr_names) != len(attr_types):
+            raise ValueError('Differing number of names and types for attributes!')
+        attrs = dict()
+        for name, typ in zip(attr_names, attr_types):
+            attrs[name] = attr_generator(typ, num_samplets)
+
     ds = class_type()
+    s_index = 0
     for cc, class_ in enumerate(class_ids):
         subids = ['s{}-c{}'.format(ix, cc) for ix in range(class_sizes[cc])]
         for sid in subids:
+            features = feat_generator(num_features)
+            if with_missing_data:
+                rand_loc = np.random.randint(num_features)
+                features[rand_loc] = missing_value_indicator
             if isinstance(ds, MLDataset):
-                ds.add_sample(sid, feat_generator(num_features), int(cc), class_)
+                ds.add_sample(sid, features, int(cc), class_)
             else:
-                ds.add_samplet(sid, feat_generator(num_features), class_)
+                if attr_names is not None:
+                    a_values = [ attrs[a_name][s_index] for a_name in attr_names]
+                    ds.add_samplet(sid, features, class_,
+                                   attr_names=attr_names, attr_values=a_values)
+                else:
+                    ds.add_samplet(sid, features, class_)
+
+            s_index += 1
 
     return ds
 
@@ -172,7 +266,11 @@ def make_random_ClfDataset(max_num_classes=20,
                            min_class_size=20,
                            max_class_size=50,
                            max_dim=100,
-                           stratified=True):
+                           stratified=True,
+                           min_num_classes=2,
+                           attr_names=None,
+                           attr_types=None
+                           ):
     "Generates a random ClassificationDataset for use in testing."
 
     return make_random_dataset(max_num_classes=max_num_classes,
@@ -180,22 +278,55 @@ def make_random_ClfDataset(max_num_classes=20,
                                max_class_size=max_class_size,
                                max_dim=max_dim,
                                stratified=stratified,
-                               class_type=ClassificationDataset)
+                               class_type=ClassificationDataset,
+                               min_num_classes=min_num_classes,
+                               attr_names=attr_names, attr_types=attr_types)
 
 
-def make_random_RegrDataset(max_num_classes=20,
-                            min_class_size=20,
-                            max_class_size=50,
+def make_random_RegrDataset(min_size=20,
+                            max_size=50,
                             max_dim=100,
-                            stratified=True):
+                            with_missing_data=False,
+                            attr_names=None,
+                            attr_types=None
+                            ):
     "Generates a random ClassificationDataset for use in testing."
 
-    return make_random_dataset(max_num_classes=max_num_classes,
-                               min_class_size=min_class_size,
-                               max_class_size=max_class_size,
-                               max_dim=max_dim,
-                               stratified=stratified,
-                               class_type=RegressionDataset)
+    smallest = min(min_size, max_size)
+    max_size = max(min_size, max_size)
+    largest = max(50, max_size)
+    largest = max(smallest + 3, largest)
+
+    sample_size = np.random.randint(smallest, largest+1)
+
+    num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
+
+    # attributes
+    if attr_names is not None:
+        if len(attr_names) != len(attr_types):
+            raise ValueError('Differing number of names and types for attributes!')
+        attrs = dict()
+        for name, typ in zip(attr_names, attr_types):
+            attrs[name] = attr_generator(typ, sample_size)
+
+    ds = RegressionDataset()
+
+    subids = ['s{}'.format(ix) for ix in range(sample_size)]
+    for counter, sid in enumerate(subids):
+        features = feat_generator(num_features)
+        target = np.random.randint(sample_size)
+        if with_missing_data:
+            rand_loc = np.random.randint(num_features)
+            features[rand_loc] = missing_value_indicator
+
+        if attr_names is not None:
+            a_values = [attrs[a_name][counter] for a_name in attr_names]
+            ds.add_samplet(sid, features, target,
+                           attr_names=attr_names, attr_values=a_values)
+        else:
+            ds.add_samplet(sid, features, target)
+
+    return ds
 
 
 def make_random_MLdataset(max_num_classes=20,
@@ -211,3 +342,20 @@ def make_random_MLdataset(max_num_classes=20,
                                max_dim=max_dim,
                                stratified=stratified,
                                class_type=MLDataset)
+
+
+def dataset_with_new_features_same_everything_else(in_ds, max_feat_dim):
+    """Helper utility for MultiDataset purposes."""
+
+    feat_dim = np.random.randint(1, max_feat_dim)
+    out_ds = in_ds.__class__()
+    for id_ in in_ds.samplet_ids:
+        out_ds.add_samplet(id_,
+                           np.random.rand(feat_dim),
+                           target=in_ds.targets[id_])
+    # copying attr
+    out_ds.attr = in_ds.attr
+    out_ds.dataset_attr = in_ds.dataset_attr
+    out_ds.attr_dtype = in_ds.attr_dtype
+
+    return out_ds

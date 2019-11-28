@@ -8,7 +8,19 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-Usage/demo notebook (no setup required): 
+## CSVs suck. Upgrade your life with pyradigm
+
+The illustration below describes the full functionality of `pyradigm` in the latest version `0.6`, for which docs will be updated shortly (see below illustration for docs on previous versions):
+
+![flyer.png](docs/flyer.png)
+
+The value of pyradigm is even more appreciated in the management of multi-modal feature sets, which becomes more efficient and easier to manage.
+
+![multimodalflyer.png](docs/flyer_multimodal.png)
+
+## DOCS FOR THE DEPRECATED VERSION 
+
+Usage/demo notebook (no setup required) :
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb)
 
@@ -20,5 +32,6 @@ Installation : http://pyradigm.readthedocs.io/docs/installation.html
 Usage and examples: http://pyradigm.readthedocs.io/docs/usage.html
 
 Note: requires Python 3 or higher. Python 2 is not supported.
+
 
 [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/raamana)

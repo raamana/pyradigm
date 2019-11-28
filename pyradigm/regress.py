@@ -1,7 +1,7 @@
 __all__ = ['RegressionDataset', ]
 
 import random
-from collections import Counter, OrderedDict
+from collections import Counter
 from os.path import isfile, realpath
 from warnings import warn
 
@@ -97,8 +97,8 @@ class RegressionDataset(BaseDataset):
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
         elif data is None and targets is None:
-            self._data = OrderedDict()
-            self._targets = OrderedDict()
+            self._data = dict()
+            self._targets = dict()
             self._num_features = 0
             self._description = ''
             self._feature_names = None
@@ -107,10 +107,8 @@ class RegressionDataset(BaseDataset):
             # but only in data and targets, not feature names
             self._validate(data, targets)
 
-            # OrderedDict to ensure the order is maintained when
-            # data/targets are returned in a matrix/array form
-            self._data = OrderedDict(data)
-            self._targets = OrderedDict(targets)
+            self._data = dict(data)
+            self._targets = dict(targets)
             self._description = description
 
             sample_ids = list(data)
@@ -200,25 +198,14 @@ class RegressionDataset(BaseDataset):
 
         """
 
-        _ignore1, target_sizes = self.summarize()
-        smallest_class_size = np.min(target_sizes)
-
         if count is None and (0.0 < train_perc < 1.0):
-            if train_perc < 1.0 / smallest_class_size:
-                raise ValueError('Training percentage selected too low '
-                                 'to return even one samplet from the smallest '
-                                 'class!')
             train_set = self.random_subset_ids(train_perc)
         elif train_perc is None and count > 0:
-            if count >= smallest_class_size:
-                raise ValueError(
-                        'Selections would exclude the smallest class from test set. '
-                        'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count)
         else:
             raise ValueError('Invalid, or out of range selection: '
                              'only one of count or percentage '
-                             'can be used to select subset at a given time.')
+                             'can be specified for subset selection.')
 
         test_set = list(set(self.samplet_ids) - set(train_set))
 
@@ -452,44 +439,3 @@ class RegressionDataset(BaseDataset):
     def __repr__(self):
         return self.__str__()
 
-
-    def __dir__(self):
-        """"""
-
-        return ['add_attr',
-                'add_dataset_attr',
-                'add_samplet',
-                'attr',
-                'attr_summary',
-                'compatible',
-                'data',
-                'data_and_targets',
-                'dataset_attr',
-                'del_samplet',
-                'description',
-                'dtype',
-                'extend',
-                'feature_names',
-                'from_arff',
-                'get',
-                'get_data_matrix_in_order',
-                'get_feature_subset',
-                'get_subset',
-                'get_target',
-                'glance',
-                'num_features',
-                'num_samplets',
-                'num_targets',
-                'random_subset',
-                'random_subset_ids',
-                'random_subset_ids_by_count',
-                'samplet_ids_with_target',
-                'samplet_ids',
-                'save',
-                'shape',
-                'summarize',
-                'target_set',
-                'target_sizes',
-                'targets',
-                'train_test_split_ids',
-                'transform']

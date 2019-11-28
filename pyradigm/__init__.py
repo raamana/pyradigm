@@ -1,5 +1,5 @@
 
-__all__ = [ 'ClassificationDataset', 'RegressionDataset', 'MultiDataset',
+__all__ = [ 'ClassificationDataset', 'RegressionDataset',
             'BaseDataset', 'check_compatibility',
             'pyradigm', 'MLDataset', 'cli_run']
 
@@ -11,7 +11,7 @@ if version_info.major >= 3:
     from pyradigm.classify import ClassificationDataset
     from pyradigm.regress import RegressionDataset
     from pyradigm.pyradigm import MLDataset, cli_run
-    from pyradigm.multiple import MultiDataset
+    from pyradigm.multiple import MultiDatasetClassify, MultiDatasetRegress
     from pyradigm.utils import check_compatibility
 else:
     raise NotImplementedError('pyradigm supports only Python 3 or higher! '

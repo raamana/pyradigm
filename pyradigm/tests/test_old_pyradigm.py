@@ -68,7 +68,6 @@ empty_dataset = MLDataset()
 test2 = MLDataset()
 test3 = MLDataset()
 
-# TODO write tests for CLI
 
 def test_empty():
     assert not empty_dataset
@@ -224,7 +223,7 @@ def test_get_nonexisting_class():
 def test_rand_feat_subset():
     nf = copy_dataset.num_features
     subset_len = np.random.randint(1, nf)
-    subset= np.random.random_integers(1, nf-1, size=subset_len )
+    subset= np.random.randint(1, nf, size=subset_len )
     subds = copy_dataset.get_feature_subset(subset)
     assert subds.num_features == subset_len
 
