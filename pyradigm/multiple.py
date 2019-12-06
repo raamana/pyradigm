@@ -364,6 +364,7 @@ class MultiDatasetClassify(BaseMultiDataset):
         if subgroup is None or subgroup == target_set:
             ds_out = dataset
         elif subgroup < target_set: # < on sets is an issubset operation
+            subgroup = sorted(list(subgroup)) # ensure reproducibility
             new_id = '{}({}) {}'.format(dataset.description,
                                         ','.join(subgroup),
                                         identifier)
