@@ -1262,7 +1262,7 @@ class BaseDataset(ABC):
             self._validate(self._data, self._targets)
 
             # validating target type
-            if not np.issubdtype(_loaded_target_type, self._target_type):
+            if not np.issubdtype(_loaded_target_type, np.dtype(self._target_type)):
                 raise TypeError('Unexpected target type {}. It must be {} or alike!'
                                 ''.format(_loaded_target_type, self._target_type))
 
