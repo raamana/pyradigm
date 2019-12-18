@@ -1618,9 +1618,9 @@ def cli_run():
     if path_list:
         for ds_path in path_list:
             with catch_warnings():
-                simplefilter(action='once', category=DeprecationWarning)
-                simplefilter(action='once', category=UserWarning)
-                simplefilter(action='once', category=FutureWarning)
+                simplefilter(action='ignore', category=DeprecationWarning)
+                simplefilter(action='ignore', category=UserWarning)
+                simplefilter(action='ignore', category=FutureWarning)
 
                 ds = load_dataset(ds_path)
                 if summary_requested:
