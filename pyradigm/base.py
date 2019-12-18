@@ -1250,13 +1250,21 @@ class BaseDataset(ABC):
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
                 self._data, self._targets, \
-                self._dtype, self._target_type, self._description, \
+                self._dtype, _loaded_target_type, self._description, \
                 self._num_features, self._feature_names, \
                 self._attr, self._attr_dtype, self._dataset_attr = pickle.load(df)
         except IOError as ioe:
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
             raise
+        else:
+            # checking the mechanics, lengths, common dimensionality etc
+            self._validate(self._data, self._targets)
+
+            # validating target type
+            if not np.issubdtype(_loaded_target_type, self._target_type):
+                raise TypeError('Unexpected target type {}. It must be {} or alike!'
+                                ''.format(_loaded_target_type, self._target_type))
 
 
     def save(self, file_path,
