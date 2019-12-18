@@ -88,6 +88,10 @@ class BaseDataset(ABC):
 
         if np.issubdtype(dtype, np.generic):
             self._dtype = dtype
+        else:
+            raise TypeError('data type for features {} not recognized!'
+                            'It must be a subdtype of np.generic'
+                            ''.format(dtype))
 
         if not isinstance(allow_nan_inf, (bool, str)):
             raise TypeError('allow_nan_inf flag can only be bool or str')
