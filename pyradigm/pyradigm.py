@@ -9,7 +9,7 @@ import pickle
 import random
 import sys
 import traceback
-import warnings
+from warnings import warn, catch_warnings, filterwarnings, simplefilter
 from collections.abc import Sequence
 from collections import Counter, OrderedDict
 from itertools import islice
@@ -478,7 +478,7 @@ class MLDataset(object):
 
         """
         if sample_id not in self.__data:
-            warnings.warn('Sample to delete not found in the dataset - nothing to do.')
+            warn('Sample to delete not found in the dataset - nothing to do.')
         else:
             self.__data.pop(sample_id)
             self.__classes.pop(sample_id)
@@ -735,10 +735,10 @@ class MLDataset(object):
         subsets = list()
 
         if count_per_class < 1:
-            warnings.warn('Atleast one sample must be selected from each class')
+            warn('Atleast one sample must be selected from each class')
             return list()
         elif count_per_class >= self.num_samples:
-            warnings.warn('All samples requested - returning a copy!')
+            warn('All samples requested - returning a copy!')
             return self.keys
 
         # seeding the random number generator
@@ -754,7 +754,7 @@ class MLDataset(object):
             subset_size_this_class = max(0, min(class_size, count_per_class))
             if subset_size_this_class < 1 or this_class is None:
                 # warning if none were selected
-                warnings.warn('No subjects from class {} were selected.'.format(class_id))
+                warn('No subjects from class {} were selected.'.format(class_id))
             else:
                 subsets_this_class = this_class[0:count_per_class]
                 subsets.extend(subsets_this_class)
@@ -762,7 +762,7 @@ class MLDataset(object):
         if len(subsets) > 0:
             return subsets
         else:
-            warnings.warn('Zero samples were selected. Returning an empty list!')
+            warn('Zero samples were selected. Returning an empty list!')
             return list()
 
 
@@ -793,10 +793,10 @@ class MLDataset(object):
         subsets = list()
 
         if perc_per_class <= 0.0:
-            warnings.warn('Zero percentage requested - returning an empty dataset!')
+            warn('Zero percentage requested - returning an empty dataset!')
             return list()
         elif perc_per_class >= 1.0:
-            warnings.warn('Full or a larger dataset requested - returning a copy!')
+            warn('Full or a larger dataset requested - returning a copy!')
             return self.keys
 
         # seeding the random number generator
@@ -822,7 +822,7 @@ class MLDataset(object):
         if len(subsets) > 0:
             return subsets
         else:
-            warnings.warn('Zero samples were selected. Returning an empty list!')
+            warn('Zero samples were selected. Returning an empty list!')
             return list()
 
 
@@ -846,7 +846,7 @@ class MLDataset(object):
         if len(subsets) > 0:
             return self.get_subset(subsets)
         else:
-            warnings.warn('Zero samples were selected. Returning an empty dataset!')
+            warn('Zero samples were selected. Returning an empty dataset!')
             return MLDataset()
 
 
@@ -906,7 +906,7 @@ class MLDataset(object):
             subdataset.__dtype = self.dtype
             return subdataset
         else:
-            warnings.warn('subset of IDs requested do not exist in the dataset!')
+            warn('subset of IDs requested do not exist in the dataset!')
             return MLDataset()
 
 
@@ -926,7 +926,7 @@ class MLDataset(object):
         """
 
         if len(subset_ids) < 1:
-            warnings.warn('subset must have atleast one ID - returning empty matrix!')
+            warn('subset must have atleast one ID - returning empty matrix!')
             return np.empty((0, 0))
 
         if isinstance(subset_ids, set):
@@ -1053,7 +1053,7 @@ class MLDataset(object):
                 raise TypeError('Invalid data type.')
             self.__dtype = type_val
         else:
-            warnings.warn('Data type is already inferred. Can not be set!')
+            warn('Data type is already inferred. Can not be set!')
 
 
     @property
@@ -1442,10 +1442,10 @@ class MLDataset(object):
 
         num_existing_keys = len(set(self.keys).intersection(other.keys))
         if num_existing_keys < 1:
-            warnings.warn('None of the sample ids to be removed found in this dataset '
+            warn('None of the sample ids to be removed found in this dataset '
                           '- nothing to do.')
         if len(self.keys) == num_existing_keys:
-            warnings.warn(
+            warn(
                 'Requested removal of all the samples - output dataset would be empty.')
 
         removed = copy.deepcopy(self)
@@ -1570,7 +1570,7 @@ def check_compatibility(datasets, reqd_num_features=None):
         pivot = MLDataset(pivot)
 
     if check_dimensionality and pivot.num_features != reqd_num_features[0]:
-        warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+        warn('Dimensionality mismatch! Expected {} whereas current {}.'
                       ''.format(reqd_num_features[0], pivot.num_features))
         dim_mismatch = True
 
@@ -1587,7 +1587,7 @@ def check_compatibility(datasets, reqd_num_features=None):
             is_compatible = False
 
         if check_dimensionality and reqd_dim != ds.num_features:
-            warnings.warn('Dimensionality mismatch! Expected {} whereas current {}.'
+            warn('Dimensionality mismatch! Expected {} whereas current {}.'
                           ''.format(reqd_dim, ds.num_features))
             dim_mismatch = True
 
@@ -1617,11 +1617,16 @@ def cli_run():
     # printing info if requested
     if path_list:
         for ds_path in path_list:
-            ds = load_dataset(ds_path)
-            if summary_requested:
-                print_info(ds, ds_path)
-            if meta_requested:
-                print_meta(ds, ds_path)
+            with catch_warnings():
+                simplefilter(action='once', category=DeprecationWarning)
+                simplefilter(action='once', category=UserWarning)
+                simplefilter(action='once', category=FutureWarning)
+
+                ds = load_dataset(ds_path)
+                if summary_requested:
+                    print_info(ds, ds_path)
+                if meta_requested:
+                    print_meta(ds, ds_path)
 
     # combining datasets
     if add_path_list:
