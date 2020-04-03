@@ -1,6 +1,7 @@
 import random
 from warnings import warn
-from collections import Iterable, Counter
+from collections.abc import Iterable
+from collections import Counter
 from copy import copy
 from operator import itemgetter
 from sys import version_info

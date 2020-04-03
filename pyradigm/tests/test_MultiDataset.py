@@ -1,13 +1,14 @@
-import numpy as np
-from os.path import join as pjoin, exists as pexists, realpath, dirname
-from os import makedirs
 from functools import partial
-from pyradigm import (MultiDatasetClassify, MultiDatasetRegress,
-                      ClassificationDataset as ClfDataset,
-                      RegressionDataset as RegrDataset)
-from pyradigm.utils import (make_random_ClfDataset, make_random_RegrDataset,
-                            make_random_dataset,
-                            dataset_with_new_features_same_everything_else)
+from os import makedirs
+from os.path import dirname, join as pjoin, realpath
+
+import numpy as np
+
+from pyradigm import (ClassificationDataset as ClfDataset, MultiDatasetClassify,
+                      MultiDatasetRegress, RegressionDataset as RegrDataset)
+from pyradigm.utils import (dataset_with_new_features_same_everything_else,
+                            make_random_ClfDataset, make_random_RegrDataset,
+                            make_random_dataset)
 
 test_dir = dirname(__file__)
 out_dir = realpath(pjoin(test_dir, 'tmp'))
@@ -16,8 +17,6 @@ makedirs(out_dir, exist_ok=True)
 min_num_modalities = 3
 max_num_modalities = 10
 max_feat_dim = 10
-
-ds_class = RegrDataset
 
 
 def make_fully_separable_classes(max_class_size=10, max_dim=22):
