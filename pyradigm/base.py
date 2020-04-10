@@ -88,6 +88,10 @@ class BaseDataset(ABC):
 
         if np.issubdtype(dtype, np.generic):
             self._dtype = dtype
+        else:
+            raise TypeError('data type for features {} not recognized!'
+                            'It must be a subdtype of np.generic'
+                            ''.format(dtype))
 
         if not isinstance(allow_nan_inf, (bool, str)):
             raise TypeError('allow_nan_inf flag can only be bool or str')
@@ -1245,21 +1249,26 @@ class BaseDataset(ABC):
 
     def _load(self, path):
         """Method to load the serialized dataset from disk."""
+
         try:
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
                 self._data, self._targets, \
-                self._dtype, self._target_type, self._description, \
+                self._dtype, _loaded_target_type, self._description, \
                 self._num_features, self._feature_names, \
                 self._attr, self._attr_dtype, self._dataset_attr = pickle.load(df)
-
-            # ensure the loaded dataset is valid
-            self._validate(self._data, self._targets)
-
         except IOError as ioe:
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
             raise
+        else:
+            # checking the mechanics, lengths, common dimensionality etc
+            self._validate(self._data, self._targets)
+
+            # validating target type
+            if not np.issubdtype(_loaded_target_type, np.dtype(self._target_type)):
+                raise TypeError('Unexpected target type {}. It must be {} or alike!'
+                                ''.format(_loaded_target_type, self._target_type))
 
 
     def save(self, file_path,
@@ -1331,15 +1340,14 @@ class BaseDataset(ABC):
 
     @staticmethod
     def _validate(data, targets):
-        "Validator of inputs."
+        "checking the mechanics, lengths, common dimensionality etc"
 
         if not isinstance(data, dict):
-            raise TypeError(
-                'data must be a dict! keys: samplet ID or any unique identifier')
+            raise TypeError('data must be a dict! '
+                            'keys: samplet ID or any unique identifier')
         if not isinstance(targets, dict):
-            raise TypeError(
-                'targets must be a dict! keys: samplet ID or any unique identifier')
-
+            raise TypeError('targets must be a dict! '
+                            'keys: samplet ID or any unique identifier')
         if not len(data) == len(targets):
             raise ValueError('Lengths of data, targets and classes do not match!')
         if not set(list(data)) == set(list(targets)):
@@ -1347,8 +1355,9 @@ class BaseDataset(ABC):
 
         num_features_in_elements = [samplet.size for samplet in data.values()]
         if len(np.unique(num_features_in_elements)) > 1:
-            raise ValueError('Different samplets have different number of features - '
-                              'invalid!')
+            raise ValueError('Different samplets have different number of features '
+                             '- invalid! Different dimensionalities detected: {}'
+                             ''.format(num_features_in_elements))
 
         return True
 

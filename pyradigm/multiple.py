@@ -1,6 +1,7 @@
 import random
 from warnings import warn
-from collections import Iterable, Counter
+from collections.abc import Iterable
+from collections import Counter
 from copy import copy
 from operator import itemgetter
 from sys import version_info
@@ -59,6 +60,7 @@ class BaseMultiDataset(object):
         self._modalities = dict()
         self._labels = dict()
 
+        self.feature_names = dict()
         self.num_features = list()
 
         # TODO more efficient internal repr is possible as ids/classes do not need be
@@ -117,6 +119,7 @@ class BaseMultiDataset(object):
 
             self.num_samplets = len(self._ids)
             self._modalities[identifier] = dataset.data
+            self.feature_names[identifier] = dataset.feature_names
             self.num_features.append(dataset.num_features)
 
             # maintaining a no-data pyradigm Dataset internally to reuse its methods
@@ -148,6 +151,7 @@ class BaseMultiDataset(object):
 
             if identifier not in self._modalities:
                 self._modalities[identifier] = dataset.data
+                self.feature_names[identifier] = dataset.feature_names
                 self.num_features.append(dataset.num_features)
             else:
                 raise KeyError('{} already exists in MultiDataset'
@@ -182,8 +186,8 @@ class BaseMultiDataset(object):
 
     @property
     def modality_ids(self):
-        """List of identifiers for all modalities"""
-        return list(self._modalities.keys())
+        """List of identifiers for all modalities, sorted for reproducibility."""
+        return sorted(list(self._modalities.keys()))
 
     @abstractmethod
     def __str__(self):
@@ -361,6 +365,7 @@ class MultiDatasetClassify(BaseMultiDataset):
         if subgroup is None or subgroup == target_set:
             ds_out = dataset
         elif subgroup < target_set: # < on sets is an issubset operation
+            subgroup = sorted(list(subgroup)) # ensure reproducibility
             new_id = '{}({}) {}'.format(dataset.description,
                                         ','.join(subgroup),
                                         identifier)

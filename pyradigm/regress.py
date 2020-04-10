@@ -357,7 +357,7 @@ class RegressionDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError('These classes {} do not exist in this dataset.'
+            raise ValueError('These targets {} do not exist in this dataset.'
                              ''.format(non_existent))
 
         subsets = list()
