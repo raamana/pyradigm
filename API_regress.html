@@ -1,0 +1,926 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API for Regression dataset &mdash; pyradigm 0.6+58.g1c5fab3.dirty documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyradigm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6+58.g1c5fab3.dirty
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Features and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_dataset.html">MultiDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API_classify.html">API for Classification dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API for Regression dataset</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="API_multi_dataset.html">API for MultiDataset containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_cli.html">Command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyradigm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API for Regression dataset</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/API_regress.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-for-regression-dataset">
+<h1>API for Regression dataset<a class="headerlink" href="#api-for-regression-dataset" title="Permalink to this headline">¶</a></h1>
+<p>A tutorial-like presentation is available at <a class="reference internal" href="usage.html"><span class="doc">Features and usage</span></a>, which teaches the overall usage pattern and how to use the following API for the <code class="docutils literal notranslate"><span class="pre">RegressionDataset</span></code>.</p>
+<span class="target" id="module-pyradigm.regress"></span><dl class="class">
+<dt id="pyradigm.regress.RegressionDataset">
+<em class="property">class </em><code class="sig-prename descclassname">pyradigm.regress.</code><code class="sig-name descname">RegressionDataset</code><span class="sig-paren">(</span><em class="sig-param">dataset_path=None</em>, <em class="sig-param">in_dataset=None</em>, <em class="sig-param">data=None</em>, <em class="sig-param">targets=None</em>, <em class="sig-param">description=''</em>, <em class="sig-param">feature_names=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float64'&gt;</em>, <em class="sig-param">allow_nan_inf=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyradigm.base.BaseDataset</span></code></p>
+<p>RegressionDataset where target values are numeric (such as float or int)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.attr" title="pyradigm.regress.RegressionDataset.attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr</span></code></a></dt><dd><p>Returns attributes dictionary, keyed-in by [attr_name][samplet_id]</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.attr_dtype" title="pyradigm.regress.RegressionDataset.attr_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_dtype</span></code></a></dt><dd><p>Direct access to attr dtype</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.data" title="pyradigm.regress.RegressionDataset.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a></dt><dd><p>data in its original dict form.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.dataset_attr" title="pyradigm.regress.RegressionDataset.dataset_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataset_attr</span></code></a></dt><dd><p>Returns dataset attributes</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.description" title="pyradigm.regress.RegressionDataset.description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code></a></dt><dd><p>Text description (header) that can be set by user.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.dtype" title="pyradigm.regress.RegressionDataset.dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtype</span></code></a></dt><dd><p>Returns the data type of the features in the Dataset</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.feature_names" title="pyradigm.regress.RegressionDataset.feature_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_names</span></code></a></dt><dd><p>Returns the feature names as an numpy array of strings.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.num_features" title="pyradigm.regress.RegressionDataset.num_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_features</span></code></a></dt><dd><p>number of features in each samplet.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.num_samplets" title="pyradigm.regress.RegressionDataset.num_samplets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_samplets</span></code></a></dt><dd><p>number of samplets in the entire dataset.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.num_targets" title="pyradigm.regress.RegressionDataset.num_targets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_targets</span></code></a></dt><dd><p>Total number of unique classes in the dataset.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.samplet_ids" title="pyradigm.regress.RegressionDataset.samplet_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids</span></code></a></dt><dd><p>Sample identifiers (strings) forming the basis of Dataset</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.shape" title="pyradigm.regress.RegressionDataset.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></dt><dd><p>Returns the pythonic shape of the dataset: num_samplets x num_features.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.target_set" title="pyradigm.regress.RegressionDataset.target_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_set</span></code></a></dt><dd><p>Set of unique classes in the dataset.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.target_sizes" title="pyradigm.regress.RegressionDataset.target_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_sizes</span></code></a></dt><dd><p>Returns the sizes of different objects in a Counter object.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.regress.RegressionDataset.targets" title="pyradigm.regress.RegressionDataset.targets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">targets</span></code></a></dt><dd><p>Returns the array of targets for all the samplets.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.add_attr" title="pyradigm.regress.RegressionDataset.add_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_attr</span></code></a>(self, attr_name, samplet_id, attr_value)</p></td>
+<td><p>Method to add samplet-wise attributes to the dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.add_dataset_attr" title="pyradigm.regress.RegressionDataset.add_dataset_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_dataset_attr</span></code></a>(self, attr_name, attr_value)</p></td>
+<td><p>Adds dataset-wide attributes (common to all samplets).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.add_samplet" title="pyradigm.regress.RegressionDataset.add_samplet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_samplet</span></code></a>(self, samplet_id, features, target)</p></td>
+<td><p>Adds a new samplet to the dataset with its features, label and class ID.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.attr_summary" title="pyradigm.regress.RegressionDataset.attr_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_summary</span></code></a>(self)</p></td>
+<td><p>Simple summary of attributes currently stored in the dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.data_and_targets" title="pyradigm.regress.RegressionDataset.data_and_targets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_and_targets</span></code></a>(self)</p></td>
+<td><p>Dataset features and targets in a matrix form for learning.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.del_attr" title="pyradigm.regress.RegressionDataset.del_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">del_attr</span></code></a>(self, attr_name[, samplet_ids])</p></td>
+<td><p>Method to retrieve specified attribute for a list of samplet IDs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.del_samplet" title="pyradigm.regress.RegressionDataset.del_samplet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">del_samplet</span></code></a>(self, sample_id)</p></td>
+<td><p>Method to remove a samplet from the dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.extend" title="pyradigm.regress.RegressionDataset.extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code></a>(self, other)</p></td>
+<td><p>Method to extend the dataset vertically (add samplets from  anotehr dataset).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.from_arff" title="pyradigm.regress.RegressionDataset.from_arff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_arff</span></code></a>(arff_path[, encode_nonnumeric])</p></td>
+<td><p>Loads a given dataset saved in Weka’s ARFF format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get" title="pyradigm.regress.RegressionDataset.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(self, item[, not_found_value])</p></td>
+<td><p>Method like dict.get() which can return specified value if key not found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get_attr" title="pyradigm.regress.RegressionDataset.get_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attr</span></code></a>(self, attr_name[, samplet_ids])</p></td>
+<td><p>Method to retrieve specified attribute for a list of samplet IDs</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get_data_matrix_in_order" title="pyradigm.regress.RegressionDataset.get_data_matrix_in_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data_matrix_in_order</span></code></a>(self, subset_ids)</p></td>
+<td><p>Returns a numpy array of features, rows in the same order as subset_ids</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get_feature_subset" title="pyradigm.regress.RegressionDataset.get_feature_subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_subset</span></code></a>(self, subset_idx)</p></td>
+<td><p>Returns the subset of features indexed numerically.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get_subset" title="pyradigm.regress.RegressionDataset.get_subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subset</span></code></a>(self, subset_ids)</p></td>
+<td><p>Returns a smaller dataset identified by their keys/samplet IDs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.get_target" title="pyradigm.regress.RegressionDataset.get_target"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_target</span></code></a>(self, target_id)</p></td>
+<td><p>Returns a smaller dataset of samplets with the requested target.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.glance" title="pyradigm.regress.RegressionDataset.glance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glance</span></code></a>(self[, nitems])</p></td>
+<td><p>Quick and partial glance of the data matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.random_subset" title="pyradigm.regress.RegressionDataset.random_subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_subset</span></code></a>(self[, perc])</p></td>
+<td><p>Returns a random sub-dataset (of specified size by percentage) within each class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.random_subset_ids" title="pyradigm.regress.RegressionDataset.random_subset_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_subset_ids</span></code></a>(self[, perc])</p></td>
+<td><p>Returns a random subset of sample ids, of size percentage*num_samplets</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.random_subset_ids_by_count" title="pyradigm.regress.RegressionDataset.random_subset_ids_by_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_subset_ids_by_count</span></code></a>(self[, count])</p></td>
+<td><p>Returns a random subset of sample ids, of size percentage*num_samplets</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.samplet_ids_with_target" title="pyradigm.regress.RegressionDataset.samplet_ids_with_target"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids_with_target</span></code></a>(self, target_id)</p></td>
+<td><p>Returns a list of samplet ids with a given target_id</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.save" title="pyradigm.regress.RegressionDataset.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(self, file_path[, …])</p></td>
+<td><p>Method to save the dataset to disk.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.summarize" title="pyradigm.regress.RegressionDataset.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>(self)</p></td>
+<td><p>Summary of classes: names, numeric labels and sizes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.train_test_split_ids" title="pyradigm.regress.RegressionDataset.train_test_split_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train_test_split_ids</span></code></a>(self[, train_perc, count])</p></td>
+<td><p>Returns two disjoint sets of samplet ids for use in cross-validation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset.transform" title="pyradigm.regress.RegressionDataset.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(self, func[, func_description])</p></td>
+<td><p>Applies a given a function to the features of each subject</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.add_attr">
+<code class="sig-name descname">add_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">samplet_id</em>, <em class="sig-param">attr_value</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.add_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to add samplet-wise attributes to the dataset.</p>
+<p>Note: attribute values get overwritten by default, if they already exist
+for a given samplet</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_name</strong> (<em>str</em>) – Name of the attribute to be added.</p></li>
+<li><p><strong>samplet_id</strong> (<em>str</em><em> or </em><em>list of str</em>) – Identifier(s) for the samplet</p></li>
+<li><p><strong>attr_value</strong> (<em>generic</em><em> or </em><em>list of generic</em>) – Value(s) of the attribute. Any data type allowed, although it is
+strongly recommended to keep the data type the same, or compatible,
+across all the samplets in this dataset.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.add_dataset_attr">
+<code class="sig-name descname">add_dataset_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">attr_value</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.add_dataset_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds dataset-wide attributes (common to all samplets).</p>
+<p>This is a great way to add meta data (such as version, processing details,
+anything else common to all samplets). This is better than encoding the info
+into the description field, as this allow programmatic retrieval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_name</strong> (<em>str</em>) – Identifier for the attribute</p></li>
+<li><p><strong>attr_value</strong> (<em>object</em>) – Value of the attribute (any datatype)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.add_samplet">
+<code class="sig-name descname">add_samplet</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">samplet_id</em>, <em class="sig-param">features</em>, <em class="sig-param">target</em>, <em class="sig-param">overwrite=False</em>, <em class="sig-param">feature_names=None</em>, <em class="sig-param">attr_names=None</em>, <em class="sig-param">attr_values=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.add_samplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new samplet to the dataset with its features, label and class ID.</p>
+<p>This is the preferred way to construct the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samplet_id</strong> (<em>str</em>) – An identifier uniquely identifies this samplet.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em>, </em><em>ndarray</em>) – The features for this samplet</p></li>
+<li><p><strong>target</strong> (<em>int</em><em>, </em><em>str</em>) – The label for this samplet</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em>) – If True, allows the overwite of features for an existing subject ID.
+Default : False.</p></li>
+<li><p><strong>feature_names</strong> (<em>list</em>) – The names for each feature. Assumed to be in the same order as <cite>features</cite></p></li>
+<li><p><strong>attr_names</strong> (<em>str</em><em> or </em><em>list of str</em>) – Name of the attribute to be added for this samplet</p></li>
+<li><p><strong>attr_values</strong> (<em>generic</em><em> or </em><em>list of generic</em>) – Value of the attribute. Any data type allowed as long as they are
+compatible across all the samplets in this dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <cite>samplet_id</cite> is already in the Dataset (and overwrite=False), or
+If dimensionality of the current samplet does not match the current, or
+If <cite>feature_names</cite> do not match existing names</p></li>
+<li><p><strong>TypeError</strong> – If samplet to be added is of different data type compared to existing
+samplets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.attr">
+<em class="property">property </em><code class="sig-name descname">attr</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns attributes dictionary, keyed-in by [attr_name][samplet_id]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.attr_dtype">
+<em class="property">property </em><code class="sig-name descname">attr_dtype</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.attr_dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direct access to attr dtype</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.attr_summary">
+<code class="sig-name descname">attr_summary</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.attr_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple summary of attributes currently stored in the dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.data">
+<em class="property">property </em><code class="sig-name descname">data</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>data in its original dict form.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.data_and_targets">
+<code class="sig-name descname">data_and_targets</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.data_and_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataset features and targets in a matrix form for learning.</p>
+<p>Also returns samplet_ids in the same order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>data_matrix</strong> (<em>ndarray</em>) – 2D array of shape [num_samplets, num_features]
+with features corresponding row-wise to samplet_ids</p></li>
+<li><p><strong>targets</strong> (<em>ndarray</em>) – Array of numeric targets for each samplet corresponding row-wise to samplet_ids</p></li>
+<li><p><strong>samplet_ids</strong> (<em>list</em>) – List of samplet ids</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.dataset_attr">
+<em class="property">property </em><code class="sig-name descname">dataset_attr</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.dataset_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dataset attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.del_attr">
+<code class="sig-name descname">del_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">samplet_ids='all'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.del_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to retrieve specified attribute for a list of samplet IDs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_name</strong> (<em>str</em>) – Name of the attribute</p></li>
+<li><p><strong>samplet_ids</strong> (<em>str</em><em> or </em><em>list</em>) – One or more samplet IDs whose attribute is being queried.
+Default: ‘all’, all the existing samplet IDs will be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Warning</strong> – If attr_name was never set for this dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.del_samplet">
+<code class="sig-name descname">del_samplet</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">sample_id</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.del_samplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to remove a samplet from the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample_id</strong> (<em>str</em>) – samplet id to be removed.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>UserWarning</strong> – If samplet id to delete was not found in the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.description">
+<em class="property">property </em><code class="sig-name descname">description</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text description (header) that can be set by user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.dtype">
+<em class="property">property </em><code class="sig-name descname">dtype</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the data type of the features in the Dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.extend">
+<code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to extend the dataset vertically (add samplets from  anotehr dataset).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>Dataset</em>) – second dataset to be combined with the current
+(different samplets, but same dimensionality)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>TypeError</strong> – if input is not an Dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.feature_names">
+<em class="property">property </em><code class="sig-name descname">feature_names</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the feature names as an numpy array of strings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.from_arff">
+<em class="property">classmethod </em><code class="sig-name descname">from_arff</code><span class="sig-paren">(</span><em class="sig-param">arff_path</em>, <em class="sig-param">encode_nonnumeric=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.from_arff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a given dataset saved in Weka’s ARFF format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arff_path</strong> (<em>str</em>) – Path to a dataset saved in Weka’s ARFF file format.</p></li>
+<li><p><strong>encode_nonnumeric</strong> (<em>bool</em>) – Flag to specify whether to encode non-numeric features (categorical,
+nominal or string) features to numeric values.
+Currently used only when importing ARFF files.
+It is usually better to encode your data at the source,
+and then import them. Use with caution!</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">item</em>, <em class="sig-param">not_found_value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method like dict.get() which can return specified value if key not found</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get_attr">
+<code class="sig-name descname">get_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">samplet_ids='all'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to retrieve specified attribute for a list of samplet IDs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_name</strong> (<em>str</em>) – Name of the attribute</p></li>
+<li><p><strong>samplet_ids</strong> (<em>str</em><em> or </em><em>list</em>) – One or more samplet IDs whose attribute is being queried.
+Default: ‘all’, all the existing samplet IDs will be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>attr_values</strong> – Attribute values for the list of samplet IDs</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If attr_name was never set for dataset, or any of the samplets requested</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get_data_matrix_in_order">
+<code class="sig-name descname">get_data_matrix_in_order</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">subset_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get_data_matrix_in_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a numpy array of features, rows in the same order as subset_ids</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subset_ids</strong> (<em>list</em>) – List od samplet IDs to extracted from the dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>matrix</strong> – Matrix of features, for each id in subset_ids, in order.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get_feature_subset">
+<code class="sig-name descname">get_feature_subset</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">subset_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get_feature_subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the subset of features indexed numerically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subset_idx</strong> (<em>list</em><em>, </em><em>ndarray</em>) – List of indices to features to be returned</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Dataset</strong> – with subset of features requested.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dataset</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>UnboundLocalError</strong> – If input indices are out of bounds for the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get_subset">
+<code class="sig-name descname">get_subset</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">subset_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get_subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a smaller dataset identified by their keys/samplet IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subset_ids</strong> (<em>list</em>) – List od samplet IDs to extracted from the dataset.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>sub-dataset</strong> – sub-dataset containing only requested samplet IDs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.get_target">
+<code class="sig-name descname">get_target</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">target_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.get_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.get_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a smaller dataset of samplets with the requested target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target_id</strong> (<em>str</em><em> or </em><em>list</em>) – identifier(s) of the class(es) to be returned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>With subset of samples belonging to the given class(es).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset" title="pyradigm.regress.RegressionDataset">RegressionDataset</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If one or more of the requested classes do not exist in this dataset.
+If the specified id is empty or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.glance">
+<code class="sig-name descname">glance</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">nitems=5</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.glance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quick and partial glance of the data matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nitems</strong> (<em>int</em>) – Number of items to glance from the dataset.
+Default : 5</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.num_features">
+<em class="property">property </em><code class="sig-name descname">num_features</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.num_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>number of features in each samplet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.num_samplets">
+<em class="property">property </em><code class="sig-name descname">num_samplets</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.num_samplets" title="Permalink to this definition">¶</a></dt>
+<dd><p>number of samplets in the entire dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.num_targets">
+<em class="property">property </em><code class="sig-name descname">num_targets</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.num_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of unique classes in the dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.random_subset">
+<code class="sig-name descname">random_subset</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">perc=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.random_subset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.random_subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a random sub-dataset (of specified size by percentage) within each
+class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perc</strong> (<em>float</em>) – Fraction of samples to be taken from the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>subdataset</strong> – random sub-dataset of specified size.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pyradigm.regress.RegressionDataset" title="pyradigm.regress.RegressionDataset">RegressionDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.random_subset_ids">
+<code class="sig-name descname">random_subset_ids</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">perc=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.random_subset_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.random_subset_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a random subset of sample ids, of size percentage*num_samplets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>perc</strong> (<em>float</em>) – Fraction of the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>subset</strong> – List of samplet ids</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If no subjects from one or more classes were selected.</p></li>
+<li><p><strong>UserWarning</strong> – If an empty or full dataset is requested.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.random_subset_ids_by_count">
+<code class="sig-name descname">random_subset_ids_by_count</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">count=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.random_subset_ids_by_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.random_subset_ids_by_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a random subset of sample ids, of size percentage*num_samplets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>count</strong> (<em>float</em>) – Fraction of dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>subset</strong> – List of samplet ids</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If no subjects from one or more classes were selected.</p></li>
+<li><p><strong>UserWarning</strong> – If an empty or full dataset is requested.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.samplet_ids">
+<em class="property">property </em><code class="sig-name descname">samplet_ids</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.samplet_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample identifiers (strings) forming the basis of Dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.samplet_ids_with_target">
+<code class="sig-name descname">samplet_ids_with_target</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">target_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.samplet_ids_with_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.samplet_ids_with_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of samplet ids with a given target_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target_id</strong> (<em>float</em>) – Value of the target to query</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>subset_ids</strong> – List of samplet ids belonging to a given target_id.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">file_path</em>, <em class="sig-param">allow_constant_features=False</em>, <em class="sig-param">allow_constant_features_across_samplets=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to save the dataset to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – File path to save the current dataset to</p></li>
+<li><p><strong>allow_constant_features</strong> (<em>bool</em>) – Flag indicating whether to allow all the values for features for a
+samplet to be identical (e.g. all zeros). This flag (when False)
+intends to catch unusual, and likely incorrect, situations when all
+features for a  given samplet are all zeros or are all some other
+constant value. In normal, natural, and real-world scenarios,
+different features will have different values. So when they are 0s or
+some other constant value, it is indicative of a bug somewhere. When
+constant values is intended, pass True for this flag.</p></li>
+<li><p><strong>allow_constant_features_across_samplets</strong> (<em>bool</em>) – While the previous flag allow_constant_features looks at one samplet
+at a time (across features; along rows in feature matrix X: N x p),
+this flag checks for constant values across all samplets for a given
+feature (along the columns). When similar values are expected across
+all samplets, pass True to this flag.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>IOError</strong> – If saving to disk is not successful.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.shape">
+<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>num_samplets x num_features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Returns the pythonic shape of the dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.summarize">
+<code class="sig-name descname">summarize</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.summarize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary of classes: names, numeric labels and sizes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>target_set</strong> (<em>list</em>) – List of names of all the classes</p></li>
+<li><p><strong>target_sizes</strong> (<em>list</em>) – Size of each class (number of samples)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.target_set">
+<em class="property">property </em><code class="sig-name descname">target_set</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.target_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of unique classes in the dataset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.target_sizes">
+<em class="property">property </em><code class="sig-name descname">target_sizes</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.target_sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sizes of different objects in a Counter object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.targets">
+<em class="property">property </em><code class="sig-name descname">targets</code><a class="headerlink" href="#pyradigm.regress.RegressionDataset.targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the array of targets for all the samplets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.train_test_split_ids">
+<code class="sig-name descname">train_test_split_ids</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">train_perc=None</em>, <em class="sig-param">count=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/regress.html#RegressionDataset.train_test_split_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.regress.RegressionDataset.train_test_split_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns two disjoint sets of samplet ids for use in cross-validation.</p>
+<p>Offers two ways to specify the sizes: fraction or count.
+Only one access method can be used at a time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_perc</strong> (<em>float</em>) – fraction of samplets to build the training subset, between 0 and 1</p></li>
+<li><p><strong>count</strong> (<em>int</em>) – exact count of samplets to build the training subset, between 1 and N-1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>train_set</strong> (<em>list</em>) – List of ids in the training set.</p></li>
+<li><p><strong>test_set</strong> (<em>list</em>) – List of ids in the test set.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the fraction is outside open interval (0, 1), or
+If counts are outside larger than the smallest class, or
+If unrecognized format is provided for input args, or
+If the selection results in empty subsets for either train or test sets.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.regress.RegressionDataset.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">func</em>, <em class="sig-param">func_description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.regress.RegressionDataset.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Applies a given a function to the features of each subject</dt><dd><p>and returns a new dataset with other info unchanged.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>callable</em>) – <p>A callable that takes in a single ndarray and returns a single ndarray.
+Ensure the transformed dimensionality must be the same for all subjects.</p>
+<p>If your function requires more than one argument,
+use <cite>functools.partial</cite> to freeze all the arguments
+except the features for the subject.</p>
+</p></li>
+<li><p><strong>func_description</strong> (<em>str</em><em>, </em><em>optional</em>) – Human readable description of the given function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>xfm_ds</strong> – with features obtained from subject-wise transform</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dataset</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If given func is not a callable</p></li>
+<li><p><strong>ValueError</strong> – If transformation of any of the subjects features raises an exception.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>A simple example below shows the application of the <cite>.apply_xfm()</cite> to
+create a new pyradigm dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyradigm</span> <span class="kn">import</span> <span class="n">ClassificationDataset</span> <span class="k">as</span> <span class="n">ClfDataset</span>
+
+<span class="n">thickness</span> <span class="o">=</span> <span class="n">ClfDataset</span><span class="p">(</span><span class="n">in_path</span><span class="o">=</span><span class="s1">&#39;ADNI_thickness.csv&#39;</span><span class="p">)</span>
+<span class="c1"># get_pcg_median is a function that computes the median value in PCG</span>
+<span class="n">pcg_thickness</span> <span class="o">=</span> <span class="n">thickness</span><span class="o">.</span><span class="n">apply_xfm</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">get_pcg_median</span><span class="p">,</span>
+                            <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;applying ROI mask for PCG&#39;</span><span class="p">)</span>
+<span class="n">pcg_median</span> <span class="o">=</span> <span class="n">pcg_thickness</span><span class="o">.</span><span class="n">apply_xfm</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+                            <span class="n">description</span><span class="o">=</span><span class="s1">&#39;median per subject&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A complex example using a function that takes more than one argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">hiwenet</span>
+
+<span class="n">thickness</span> <span class="o">=</span> <span class="n">ClfDataset</span><span class="p">(</span><span class="n">in_path</span><span class="o">=</span><span class="s1">&#39;ADNI_thickness.csv&#39;</span><span class="p">)</span>
+<span class="n">roi_membership</span> <span class="o">=</span> <span class="n">read_roi_membership</span><span class="p">()</span>
+<span class="n">calc_hist_dist</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">hiwenet</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="n">roi_membership</span><span class="p">)</span>
+
+<span class="n">thickness_hiwenet</span> <span class="o">=</span> <span class="n">thickness</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">calc_hist_dist</span><span class="p">,</span>
+                            <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;histogram weighted networks&#39;</span><span class="p">)</span>
+<span class="n">median_thk_hiwenet</span> <span class="o">=</span> <span class="n">thickness_hiwenet</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+                            <span class="n">description</span><span class="o">=</span><span class="s1">&#39;median per subject&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pradeep Reddy Raamana
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

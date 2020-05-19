@@ -1,0 +1,641 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyradigm.regress &mdash; pyradigm 0.6+58.g1c5fab3.dirty documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyradigm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6+58.g1c5fab3.dirty
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Features and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../multi_dataset.html">MultiDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_classify.html">API for Classification dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_regress.html">API for Regression dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_multi_dataset.html">API for MultiDataset containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage_cli.html">Command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyradigm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyradigm.regress</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyradigm.regress</h1><div class="highlight"><pre>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RegressionDataset&#39;</span><span class="p">,</span> <span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">realpath</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyradigm.base</span> <span class="k">import</span> <span class="n">BaseDataset</span>
+
+
+<div class="viewcode-block" id="RegressionDataset"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset">[docs]</a><span class="k">class</span> <span class="nc">RegressionDataset</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    RegressionDataset where target values are numeric (such as float or int)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dataset_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">in_dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">targets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">,</span>
+                 <span class="n">allow_nan_inf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Default constructor.</span>
+<span class="sd">        Recommended way to construct the dataset is via add_samplet method,</span>
+<span class="sd">        one samplet at a time, as it allows for unambiguous identification of</span>
+<span class="sd">        each row in data matrix.</span>
+
+<span class="sd">        This constructor can be used in 3 ways:</span>
+<span class="sd">            - As a copy constructor to make a copy of the given in_dataset</span>
+<span class="sd">            - Or by specifying the tuple of data, targets and classes.</span>
+<span class="sd">                In this usage, you can provide additional inputs such as description</span>
+<span class="sd">                and feature_names.</span>
+<span class="sd">            - Or by specifying a file path which contains previously saved Dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_path : str</span>
+<span class="sd">            path to saved Dataset on disk, to directly load it.</span>
+
+<span class="sd">        in_dataset : Dataset</span>
+<span class="sd">            Dataset to be copied to create a new one.</span>
+
+<span class="sd">        data : dict</span>
+<span class="sd">            dict of features (samplet_ids are treated to be samplet ids)</span>
+
+<span class="sd">        targets : dict</span>
+<span class="sd">            dict of targets</span>
+<span class="sd">            (samplet_ids must match with data/classes, are treated to be samplet ids)</span>
+
+<span class="sd">        description : str</span>
+<span class="sd">            Arbitrary string to describe the current dataset.</span>
+
+<span class="sd">        feature_names : list, ndarray</span>
+<span class="sd">            List of names for each feature in the dataset.</span>
+
+<span class="sd">        dtype : np.dtype</span>
+<span class="sd">            Data type of the features to be stored</span>
+
+<span class="sd">        allow_nan_inf : bool or str</span>
+<span class="sd">            Flag to indicate whether raise an error if NaN or Infinity values are</span>
+<span class="sd">            found. If False, adding samplets with NaN or Inf features raises an error</span>
+<span class="sd">            If True, neither NaN nor Inf raises an error. You can pass &#39;NaN&#39; or</span>
+<span class="sd">            &#39;Inf&#39; to specify which value to allow depending on your needs.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If in_dataset is not of type Dataset or is empty, or</span>
+<span class="sd">            An invalid combination of input args is given.</span>
+<span class="sd">        IOError</span>
+<span class="sd">            If dataset_path provided does not exist.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">,</span>
+                         <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                         <span class="n">allow_nan_inf</span><span class="o">=</span><span class="n">allow_nan_inf</span><span class="p">,</span>
+                         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">realpath</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)):</span>
+                <span class="c1"># print(&#39;Loading the dataset from: {}&#39;.format(dataset_path))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Specified file could not be read.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">in_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Invalid Class input: </span><span class="si">{}</span><span class="s1"> expected!&#39;</span>
+                                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">in_dataset</span><span class="o">.</span><span class="n">num_samplets</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dataset to copy is empty.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_copy</span><span class="p">(</span><span class="n">in_dataset</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">targets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_num_features</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_feature_names</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">targets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># ensuring the inputs really correspond to each other</span>
+            <span class="c1"># but only in data and targets, not feature names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">description</span>
+
+            <span class="n">sample_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">features0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">sample_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_num_features</span> <span class="o">=</span> <span class="n">features0</span><span class="o">.</span><span class="n">size</span> \
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> \
+                <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">features0</span><span class="p">)</span>
+
+            <span class="c1"># assigning default names for each feature</span>
+            <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_feature_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incorrect way to construct the dataset.&#39;</span><span class="p">)</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">target_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set of unique classes in the dataset.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">target_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the sizes of different objects in a Counter object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Total number of unique classes in the dataset.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RegressionDataset.samplet_ids_with_target"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.samplet_ids_with_target">[docs]</a>    <span class="k">def</span> <span class="nf">samplet_ids_with_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of samplet ids with a given target_id</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        target_id : float</span>
+<span class="sd">            Value of the target to query</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        subset_ids : list</span>
+<span class="sd">            List of samplet ids belonging to a given target_id.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">subset_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_with_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">subset_ids</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.train_test_split_ids"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.train_test_split_ids">[docs]</a>    <span class="k">def</span> <span class="nf">train_test_split_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_perc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns two disjoint sets of samplet ids for use in cross-validation.</span>
+
+<span class="sd">        Offers two ways to specify the sizes: fraction or count.</span>
+<span class="sd">        Only one access method can be used at a time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_perc : float</span>
+<span class="sd">            fraction of samplets to build the training subset, between 0 and 1</span>
+
+<span class="sd">        count : int</span>
+<span class="sd">            exact count of samplets to build the training subset, between 1 and N-1</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        train_set : list</span>
+<span class="sd">            List of ids in the training set.</span>
+<span class="sd">        test_set : list</span>
+<span class="sd">            List of ids in the test set.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the fraction is outside open interval (0, 1), or</span>
+<span class="sd">            If counts are outside larger than the smallest class, or</span>
+<span class="sd">            If unrecognized format is provided for input args, or</span>
+<span class="sd">            If the selection results in empty subsets for either train or test sets.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">train_perc</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">):</span>
+            <span class="n">train_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_subset_ids</span><span class="p">(</span><span class="n">train_perc</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">train_perc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">train_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_subset_ids_by_count</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid, or out of range selection: &#39;</span>
+                             <span class="s1">&#39;only one of count or percentage &#39;</span>
+                             <span class="s1">&#39;can be specified for subset selection.&#39;</span><span class="p">)</span>
+
+        <span class="n">test_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplet_ids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_set</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_set</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Empty training set! Selection perc or count too small!&#39;</span>
+                             <span class="s1">&#39;Change selections or check your dataset.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_set</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Empty test set! Selection perc or count too small!&#39;</span>
+                             <span class="s1">&#39;Change selections or check your dataset.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">train_set</span><span class="p">,</span> <span class="n">test_set</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.random_subset"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.random_subset">[docs]</a>    <span class="k">def</span> <span class="nf">random_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a random sub-dataset (of specified size by percentage) within each</span>
+<span class="sd">        class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        perc : float</span>
+<span class="sd">            Fraction of samples to be taken from the dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        subdataset : RegressionDataset</span>
+<span class="sd">            random sub-dataset of specified size.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">id_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_subset_ids</span><span class="p">(</span><span class="n">perc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_subset</span><span class="p">(</span><span class="n">id_subset</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Zero samples were selected. Returning an empty dataset!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.random_subset_ids"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.random_subset_ids">[docs]</a>    <span class="k">def</span> <span class="nf">random_subset_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a random subset of sample ids, of size percentage*num_samplets</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        perc : float</span>
+<span class="sd">            Fraction of the dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        subset : list</span>
+<span class="sd">            List of samplet ids</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If no subjects from one or more classes were selected.</span>
+<span class="sd">        UserWarning</span>
+<span class="sd">            If an empty or full dataset is requested.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">perc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Zero percentage requested - returning an empty dataset!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">perc</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Full or a larger dataset requested - returning a copy!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplet_ids</span>
+
+        <span class="c1"># calculating the requested number of samples</span>
+        <span class="n">subset_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span> <span class="o">*</span> <span class="n">perc</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_subset_ids_by_count</span><span class="p">(</span><span class="n">subset_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.random_subset_ids_by_count"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.random_subset_ids_by_count">[docs]</a>    <span class="k">def</span> <span class="nf">random_subset_ids_by_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a random subset of sample ids, of size percentage*num_samplets</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        count : float</span>
+<span class="sd">            Fraction of dataset</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        subset : list</span>
+<span class="sd">            List of samplet ids</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If no subjects from one or more classes were selected.</span>
+<span class="sd">        UserWarning</span>
+<span class="sd">            If an empty or full dataset is requested.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Zero samplets requested - returning an empty dataset!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Full or a larger dataset requested - returning a copy!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplet_ids</span>
+
+        <span class="c1"># clipping the range to [1, n]</span>
+        <span class="n">subset_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">,</span> <span class="n">count</span><span class="p">))</span>
+
+        <span class="c1"># making a local copy</span>
+        <span class="n">id_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplet_ids</span><span class="p">)</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span>
+        <span class="n">id_subset</span> <span class="o">=</span> <span class="n">id_list</span><span class="p">[:</span><span class="n">subset_size</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">id_subset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Zero samples were selected. Returning an empty list!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.get_target"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.get_target">[docs]</a>    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a smaller dataset of samplets with the requested target.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        target_id : str or list</span>
+<span class="sd">            identifier(s) of the class(es) to be returned.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        RegressionDataset</span>
+<span class="sd">            With subset of samples belonging to the given class(es).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If one or more of the requested classes do not exist in this dataset.</span>
+<span class="sd">            If the specified id is empty or None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target_id</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;target id can not be empty or None.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_type</span><span class="p">):</span>
+            <span class="n">target_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">target_id</span><span class="p">,</span> <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target_ids</span> <span class="o">=</span> <span class="n">target_id</span>
+
+        <span class="n">non_existent</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">target_ids</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_existent</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;These targets </span><span class="si">{}</span><span class="s1"> do not exist in this dataset.&#39;</span>
+                             <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">non_existent</span><span class="p">))</span>
+
+        <span class="n">subsets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">target_id</span> <span class="ow">in</span> <span class="n">target_ids</span><span class="p">:</span>
+            <span class="n">subsets_this_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_with_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+            <span class="n">subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">subsets_this_class</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_subset</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RegressionDataset.summarize"><a class="viewcode-back" href="../../API_regress.html#pyradigm.regress.RegressionDataset.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Summary of classes: names, numeric labels and sizes</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        target_set : list</span>
+<span class="sd">            List of names of all the classes</span>
+
+<span class="sd">        target_sizes : list</span>
+<span class="sd">            Size of each class (number of samples)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">target_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_set</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_set</span><span class="p">):</span>
+            <span class="n">target_sizes</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_sizes</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_set</span><span class="p">,</span> <span class="n">target_sizes</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a concise and useful text summary of the dataset.&quot;&quot;&quot;</span>
+        <span class="n">full_descr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
+            <span class="n">full_descr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">full_descr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> samplets, </span><span class="si">{}</span><span class="s1"> features&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">))</span>
+
+            <span class="n">attr_descr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attr_repr</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_descr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">full_descr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr_descr</span><span class="p">)</span>
+
+            <span class="c1"># class_ids = list(self.target_sizes)</span>
+            <span class="c1"># max_width = max([len(cls) for cls in class_ids])</span>
+            <span class="c1"># num_digit = max([len(str(val)) for val in self.target_sizes.values()])</span>
+            <span class="c1"># for cls in class_ids:</span>
+            <span class="c1">#     full_descr.append(</span>
+            <span class="c1">#             &#39;Class {cls:&gt;{clswidth}} : &#39;</span>
+            <span class="c1">#             &#39;{size:&gt;{numwidth}} samplets&#39;</span>
+            <span class="c1">#             &#39;&#39;.format(cls=cls, clswidth=max_width,</span>
+            <span class="c1">#                       size=self.target_sizes.get(cls),</span>
+            <span class="c1">#                       numwidth=num_digit))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">full_descr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Empty dataset.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_descr</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__format__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt_str</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fmt_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;short&#39;</span><span class="p">]:</span>
+            <span class="n">descr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> samplets x </span><span class="si">{}</span><span class="s1"> features each&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">)</span>
+
+            <span class="n">attr_descr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attr_repr</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_descr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">descr</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_descr</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">descr</span>
+        <span class="k">elif</span> <span class="n">fmt_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Requested type of format not implemented.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                      <span class="s2">&quot;It can only be &#39;short&#39; (default) or &#39;full&#39;, &quot;</span>
+                                      <span class="s2">&quot;or a shorthand: &#39;s&#39; or &#39;f&#39; &quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pradeep Reddy Raamana
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

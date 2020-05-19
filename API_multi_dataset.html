@@ -1,0 +1,469 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API for MultiDataset containers &mdash; pyradigm 0.6+58.g1c5fab3.dirty documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyradigm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6+58.g1c5fab3.dirty
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Features and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi_dataset.html">MultiDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API_classify.html">API for Classification dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API_regress.html">API for Regression dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API for MultiDataset containers</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage_cli.html">Command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyradigm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API for MultiDataset containers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/API_multi_dataset.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-for-multidataset-containers">
+<h1>API for MultiDataset containers<a class="headerlink" href="#api-for-multidataset-containers" title="Permalink to this headline">¶</a></h1>
+<p>MultiDataset comes in the following different variations to accommodate different types of targets</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MultiDatasetClassify</span></code> <span class="xref std std-ref">mulclf</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MultiDatasetRegress</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>API for the above classes is shown below:</p>
+<span class="target" id="mulclf"></span><dl class="class">
+<dt id="pyradigm.multiple.MultiDatasetClassify">
+<em class="property">class </em><code class="sig-prename descclassname">pyradigm.multiple.</code><code class="sig-name descname">MultiDatasetClassify</code><span class="sig-paren">(</span><em class="sig-param">dataset_spec=None</em>, <em class="sig-param">name='MultiDatasetClassify'</em>, <em class="sig-param">subgroup=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetClassify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyradigm.multiple.BaseMultiDataset</span></code></p>
+<p>Container class to manage multimodal classification datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.common_attr" title="pyradigm.multiple.MultiDatasetClassify.common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">common_attr</span></code></a></dt><dd><p>Attributes common to all subjects/datasets, such as covariates, in this</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.modality_ids" title="pyradigm.multiple.MultiDatasetClassify.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.samplet_ids" title="pyradigm.multiple.MultiDatasetClassify.samplet_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids</span></code></a></dt><dd><p>List of samplet IDs in the multi-dataset</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.target_set" title="pyradigm.multiple.MultiDatasetClassify.target_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_set</span></code></a></dt><dd><p>Set of targets/classes in this multi-dataset</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.target_sizes" title="pyradigm.multiple.MultiDatasetClassify.target_sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_sizes</span></code></a></dt><dd><p>Sizes of targets in this classification dataset.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.append" title="pyradigm.multiple.MultiDatasetClassify.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(self, dataset, identifier)</p></td>
+<td><p>Adds a dataset, if compatible with the existing ones.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.append_subgroup" title="pyradigm.multiple.MultiDatasetClassify.append_subgroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_subgroup</span></code></a>(self, dataset, identifier, …)</p></td>
+<td><p>Custom add method</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.get_attr" title="pyradigm.multiple.MultiDatasetClassify.get_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attr</span></code></a>(self, ds_id, attr_name[, …])</p></td>
+<td><p>Method to retrieve modality-/dataset-specific attributes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.get_common_attr" title="pyradigm.multiple.MultiDatasetClassify.get_common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_common_attr</span></code></a>(self, names, subset[, …])</p></td>
+<td><p>Helper to retrieve the requested attributes common to all datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.get_subsets" title="pyradigm.multiple.MultiDatasetClassify.get_subsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subsets</span></code></a>(self, subset_list)</p></td>
+<td><p>Returns the requested subsets of data while iterating over modalities</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.holdout" title="pyradigm.multiple.MultiDatasetClassify.holdout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">holdout</span></code></a>(self[, train_perc, num_rep, …])</p></td>
+<td><p>Builds a holdout generator for train and test sets for cross-validation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.set_attr" title="pyradigm.multiple.MultiDatasetClassify.set_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attr</span></code></a>(self, ds_id, attr_name, attr_value)</p></td>
+<td><p>Method to set modality-/dataset-specific attributes</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dataset</em>, <em class="sig-param">identifier</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a dataset, if compatible with the existing ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>pyradigm dataset</em><em> or </em><em>compatible</em>) – </p></li>
+<li><p><strong>identifier</strong> (<em>hashable</em>) – String or integer or another hashable to uniquely identify this dataset</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.append_subgroup">
+<code class="sig-name descname">append_subgroup</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dataset</em>, <em class="sig-param">identifier</em>, <em class="sig-param">subgroup</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetClassify.append_subgroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.append_subgroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom add method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.common_attr">
+<em class="property">property </em><code class="sig-name descname">common_attr</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.common_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attributes common to all subjects/datasets, such as covariates, in this
+MultiDataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.get_attr">
+<code class="sig-name descname">get_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ds_id</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">not_found_value='raise'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.get_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to retrieve modality-/dataset-specific attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.get_common_attr">
+<code class="sig-name descname">get_common_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">names</em>, <em class="sig-param">subset</em>, <em class="sig-param">not_found_value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.get_common_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to retrieve the requested attributes common to all datasets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.get_subsets">
+<code class="sig-name descname">get_subsets</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">subset_list</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.get_subsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the requested subsets of data while iterating over modalities</p>
+<p>if subset_list were to contain two sets of IDs e.g. (train, test)</p>
+<dl class="simple">
+<dt>return data would be this tuple:</dt><dd><p>(modality, (train_data, train_targets), (test_data, test_targets))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.holdout">
+<code class="sig-name descname">holdout</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">train_perc=0.7</em>, <em class="sig-param">num_rep=50</em>, <em class="sig-param">stratified=True</em>, <em class="sig-param">return_ids_only=False</em>, <em class="sig-param">format='MLDataset'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetClassify.holdout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.holdout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a holdout generator for train and test sets for cross-validation.
+Ensures all the classes are represented equally in the training set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.modality_ids">
+<em class="property">property </em><code class="sig-name descname">modality_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.modality_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.samplet_ids">
+<em class="property">property </em><code class="sig-name descname">samplet_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.samplet_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of samplet IDs in the multi-dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.set_attr">
+<code class="sig-name descname">set_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ds_id</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">attr_value</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.set_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to set modality-/dataset-specific attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.target_set">
+<em class="property">property </em><code class="sig-name descname">target_set</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.target_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of targets/classes in this multi-dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetClassify.target_sizes">
+<em class="property">property </em><code class="sig-name descname">target_sizes</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.target_sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sizes of targets in this classification dataset.
+Useful for summary and to compute chance accuracy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="mulregr"></span><dl class="class">
+<dt id="pyradigm.multiple.MultiDatasetRegress">
+<em class="property">class </em><code class="sig-prename descclassname">pyradigm.multiple.</code><code class="sig-name descname">MultiDatasetRegress</code><span class="sig-paren">(</span><em class="sig-param">dataset_spec=None</em>, <em class="sig-param">name='MultiDatasetRegress'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetRegress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyradigm.multiple.BaseMultiDataset</span></code></p>
+<p>Container class to manage multimodal classification datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.common_attr" title="pyradigm.multiple.MultiDatasetRegress.common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">common_attr</span></code></a></dt><dd><p>Attributes common to all subjects/datasets, such as covariates, in this</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.modality_ids" title="pyradigm.multiple.MultiDatasetRegress.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+</dd>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.samplet_ids" title="pyradigm.multiple.MultiDatasetRegress.samplet_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids</span></code></a></dt><dd><p>List of samplet IDs in the multi-dataset</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.append" title="pyradigm.multiple.MultiDatasetRegress.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(self, dataset, identifier)</p></td>
+<td><p>Adds a dataset, if compatible with the existing ones.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.get_attr" title="pyradigm.multiple.MultiDatasetRegress.get_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attr</span></code></a>(self, ds_id, attr_name[, …])</p></td>
+<td><p>Method to retrieve modality-/dataset-specific attributes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.get_common_attr" title="pyradigm.multiple.MultiDatasetRegress.get_common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_common_attr</span></code></a>(self, names, subset[, …])</p></td>
+<td><p>Helper to retrieve the requested attributes common to all datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.get_subsets" title="pyradigm.multiple.MultiDatasetRegress.get_subsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subsets</span></code></a>(self, subset_list)</p></td>
+<td><p>Returns the requested subsets of data while iterating over modalities</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.holdout" title="pyradigm.multiple.MultiDatasetRegress.holdout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">holdout</span></code></a>(self[, train_perc, num_rep, …])</p></td>
+<td><p>Builds a holdout generator for train and test sets for cross-validation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.set_attr" title="pyradigm.multiple.MultiDatasetRegress.set_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attr</span></code></a>(self, ds_id, attr_name, attr_value)</p></td>
+<td><p>Method to set modality-/dataset-specific attributes</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dataset</em>, <em class="sig-param">identifier</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a dataset, if compatible with the existing ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>pyradigm dataset</em><em> or </em><em>compatible</em>) – </p></li>
+<li><p><strong>identifier</strong> (<em>hashable</em>) – String or integer or another hashable to uniquely identify this dataset</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.common_attr">
+<em class="property">property </em><code class="sig-name descname">common_attr</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.common_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attributes common to all subjects/datasets, such as covariates, in this
+MultiDataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.get_attr">
+<code class="sig-name descname">get_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ds_id</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">not_found_value='raise'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.get_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to retrieve modality-/dataset-specific attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.get_common_attr">
+<code class="sig-name descname">get_common_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">names</em>, <em class="sig-param">subset</em>, <em class="sig-param">not_found_value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.get_common_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to retrieve the requested attributes common to all datasets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.get_subsets">
+<code class="sig-name descname">get_subsets</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">subset_list</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.get_subsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the requested subsets of data while iterating over modalities</p>
+<p>if subset_list were to contain two sets of IDs e.g. (train, test)</p>
+<dl class="simple">
+<dt>return data would be this tuple:</dt><dd><p>(modality, (train_data, train_targets), (test_data, test_targets))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.holdout">
+<code class="sig-name descname">holdout</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">train_perc=0.7</em>, <em class="sig-param">num_rep=50</em>, <em class="sig-param">return_ids_only=False</em>, <em class="sig-param">format='MLDataset'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetRegress.holdout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.holdout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a holdout generator for train and test sets for cross-validation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.modality_ids">
+<em class="property">property </em><code class="sig-name descname">modality_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.modality_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.samplet_ids">
+<em class="property">property </em><code class="sig-name descname">samplet_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.samplet_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of samplet IDs in the multi-dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyradigm.multiple.MultiDatasetRegress.set_attr">
+<code class="sig-name descname">set_attr</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ds_id</em>, <em class="sig-param">attr_name</em>, <em class="sig-param">attr_value</em><span class="sig-paren">)</span><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.set_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to set modality-/dataset-specific attributes</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pradeep Reddy Raamana
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

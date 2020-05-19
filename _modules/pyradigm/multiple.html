@@ -1,0 +1,768 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyradigm.multiple &mdash; pyradigm 0.6+58.g1c5fab3.dirty documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyradigm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6+58.g1c5fab3.dirty
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Features and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../multi_dataset.html">MultiDataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_classify.html">API for Classification dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_regress.html">API for Regression dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../API_multi_dataset.html">API for MultiDataset containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage_cli.html">Command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyradigm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyradigm.multiple</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyradigm.multiple</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="k">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">if</span> <span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyradigm.base</span> <span class="k">import</span> <span class="n">BaseDataset</span><span class="p">,</span> <span class="n">CompatibilityException</span>
+    <span class="kn">from</span> <span class="nn">pyradigm</span> <span class="k">import</span> <span class="n">MLDataset</span><span class="p">,</span> <span class="n">ClassificationDataset</span> <span class="k">as</span> <span class="n">ClfDataset</span><span class="p">,</span> \
+        <span class="n">RegressionDataset</span> <span class="k">as</span> <span class="n">RegrDataset</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;pyradigm supports only python 3 or higher! &#39;</span>
+                              <span class="s1">&#39;Upgrade to Python 3+ is recommended.&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseMultiDataset"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset">[docs]</a><span class="k">class</span> <span class="nc">BaseMultiDataset</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Container data structure to hold and manage multiple MLDataset instances.</span>
+
+<span class="sd">    Key uses:</span>
+<span class="sd">        - Uniform processing individual MLDatasets e.g. querying same set of IDs</span>
+<span class="sd">        - ensuring correspondence across multiple datasets in CV</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dataset_class</span><span class="o">=</span><span class="n">BaseDataset</span><span class="p">,</span>
+                 <span class="n">dataset_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MultiDataset&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_spec : Iterable or None</span>
+<span class="sd">            List of MLDatasets, or absolute paths to serialized MLDatasets.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dataset_class</span><span class="p">,</span> <span class="n">BaseDataset</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_class</span> <span class="o">=</span> <span class="n">dataset_class</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input class type is not recognized!&#39;</span>
+                            <span class="s1">&#39; Must be a child class of pyradigm.BaseDataset&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_init</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># number of modalities for each sample id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># TODO more efficient internal repr is possible as ids/classes do not need be</span>
+        <span class="c1"># stored redundantly for each dataset</span>
+        <span class="c1"># perhaps as different attributes/modalities/feat-sets (of .data) for example?</span>
+
+        <span class="k">if</span> <span class="n">dataset_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset_spec</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_spec</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input must be a list of atleast two datasets.&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">dataset_spec</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_spec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Actual loading of datasets&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset_spec</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an ID for a new dataset that&#39;s different from existing ones.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span>
+
+
+<div class="viewcode-block" id="BaseMultiDataset.append"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a dataset, if compatible with the existing ones.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset : pyradigm dataset or compatible</span>
+
+<span class="sd">        identifier : hashable</span>
+<span class="sd">            String or integer or another hashable to uniquely identify this dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_class</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_class</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">CompatibilityException</span><span class="p">(</span><span class="s1">&#39;Incompatible dataset. &#39;</span>
+                                         <span class="s1">&#39;You can only add instances of &#39;</span>
+                                         <span class="s1">&#39;type </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_class</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">description</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">description</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">samplet_ids</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">targets</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target_sizes</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">feature_names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">num_features</span><span class="p">)</span>
+
+            <span class="c1"># maintaining a no-data pyradigm Dataset internally to reuse its methods</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="c1"># replacing its data with zeros</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">id_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">id_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s1">&#39;attr&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr_dtype</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_init</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># this also checks for the size (num_samplets)</span>
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">samplet_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CompatibilityException</span><span class="p">(</span>
+                        <span class="s1">&#39;Differing set of IDs in two datasets.&#39;</span>
+                        <span class="s1">&#39; Unable to add this dataset to the MultiDataset.&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">targets</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CompatibilityException</span><span class="p">(</span>
+                        <span class="s1">&#39;Targets for some IDs differ in the two datasets.&#39;</span>
+                        <span class="s1">&#39; Unable to add this dataset to the MultiDataset.&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">identifier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">feature_names</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">num_features</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> already exists in MultiDataset&#39;</span>
+                               <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">identifier</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s1">&#39;attr&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># no attributes were set at all - simple copy sufficient</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr_dtype</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">a_name</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">a_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">[</span><span class="n">a_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="n">a_name</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span><span class="p">[</span><span class="n">a_name</span><span class="p">]</span> <span class="o">=</span> \
+                                <span class="n">dataset</span><span class="o">.</span><span class="n">attr_dtype</span><span class="p">[</span><span class="n">a_name</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">[</span><span class="n">a_name</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attr</span><span class="p">[</span><span class="n">a_name</span><span class="p">]:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                    <span class="s1">&#39;Values and/or IDs differ for attribute </span><span class="si">{}</span><span class="s1">. &#39;</span>
+                                    <span class="s1">&#39;Ensure all datasets have common attributes &#39;</span>
+                                    <span class="s1">&#39;with the same values&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a_name</span><span class="p">))</span>
+
+
+        <span class="c1"># each addition should be counted, if successful</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">samplet_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of samplet IDs in the multi-dataset&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modality_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of identifiers for all modalities, sorted for reproducibility.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;human readable repr&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_common_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;basic str() with common elements&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="se">\n\t</span><span class="si">{}</span><span class="s2"> samples, </span><span class="si">{}</span><span class="s2"> modalities, dims: </span><span class="si">{}</span><span class="s2">&quot;</span> \
+               <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Identifiers: </span><span class="si">{}</span><span class="s2">&quot;</span> \
+               <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Attributes: </span><span class="si">{}</span><span class="s2">&quot;</span> \
+               <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span>
+                         <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality_ids</span><span class="p">]),</span>
+                         <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
+
+<div class="viewcode-block" id="BaseMultiDataset.holdout"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.holdout">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">holdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">train_perc</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">num_rep</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">return_ids_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a generator for train and test sets for cross-validation.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_list</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the data, from all modalities, for a given list of IDs&quot;&quot;&quot;</span>
+
+        <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># returning a dict would be better if AutoMKL() can handle it</span>
+        <span class="k">for</span> <span class="n">modality</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ndarray&#39;</span><span class="p">,</span> <span class="s1">&#39;data_matrix&#39;</span><span class="p">):</span>
+                <span class="c1"># turning dict of arrays into a data matrix</span>
+                <span class="c1"># this is arguably worse, as labels are difficult to pass</span>
+                <span class="n">subset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">itemgetter</span><span class="p">(</span><span class="o">*</span><span class="n">id_list</span><span class="p">)(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;mldataset&#39;</span><span class="p">,</span> <span class="s1">&#39;pyradigm&#39;</span><span class="p">):</span>
+                <span class="c1"># getting container with fake data</span>
+                <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">get_subset</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span>
+                <span class="c1"># injecting actual features</span>
+                <span class="n">subset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span> <span class="n">id_</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="k">for</span> <span class="n">id_</span> <span class="ow">in</span> <span class="n">id_list</span> <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid output format - choose only one of &#39;</span>
+                                 <span class="s1">&#39;pyradigm or data_matrix&#39;</span><span class="p">)</span>
+
+            <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">features</span>
+
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterable mechanism&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">modality</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">modality</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+
+<div class="viewcode-block" id="BaseMultiDataset.get_subsets"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_subsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_subsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the requested subsets of data while iterating over modalities</span>
+
+<span class="sd">        if subset_list were to contain two sets of IDs e.g. (train, test)</span>
+
+<span class="sd">        return data would be this tuple:</span>
+<span class="sd">            (modality, (train_data, train_targets), (test_data, test_targets))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">modality</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">modality</span><span class="p">,</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">itemgetter</span><span class="p">(</span><span class="o">*</span><span class="n">subset</span><span class="p">)(</span><span class="n">data</span><span class="p">)),</span>
+                               <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">itemgetter</span><span class="p">(</span><span class="o">*</span><span class="n">subset</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">)))</span>
+                              <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subset_list</span> <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">common_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attributes common to all subjects/datasets, such as covariates, in this</span>
+<span class="sd">        MultiDataset&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span>
+
+
+<div class="viewcode-block" id="BaseMultiDataset.get_common_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_common_attr">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper to retrieve the requested attributes common to all datasets.&quot;&quot;&quot;</span>
+
+        <span class="n">data</span><span class="p">,</span> <span class="n">dtypes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Attr </span><span class="si">{}</span><span class="s1"> not set for this MultiDataset&#39;</span>
+                                     <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+            <span class="n">this_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">not_found_value</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">sid</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">],</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_data</span><span class="p">)</span>
+            <span class="n">dtypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">dtypes</span></div>
+
+
+<div class="viewcode-block" id="BaseMultiDataset.set_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.set_attr">[docs]</a>    <span class="k">def</span> <span class="nf">set_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to set modality-/dataset-specific attributes&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Dataset </span><span class="si">{}</span><span class="s1"> not in this </span><span class="si">{}</span><span class="s1"> multi_dataset&#39;</span>
+                           <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ds_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">][</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span></div>
+
+
+<div class="viewcode-block" id="BaseMultiDataset.get_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_attr">[docs]</a>    <span class="k">def</span> <span class="nf">get_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to retrieve modality-/dataset-specific attributes&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Dataset </span><span class="si">{}</span><span class="s1"> not in this </span><span class="si">{}</span><span class="s1"> multi_dataset&#39;</span>
+                           <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ds_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">][</span><span class="n">attr_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;attribute </span><span class="si">{}</span><span class="s1"> not set for dataset </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">not_found_value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span> <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">not_found_value</span></div></div>
+
+
+<div class="viewcode-block" id="MultiDatasetClassify"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetClassify">[docs]</a><span class="k">class</span> <span class="nc">MultiDatasetClassify</span><span class="p">(</span><span class="n">BaseMultiDataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Container class to manage multimodal classification datasets.&quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dataset_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MultiDatasetClassify&#39;</span><span class="p">,</span>
+                 <span class="n">subgroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_spec : Iterable or None</span>
+<span class="sd">            List of pyradigms, or absolute paths to serialized pyradigm Datasets.</span>
+
+<span class="sd">        name : str</span>
+<span class="sd">            human readable name for printing purposes</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sub_groups</span> <span class="o">=</span> <span class="n">subgroup</span>
+        <span class="k">if</span> <span class="n">subgroup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset_class</span><span class="o">=</span><span class="n">ClfDataset</span><span class="p">,</span>
+                             <span class="n">dataset_spec</span><span class="o">=</span><span class="n">dataset_spec</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset_class</span><span class="o">=</span><span class="n">ClfDataset</span><span class="p">,</span> <span class="n">dataset_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset_spec</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">append_subgroup</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MultiDatasetClassify.append_subgroup"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetClassify.append_subgroup">[docs]</a>    <span class="k">def</span> <span class="nf">append_subgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Custom add method&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_class</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+
+        <span class="n">target_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">target_set</span><span class="p">)</span>
+        <span class="n">subgroup</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">subgroup</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">subgroup</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">subgroup</span> <span class="o">==</span> <span class="n">target_set</span><span class="p">:</span>
+            <span class="n">ds_out</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">elif</span> <span class="n">subgroup</span> <span class="o">&lt;</span> <span class="n">target_set</span><span class="p">:</span> <span class="c1"># &lt; on sets is an issubset operation</span>
+            <span class="n">subgroup</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">subgroup</span><span class="p">))</span> <span class="c1"># ensure reproducibility</span>
+            <span class="n">new_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(</span><span class="si">{}</span><span class="s1">) </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                                        <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subgroup</span><span class="p">),</span>
+                                        <span class="n">identifier</span><span class="p">)</span>
+            <span class="n">ds_out</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_class</span><span class="p">(</span><span class="n">subgroup</span><span class="p">)</span>
+            <span class="c1"># overriding the &quot;Subset derived from ... &quot;</span>
+            <span class="n">ds_out</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">new_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more classes in </span><span class="si">{}</span><span class="s1"> does not exist in</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
+                             <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_group</span><span class="p">,</span> <span class="n">fp</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds_out</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">target_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set of targets/classes in this multi-dataset&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">target_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sizes of targets in this classification dataset.</span>
+<span class="sd">        Useful for summary and to compute chance accuracy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;human readable repr&quot;&quot;&quot;</span>
+
+        <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n\t</span><span class="s2">Classes n=</span><span class="si">{}</span><span class="s2">, sizes &quot;</span> \
+                 <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_str</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="p">))</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+        <span class="k">return</span> <span class="n">string</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__format__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_spec</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="MultiDatasetClassify.holdout"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetClassify.holdout">[docs]</a>    <span class="k">def</span> <span class="nf">holdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">train_perc</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">num_rep</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">stratified</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">return_ids_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a holdout generator for train and test sets for cross-validation.</span>
+<span class="sd">        Ensures all the classes are represented equally in the training set.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">train_perc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">train_perc</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train perc &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+
+        <span class="n">ids_in_class</span> <span class="o">=</span> <span class="p">{</span><span class="n">cid</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">sample_ids_in_class</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+
+        <span class="n">sizes_numeric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_in_class</span><span class="p">[</span><span class="n">cid</span><span class="p">])</span>
+                                  <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">ids_in_class</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+        <span class="n">size_per_class</span><span class="p">,</span> <span class="n">total_test_count</span> <span class="o">=</span> <span class="n">compute_training_sizes</span><span class="p">(</span>
+                <span class="n">train_perc</span><span class="p">,</span> <span class="n">sizes_numeric</span><span class="p">,</span> <span class="n">stratified</span><span class="o">=</span><span class="n">stratified</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">size_per_class</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;size spec differs in num elements with class sizes!&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rep</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;rep </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rep</span><span class="p">))</span>
+
+            <span class="n">train_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">cls_id</span><span class="p">,</span> <span class="n">class_size</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="c1"># shuffling the IDs each time</span>
+                <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ids_in_class</span><span class="p">[</span><span class="n">cls_id</span><span class="p">])</span>
+
+                <span class="n">subset_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">class_size</span><span class="p">,</span> <span class="n">size_per_class</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="n">subset_size</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">class_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No subjects from class </span><span class="si">{}</span><span class="s1"> were selected.&#39;</span>
+                                  <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cls_id</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">subsets_this_class</span> <span class="o">=</span> <span class="n">ids_in_class</span><span class="p">[</span><span class="n">cls_id</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">size_per_class</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+                    <span class="n">train_set</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">subsets_this_class</span><span class="p">)</span>
+
+            <span class="c1"># this ensures both are mutually exclusive!</span>
+            <span class="n">test_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_set</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">return_ids_only</span><span class="p">:</span>
+                <span class="c1"># when only IDs are required, without associated features</span>
+                <span class="c1"># returning tuples to prevent accidental changes</span>
+                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">train_set</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">test_set</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">train_set</span><span class="p">,</span> <span class="nb">format</span><span class="p">),</span> \
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">test_set</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MultiDatasetRegress"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetRegress">[docs]</a><span class="k">class</span> <span class="nc">MultiDatasetRegress</span><span class="p">(</span><span class="n">BaseMultiDataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Container class to manage multimodal classification datasets.&quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dataset_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MultiDatasetRegress&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_spec : Iterable or None</span>
+<span class="sd">            List of pyradigms, or absolute paths to serialized pyradigm Datasets.</span>
+
+<span class="sd">        name : str</span>
+<span class="sd">            human readable name for printing purposes</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset_class</span><span class="o">=</span><span class="n">RegrDataset</span><span class="p">,</span>
+                         <span class="n">dataset_spec</span><span class="o">=</span><span class="n">dataset_spec</span><span class="p">,</span>
+                         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;human readable repr&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_str</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__format__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_spec</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="MultiDatasetRegress.holdout"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetRegress.holdout">[docs]</a>    <span class="k">def</span> <span class="nf">holdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">train_perc</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                <span class="n">num_rep</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">return_ids_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a holdout generator for train and test sets for cross-validation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">train_perc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">train_perc</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train perc &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+
+        <span class="n">subset_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span> <span class="o">*</span> <span class="n">train_perc</span><span class="p">))</span>
+
+        <span class="c1"># clipping the range to [1, n]</span>
+        <span class="n">subset_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span><span class="p">,</span> <span class="n">subset_size</span><span class="p">))</span>
+
+        <span class="c1"># making it indexible with a local copy</span>
+        <span class="n">id_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rep</span><span class="p">):</span>
+
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span>
+            <span class="n">train_set</span> <span class="o">=</span> <span class="n">id_list</span><span class="p">[:</span><span class="n">subset_size</span><span class="p">]</span>
+            <span class="c1"># this ensures both are mutually exclusive!</span>
+            <span class="n">test_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">train_set</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">return_ids_only</span><span class="p">:</span>
+                <span class="c1"># when only IDs are required, without associated features</span>
+                <span class="c1"># returning tuples to prevent accidental changes</span>
+                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">train_set</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">test_set</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">train_set</span><span class="p">,</span> <span class="nb">format</span><span class="p">),</span> \
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">test_set</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="compute_training_sizes"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.compute_training_sizes">[docs]</a><span class="k">def</span> <span class="nf">compute_training_sizes</span><span class="p">(</span><span class="n">train_perc</span><span class="p">,</span> <span class="n">target_sizes</span><span class="p">,</span> <span class="n">stratified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the maximum training size that the smallest class can provide &quot;&quot;&quot;</span>
+
+    <span class="n">size_per_class</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">train_perc</span> <span class="o">*</span> <span class="n">target_sizes</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">stratified</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Different classes in training set are stratified to match smallest class!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># per-class</span>
+        <span class="n">size_per_class</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">size_per_class</span><span class="p">),</span> <span class="n">size_per_class</span><span class="p">)</span>
+
+        <span class="c1"># single number</span>
+        <span class="n">reduced_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">size_per_class</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduced_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># they must all be the same</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error in stratification of training set based on &quot;</span>
+                             <span class="s2">&quot;smallest class!&quot;</span><span class="p">)</span>
+
+    <span class="n">total_test_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">target_sizes</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">size_per_class</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">size_per_class</span><span class="p">,</span> <span class="n">total_test_samples</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Pradeep Reddy Raamana
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

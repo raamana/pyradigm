@@ -1,0 +1,10 @@
+
+
+MultiDataset container
+------------------------
+
+.. automodule:: pyradigm.multiple
+   :members: MultiDatasetClassify, MultiDatasetRegress
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
