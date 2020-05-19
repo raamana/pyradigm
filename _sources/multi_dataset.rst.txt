@@ -7,10 +7,7 @@ MultiDataset is a container data structure to hold and manage multiple MLDataset
     - ensuring same set of samplet IDs exist in all tables
     - they all link to same set of targets and attributes etc)
 
-Such compatibility checks are often necessary when performing comparisons in machine learning e.g. cross-validation (CV).
-
-
-Key uses:
+Such compatibility checks are often necessary when performing comparisons in machine learning e.g. cross-validation (CV). For example,
 
     - Uniform processing individual MLDatasets e.g. querying same set of IDs
     - ensuring correspondence across multiple datasets in cross-validation
@@ -21,3 +18,4 @@ A schematic illustrating the function of the ``MultiDataset`` is shown below, wh
 
 .. image:: flyer_multimodal.png
     :height: 500
+

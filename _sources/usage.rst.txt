@@ -4,6 +4,8 @@ Features and usage
 
 
 
-This examples and usage noted here ca be much better seen on a Jupter Notebook Viewer `here <https://nbviewer.jupyter.org/github/raamana/pyradigm/blob/master/docs/usage.ipynb>`_
+The following jupyter notebook online (in the browser) demonstrates the usage of pyradigm and its multiple classes, in a tutorial fashion. You don't need any setup or software to use it.
 
-The following is a html/rst version of the Jupyter notebook in the `pyradigm docs <https://github.com/raamana/pyradigm/blob/master/docs/usage.ipynb>`_ . Downloading, interacting and playing with that notebook is highly recommend over passive reading of this html.
+
+.. image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyradigm.multiple &mdash; pyradigm 0.6+58.g1c5fab3.dirty documentation</title>
+  <title>pyradigm.multiple &mdash; pyradigm 0.6 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.6+58.g1c5fab3.dirty
+                0.6
               </div>
             
           
@@ -175,7 +175,7 @@
                               <span class="s1">&#39;Upgrade to Python 3+ is recommended.&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset">[docs]</a><span class="k">class</span> <span class="nc">BaseMultiDataset</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">BaseMultiDataset</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Container data structure to hold and manage multiple MLDataset instances.</span>
 
@@ -247,7 +247,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset.append"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a dataset, if compatible with the existing ones.</span>
 
@@ -334,7 +334,7 @@
 
 
         <span class="c1"># each addition should be counted, if successful</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
     <span class="nd">@property</span>
@@ -362,7 +362,7 @@
                          <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality_ids</span><span class="p">]),</span>
                          <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span><span class="o">.</span><span class="n">keys</span><span class="p">()]))</span>
 
-<div class="viewcode-block" id="BaseMultiDataset.holdout"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.holdout">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">holdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">train_perc</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
                 <span class="n">num_rep</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
@@ -370,7 +370,7 @@
                 <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds a generator for train and test sets for cross-validation.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
 
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_list</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;MLDataset&#39;</span><span class="p">):</span>
@@ -405,7 +405,7 @@
                 <span class="k">yield</span> <span class="n">modality</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset.get_subsets"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_subsets">[docs]</a>    <span class="k">def</span> <span class="nf">get_subsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset_list</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_subsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the requested subsets of data while iterating over modalities</span>
 
@@ -419,7 +419,7 @@
         <span class="k">for</span> <span class="n">modality</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">yield</span> <span class="n">modality</span><span class="p">,</span> <span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">itemgetter</span><span class="p">(</span><span class="o">*</span><span class="n">subset</span><span class="p">)(</span><span class="n">data</span><span class="p">)),</span>
                                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">itemgetter</span><span class="p">(</span><span class="o">*</span><span class="n">subset</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">)))</span>
-                              <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subset_list</span> <span class="p">)</span></div>
+                              <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subset_list</span> <span class="p">)</span>
 
 
     <span class="nd">@property</span>
@@ -430,7 +430,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_common_attr</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset.get_common_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_common_attr">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_common_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Helper to retrieve the requested attributes common to all datasets.&quot;&quot;&quot;</span>
 
         <span class="n">data</span><span class="p">,</span> <span class="n">dtypes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>
@@ -446,10 +446,10 @@
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_data</span><span class="p">)</span>
             <span class="n">dtypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_common_attr_dtype</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">dtypes</span></div>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">dtypes</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset.set_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.set_attr">[docs]</a>    <span class="k">def</span> <span class="nf">set_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to set modality-/dataset-specific attributes&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">:</span>
@@ -459,10 +459,10 @@
         <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">][</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attr</span><span class="p">[</span><span class="n">ds_id</span><span class="p">][</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span>
 
 
-<div class="viewcode-block" id="BaseMultiDataset.get_attr"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.BaseMultiDataset.get_attr">[docs]</a>    <span class="k">def</span> <span class="nf">get_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_id</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">not_found_value</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to retrieve modality-/dataset-specific attributes&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">ds_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="p">:</span>
@@ -477,7 +477,7 @@
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">not_found_value</span></div></div>
+                <span class="k">return</span> <span class="n">not_found_value</span>
 
 
 <div class="viewcode-block" id="MultiDatasetClassify"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetClassify">[docs]</a><span class="k">class</span> <span class="nc">MultiDatasetClassify</span><span class="p">(</span><span class="n">BaseMultiDataset</span><span class="p">):</span>
@@ -704,7 +704,7 @@
                       <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">test_set</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="compute_training_sizes"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.compute_training_sizes">[docs]</a><span class="k">def</span> <span class="nf">compute_training_sizes</span><span class="p">(</span><span class="n">train_perc</span><span class="p">,</span> <span class="n">target_sizes</span><span class="p">,</span> <span class="n">stratified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">compute_training_sizes</span><span class="p">(</span><span class="n">train_perc</span><span class="p">,</span> <span class="n">target_sizes</span><span class="p">,</span> <span class="n">stratified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes the maximum training size that the smallest class can provide &quot;&quot;&quot;</span>
 
     <span class="n">size_per_class</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">train_perc</span> <span class="o">*</span> <span class="n">target_sizes</span><span class="p">))</span>
@@ -723,7 +723,7 @@
 
     <span class="n">total_test_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">target_sizes</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">size_per_class</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">size_per_class</span><span class="p">,</span> <span class="n">total_test_samples</span></div>
+    <span class="k">return</span> <span class="n">size_per_class</span><span class="p">,</span> <span class="n">total_test_samples</span>
 </pre></div>
 
            </div>
