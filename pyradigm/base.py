@@ -808,31 +808,36 @@ class BaseDataset(ABC):
 
         Examples
         --------
-        Simple:
+        A simple example below shows the application of the `.apply_xfm()` to
+        create a new pyradigm dataset:
 
         .. code-block:: python
 
-            from pyradigm import Dataset
+            from pyradigm import ClassificationDataset as ClfDataset
 
-            thickness = Dataset(in_path='ADNI_thickness.csv')
-            pcg_thickness = thickness.apply_xfm(func=get_pcg, description = 'applying ROI mask for PCG')
-            pcg_median = pcg_thickness.apply_xfm(func=np.median, description='median per subject')
+            thickness = ClfDataset(in_path='ADNI_thickness.csv')
+            # get_pcg_median is a function that computes the median value in PCG
+            pcg_thickness = thickness.apply_xfm(func=get_pcg_median,
+                                        description = 'applying ROI mask for PCG')
+            pcg_median = pcg_thickness.apply_xfm(func=np.median,
+                                        description='median per subject')
 
 
-        Complex example with function taking more than one argument:
+        A complex example using a function that takes more than one argument:
 
         .. code-block:: python
 
-            from pyradigm import Dataset
             from functools import partial
             import hiwenet
 
-            thickness = Dataset(in_path='ADNI_thickness.csv')
+            thickness = ClfDataset(in_path='ADNI_thickness.csv')
             roi_membership = read_roi_membership()
-            hw = partial(hiwenet, groups = roi_membership)
+            calc_hist_dist = partial(hiwenet, groups = roi_membership)
 
-            thickness_hiwenet = thickness.transform(func=hw, description = 'histogram weighted networks')
-            median_thk_hiwenet = thickness_hiwenet.transform(func=np.median, description='median per subject')
+            thickness_hiwenet = thickness.transform(func=calc_hist_dist,
+                                        description = 'histogram weighted networks')
+            median_thk_hiwenet = thickness_hiwenet.transform(func=np.median,
+                                        description='median per subject')
 
         """
 
