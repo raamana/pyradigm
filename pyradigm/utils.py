@@ -1,5 +1,5 @@
 
-from collections import Iterable
+from collections.abc import Iterable
 import numpy as np
 from pyradigm.base import missing_value_indicator
 from pyradigm import ClassificationDataset, RegressionDataset

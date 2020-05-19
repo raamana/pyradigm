@@ -2,6 +2,12 @@
 pyradigm documentation
 ========================================
 
+CSVs suck. Upgrade your life with pyradigm.
+
+.. image:: logo_pyradigm.png
+    :height: 300
+
+
 .. image:: https://travis-ci.org/raamana/pyradigm.svg?branch=master
    :target: https://travis-ci.org/raamana/pyradigm
 .. image:: https://landscape.io/github/raamana/pyradigm/master/landscape.svg?style=flat
@@ -14,17 +20,17 @@ pyradigm documentation
 .. image:: https://badge.fury.io/py/pyradigm.svg
    :target: https://badge.fury.io/py/pyradigm
 
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
 
    about
    installation
    usage
-   usage_cli
-   API
+   multi_dataset
    API_classify
    API_regress
+   API_multi_dataset
+   usage_cli
    citation
 
 

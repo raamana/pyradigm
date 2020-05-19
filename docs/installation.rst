@@ -9,7 +9,7 @@ Pyradigm can easily be installed with a single command:
     pip install -U pyradigm
 
 
-If you lack ``sudo`` access, try
+If you lack ``sudo`` or admin access, try
 
 
 .. code-block:: bash
@@ -17,10 +17,10 @@ If you lack ``sudo`` access, try
     pip install -U pyradigm --user
 
 
-OS requirements
-~~~~~~~~~~~~~~~~~~
+Operating System Requirements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you do not have python or pip installed, please follow the links below for instructions on installing them:
+If you do not have python installed, please follow the links below for instructions on installing them:
 
  - Python: https://www.python.org/downloads/ (pip comes packaged with Python)
  - Windows users:
@@ -32,8 +32,8 @@ If you do not have python or pip installed, please follow the links below for in
 
 
 
-Requirements
-------------
+Dependencies / Requirements
+----------------------------
 
  * Packages: ``numpy``, ``scipy``
  * Supported versions: Python 3.6 or higher

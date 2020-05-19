@@ -1,6 +1,8 @@
 ---------------------
-Usage examples (API)
+Features and usage
 ---------------------
+
+
 
 This examples and usage noted here ca be much better seen on a Jupter Notebook Viewer `here <https://nbviewer.jupyter.org/github/raamana/pyradigm/blob/master/docs/usage.ipynb>`_
 

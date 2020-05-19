@@ -21,7 +21,7 @@ Bibtex entries
         volume  ={2},
         number  ={17},
         journal ={The Journal of Open Source Software},
-        author  ={Reddy Raamana, Pradeep and C. Strother, Stephen},
+        author  ={Raamana, Pradeep Reddy and Strother, Stephen},
         year    ={2017}
     }
 
