@@ -5,15 +5,22 @@ API for MultiDataset containers
 
 MultiDataset comes in the following different variations to accommodate different types of targets
 
- - ``MultiDatasetClassify``
+ - ``MultiDatasetClassify`` :ref:`mulclf`
  - ``MultiDatasetRegress``
 
 
 API for the above classes is shown below:
 
 
-.. automodule:: pyradigm.multiple
-   :members: MultiDatasetClassify, MultiDatasetRegress
+.. _mulclf:
+
+.. autoclass:: pyradigm.multiple.MultiDatasetClassify
    :inherited-members:
-   :undoc-members:
+   :show-inheritance:
+
+
+.. _mulregr:
+
+.. autoclass:: pyradigm.multiple.MultiDatasetRegress
+   :inherited-members:
    :show-inheritance:
