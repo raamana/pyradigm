@@ -427,7 +427,11 @@ class MultiDatasetClassify(BaseMultiDataset):
         """
 
         if train_perc <= 0.0 or train_perc >= 1.0:
-            raise ValueError('Train perc > 0.0 and < 1.0')
+            raise ValueError('Train percentage must be > 0.0 and < 1.0')
+
+        num_rep = int(num_rep)
+        if not np.isfinite(num_rep) or num_rep < 1:
+            raise ValueError('Number of repetitions must be > 1 and be finite.')
 
         ids_in_class = {cid: self._dataset.sample_ids_in_class(cid)
                         for cid in self._target_sizes.keys()}
@@ -520,7 +524,11 @@ class MultiDatasetRegress(BaseMultiDataset):
         """
 
         if train_perc <= 0.0 or train_perc >= 1.0:
-            raise ValueError('Train perc > 0.0 and < 1.0')
+            raise ValueError('Train perc must be > 0.0 and < 1.0')
+
+        num_rep = int(num_rep)
+        if not np.isfinite(num_rep) or num_rep < 1:
+            raise ValueError('Number of repetitions must be > 1 and be finite.')
 
         subset_size = np.int64(np.floor(self.num_samplets * train_perc))
 
