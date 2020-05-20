@@ -424,6 +424,34 @@ class MultiDatasetClassify(BaseMultiDataset):
         Builds a holdout generator for train and test sets for cross-validation.
         Ensures all the classes are represented equally in the training set.
 
+        Parameters
+        ----------
+        train_perc : float
+            Percentage (0, 1) of samplets from each class to be selected for the
+            training set. Remaining IDs from each class will be added to test set.
+
+        num_rep : int
+            Number of holdout repetitions
+
+        return_ids_only : bool
+            Whether to return samplet IDs only, or the corresponding Datasets
+
+        format : str
+            Format of the Dataset to be returned when return_ids_only=False
+            format='MLDataset' returns the full-blown pyradigm data structure, and
+            format='data_matrix' returns just the feature matrix X in ndarray format
+
+        Returns
+        -------
+        train, test : tuple
+            A tuple (in order train, test) of IDs or Datasets
+
+        Raises
+        ------
+        ValueError
+            If train_perc is < 0 or > 1
+            If num_rep is not int, or < 1 or infinite
+
         """
 
         if train_perc <= 0.0 or train_perc >= 1.0:
@@ -473,7 +501,7 @@ class MultiDatasetClassify(BaseMultiDataset):
 
 
 class MultiDatasetRegress(BaseMultiDataset):
-    """Container class to manage multimodal classification datasets."""
+    """Container class to manage multimodal regression datasets."""
 
 
     def __init__(self,
@@ -520,6 +548,34 @@ class MultiDatasetRegress(BaseMultiDataset):
                 format='MLDataset'):
         """
         Builds a holdout generator for train and test sets for cross-validation.
+
+        Parameters
+        ----------
+        train_perc : float
+            Percentage (0, 1) of samplets to be selected for the training set.
+            Remaining will be added to the test set.
+
+        num_rep : int
+            Number of holdout repetitions
+
+        return_ids_only : bool
+            Whether to return samplet IDs only, or the corresponding Datasets
+
+        format : str
+            Format of the Dataset to be returned when return_ids_only=False
+            format='MLDataset' returns the full-blown pyradigm data structure, and
+            format='data_matrix' returns just the feature matrix X in ndarray format
+
+        Returns
+        -------
+        train, test : tuple
+            A tuple (in order train, test) of IDs or Datasets
+
+        Raises
+        ------
+        ValueError
+            If train_perc is < 0 or > 1
+            If num_rep is not int, or < 1 or infinite
 
         """
 
