@@ -673,8 +673,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
 
 
-    <span class="c1"># renaming the method for backwards compatibility</span>
 <div class="viewcode-block" id="ClassificationDataset.data_and_labels"><a class="viewcode-back" href="../../API_classify.html#pyradigm.classify.ClassificationDataset.data_and_labels">[docs]</a>    <span class="k">def</span> <span class="nf">data_and_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Deprecated: symbolic link to the .data_and_targets() method for</span>
+<span class="sd">        backwards compatibility.&quot;&quot;&quot;</span>
 
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;data_and_labels() is convenient method to &#39;</span>
                                          <span class="s1">&#39;access data_and_targets() method.&#39;</span>

@@ -5,7 +5,7 @@ API for MultiDataset containers
 
 MultiDataset comes in the following different variations to accommodate different types of targets
 
- - ``MultiDatasetClassify`` :ref:`mulclf`
+ - ``MultiDatasetClassify``
  - ``MultiDatasetRegress``
 
 

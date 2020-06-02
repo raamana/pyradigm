@@ -344,7 +344,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">modality_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of identifiers for all modalities, sorted for reproducibility.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;List of identifiers for all modalities/datasets, sorted for reproducibility.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modalities</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="nd">@abstractmethod</span>
@@ -531,8 +531,8 @@
             <span class="c1"># overriding the &quot;Subset derived from ... &quot;</span>
             <span class="n">ds_out</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">new_id</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more classes in </span><span class="si">{}</span><span class="s1"> does not exist in</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
-                             <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_group</span><span class="p">,</span> <span class="n">fp</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more classes in </span><span class="si">{}</span><span class="s1"> do not exist in</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
+                             <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subgroup</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">description</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds_out</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span></div>
 
@@ -582,10 +582,42 @@
 <span class="sd">        Builds a holdout generator for train and test sets for cross-validation.</span>
 <span class="sd">        Ensures all the classes are represented equally in the training set.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_perc : float</span>
+<span class="sd">            Percentage (0, 1) of samplets from each class to be selected for the</span>
+<span class="sd">            training set. Remaining IDs from each class will be added to test set.</span>
+
+<span class="sd">        num_rep : int</span>
+<span class="sd">            Number of holdout repetitions</span>
+
+<span class="sd">        return_ids_only : bool</span>
+<span class="sd">            Whether to return samplet IDs only, or the corresponding Datasets</span>
+
+<span class="sd">        format : str</span>
+<span class="sd">            Format of the Dataset to be returned when return_ids_only=False</span>
+<span class="sd">            format=&#39;MLDataset&#39; returns the full-blown pyradigm data structure, and</span>
+<span class="sd">            format=&#39;data_matrix&#39; returns just the feature matrix X in ndarray format</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        train, test : tuple</span>
+<span class="sd">            A tuple (in order train, test) of IDs or Datasets</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If train_perc is &lt; 0 or &gt; 1</span>
+<span class="sd">            If num_rep is not int, or &lt; 1 or infinite</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">train_perc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">train_perc</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train perc &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train percentage must be &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+
+        <span class="n">num_rep</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_rep</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">num_rep</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_rep</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of repetitions must be &gt; 1 and be finite.&#39;</span><span class="p">)</span>
 
         <span class="n">ids_in_class</span> <span class="o">=</span> <span class="p">{</span><span class="n">cid</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">sample_ids_in_class</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_sizes</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
@@ -627,7 +659,7 @@
 
 
 <div class="viewcode-block" id="MultiDatasetRegress"><a class="viewcode-back" href="../../API_multi_dataset.html#pyradigm.multiple.MultiDatasetRegress">[docs]</a><span class="k">class</span> <span class="nc">MultiDatasetRegress</span><span class="p">(</span><span class="n">BaseMultiDataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Container class to manage multimodal classification datasets.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Container class to manage multimodal regression datasets.&quot;&quot;&quot;</span>
 
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -675,10 +707,42 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds a holdout generator for train and test sets for cross-validation.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        train_perc : float</span>
+<span class="sd">            Percentage (0, 1) of samplets to be selected for the training set.</span>
+<span class="sd">            Remaining will be added to the test set.</span>
+
+<span class="sd">        num_rep : int</span>
+<span class="sd">            Number of holdout repetitions</span>
+
+<span class="sd">        return_ids_only : bool</span>
+<span class="sd">            Whether to return samplet IDs only, or the corresponding Datasets</span>
+
+<span class="sd">        format : str</span>
+<span class="sd">            Format of the Dataset to be returned when return_ids_only=False</span>
+<span class="sd">            format=&#39;MLDataset&#39; returns the full-blown pyradigm data structure, and</span>
+<span class="sd">            format=&#39;data_matrix&#39; returns just the feature matrix X in ndarray format</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        train, test : tuple</span>
+<span class="sd">            A tuple (in order train, test) of IDs or Datasets</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If train_perc is &lt; 0 or &gt; 1</span>
+<span class="sd">            If num_rep is not int, or &lt; 1 or infinite</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">train_perc</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">train_perc</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train perc &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Train perc must be &gt; 0.0 and &lt; 1.0&#39;</span><span class="p">)</span>
+
+        <span class="n">num_rep</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_rep</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">num_rep</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_rep</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of repetitions must be &gt; 1 and be finite.&#39;</span><span class="p">)</span>
 
         <span class="n">subset_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_samplets</span> <span class="o">*</span> <span class="n">train_perc</span><span class="p">))</span>
 

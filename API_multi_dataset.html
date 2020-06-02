@@ -164,7 +164,7 @@
 <p>MultiDataset comes in the following different variations to accommodate different types of targets</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">MultiDatasetClassify</span></code> <span class="xref std std-ref">mulclf</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MultiDatasetClassify</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MultiDatasetRegress</span></code></p></li>
 </ul>
 </div></blockquote>
@@ -179,7 +179,7 @@
 <dd class="field-odd"><dl class="simple">
 <dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.common_attr" title="pyradigm.multiple.MultiDatasetClassify.common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">common_attr</span></code></a></dt><dd><p>Attributes common to all subjects/datasets, such as covariates, in this</p>
 </dd>
-<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.modality_ids" title="pyradigm.multiple.MultiDatasetClassify.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.modality_ids" title="pyradigm.multiple.MultiDatasetClassify.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities/datasets, sorted for reproducibility.</p>
 </dd>
 <dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetClassify.samplet_ids" title="pyradigm.multiple.MultiDatasetClassify.samplet_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids</span></code></a></dt><dd><p>List of samplet IDs in the multi-dataset</p>
 </dd>
@@ -275,12 +275,35 @@ MultiDataset</p>
 <code class="sig-name descname">holdout</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">train_perc=0.7</em>, <em class="sig-param">num_rep=50</em>, <em class="sig-param">stratified=True</em>, <em class="sig-param">return_ids_only=False</em>, <em class="sig-param">format='MLDataset'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetClassify.holdout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.holdout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a holdout generator for train and test sets for cross-validation.
 Ensures all the classes are represented equally in the training set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_perc</strong> (<em>float</em>) – Percentage (0, 1) of samplets from each class to be selected for the
+training set. Remaining IDs from each class will be added to test set.</p></li>
+<li><p><strong>num_rep</strong> (<em>int</em>) – Number of holdout repetitions</p></li>
+<li><p><strong>return_ids_only</strong> (<em>bool</em>) – Whether to return samplet IDs only, or the corresponding Datasets</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – Format of the Dataset to be returned when return_ids_only=False
+format=’MLDataset’ returns the full-blown pyradigm data structure, and
+format=’data_matrix’ returns just the feature matrix X in ndarray format</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>train, test</strong> – A tuple (in order train, test) of IDs or Datasets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If train_perc is &lt; 0 or &gt; 1
+If num_rep is not int, or &lt; 1 or infinite</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyradigm.multiple.MultiDatasetClassify.modality_ids">
 <em class="property">property </em><code class="sig-name descname">modality_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetClassify.modality_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+<dd><p>List of identifiers for all modalities/datasets, sorted for reproducibility.</p>
 </dd></dl>
 
 <dl class="method">
@@ -314,13 +337,13 @@ Useful for summary and to compute chance accuracy.</p>
 <dt id="pyradigm.multiple.MultiDatasetRegress">
 <em class="property">class </em><code class="sig-prename descclassname">pyradigm.multiple.</code><code class="sig-name descname">MultiDatasetRegress</code><span class="sig-paren">(</span><em class="sig-param">dataset_spec=None</em>, <em class="sig-param">name='MultiDatasetRegress'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetRegress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyradigm.multiple.BaseMultiDataset</span></code></p>
-<p>Container class to manage multimodal classification datasets.</p>
+<p>Container class to manage multimodal regression datasets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
 <dd class="field-odd"><dl class="simple">
 <dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.common_attr" title="pyradigm.multiple.MultiDatasetRegress.common_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">common_attr</span></code></a></dt><dd><p>Attributes common to all subjects/datasets, such as covariates, in this</p>
 </dd>
-<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.modality_ids" title="pyradigm.multiple.MultiDatasetRegress.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+<dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.modality_ids" title="pyradigm.multiple.MultiDatasetRegress.modality_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modality_ids</span></code></a></dt><dd><p>List of identifiers for all modalities/datasets, sorted for reproducibility.</p>
 </dd>
 <dt><a class="reference internal" href="#pyradigm.multiple.MultiDatasetRegress.samplet_ids" title="pyradigm.multiple.MultiDatasetRegress.samplet_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samplet_ids</span></code></a></dt><dd><p>List of samplet IDs in the multi-dataset</p>
 </dd>
@@ -402,12 +425,35 @@ MultiDataset</p>
 <dt id="pyradigm.multiple.MultiDatasetRegress.holdout">
 <code class="sig-name descname">holdout</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">train_perc=0.7</em>, <em class="sig-param">num_rep=50</em>, <em class="sig-param">return_ids_only=False</em>, <em class="sig-param">format='MLDataset'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyradigm/multiple.html#MultiDatasetRegress.holdout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.holdout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a holdout generator for train and test sets for cross-validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_perc</strong> (<em>float</em>) – Percentage (0, 1) of samplets to be selected for the training set.
+Remaining will be added to the test set.</p></li>
+<li><p><strong>num_rep</strong> (<em>int</em>) – Number of holdout repetitions</p></li>
+<li><p><strong>return_ids_only</strong> (<em>bool</em>) – Whether to return samplet IDs only, or the corresponding Datasets</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – Format of the Dataset to be returned when return_ids_only=False
+format=’MLDataset’ returns the full-blown pyradigm data structure, and
+format=’data_matrix’ returns just the feature matrix X in ndarray format</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>train, test</strong> – A tuple (in order train, test) of IDs or Datasets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If train_perc is &lt; 0 or &gt; 1
+If num_rep is not int, or &lt; 1 or infinite</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyradigm.multiple.MultiDatasetRegress.modality_ids">
 <em class="property">property </em><code class="sig-name descname">modality_ids</code><a class="headerlink" href="#pyradigm.multiple.MultiDatasetRegress.modality_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of identifiers for all modalities, sorted for reproducibility.</p>
+<dd><p>List of identifiers for all modalities/datasets, sorted for reproducibility.</p>
 </dd></dl>
 
 <dl class="method">

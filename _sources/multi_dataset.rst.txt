@@ -19,3 +19,5 @@ A schematic illustrating the function of the ``MultiDataset`` is shown below, wh
 .. image:: flyer_multimodal.png
     :height: 500
 
+.. note::
+    A tutorial jupyter notebook will be released soon. Stay tuned!
