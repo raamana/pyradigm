@@ -1,14 +1,15 @@
+from collections.abc import Iterable
 
-from collections import Iterable
 import numpy as np
-from pyradigm.base import missing_value_indicator
+
 from pyradigm import ClassificationDataset, RegressionDataset
+from pyradigm.base import missing_value_indicator
 from pyradigm.pyradigm import MLDataset
+from pyradigm.base import is_iterable_but_not_str, BaseDataset
+from warnings import warn
 
 feat_generator = np.random.randn
 
-from pyradigm.base import is_iterable_but_not_str, BaseDataset
-from warnings import warn
 
 def load_dataset(ds_path):
     """Convenience utility to quickly load any type of pyradigm dataset"""
@@ -61,7 +62,8 @@ def check_compatibility(datasets,
 
     i.e. with same set of subjects, each with the same target in all instances.
 
-    Checks the first dataset in the list against the rest, and returns a boolean array.
+    Checks the first dataset in the list against the rest, and returns a boolean
+    array.
 
     Parameters
     ----------
@@ -84,7 +86,8 @@ def check_compatibility(datasets,
         Boolean flag indicating whether all datasets are compatible or not
 
     compatibility : list
-        List indicating whether first dataset is compatible with the rest individually.
+        List indicating whether first dataset is compatible with the rest
+        individually.
         This could be useful to select a subset of mutually compatible datasets.
         Length : n-1
 
@@ -93,7 +96,8 @@ def check_compatibility(datasets,
 
     size_descriptor : tuple
         A tuple with values for (num_samplets, reqd_num_features)
-        - num_samplets must be common for all datasets that are evaluated for compatibility
+        - num_samplets must be common for all datasets that are evaluated for
+        compatibility
         - reqd_num_features is None (when no check on dimensionality is perfomed), or
             list of corresponding dimensionalities for each input dataset
 
@@ -113,9 +117,9 @@ def check_compatibility(datasets,
         if isinstance(reqd_num_features, Iterable):
             if len(reqd_num_features) != num_datasets:
                 raise ValueError(
-                    'Specify dimensionality for exactly {} datasets.'
-                    ' Given for a different number {}'
-                    ''.format(num_datasets, len(reqd_num_features)))
+                        'Specify dimensionality for exactly {} datasets.'
+                        ' Given for a different number {}'
+                        ''.format(num_datasets, len(reqd_num_features)))
             reqd_num_features = list(map(int, reqd_num_features))
         else:  # same dimensionality for all
             reqd_num_features = [int(reqd_num_features)] * num_datasets
@@ -164,6 +168,7 @@ def check_compatibility(datasets,
     return all(compatible), compatible, dim_mismatch, \
            (pivot.num_samplets, reqd_num_features)
 
+
 def attr_generator(attr_type, count):
     """Generates distributions of a given type"""
 
@@ -171,10 +176,10 @@ def attr_generator(attr_type, count):
     if attr_type in ('int', 'age'):
         return np.random.randint(100, size=count)
     elif attr_type in ('float', 'weight'):
-        return 100*np.abs(np.random.rand(count))
+        return 100 * np.abs(np.random.rand(count))
     elif attr_type in ('sex', 'gender'):
         return np.random.choice(['male', 'female', 'other'], count, replace=True)
-    elif attr_type in ('site', ):
+    elif attr_type in ('site',):
         return np.random.choice(['site{}'.format(ss) for ss in range(6)],
                                 count, replace=True)
     elif isinstance(attr_type, Iterable):
@@ -213,7 +218,7 @@ def make_random_dataset(max_num_classes=20,
     if type(num_classes) == np.ndarray:
         num_classes = num_classes[0]
     if not stratified:
-        class_sizes = np.random.randint(smallest, largest+1, num_classes)
+        class_sizes = np.random.randint(smallest, largest + 1, num_classes)
     else:
         class_sizes = np.repeat(np.random.randint(smallest, largest), num_classes)
 
@@ -251,7 +256,7 @@ def make_random_dataset(max_num_classes=20,
                 ds.add_sample(sid, features, int(cc), class_)
             else:
                 if attr_names is not None:
-                    a_values = [ attrs[a_name][s_index] for a_name in attr_names]
+                    a_values = [attrs[a_name][s_index] for a_name in attr_names]
                     ds.add_samplet(sid, features, class_,
                                    attr_names=attr_names, attr_values=a_values)
                 else:
@@ -297,7 +302,7 @@ def make_random_RegrDataset(min_size=20,
     largest = max(50, max_size)
     largest = max(smallest + 3, largest)
 
-    sample_size = np.random.randint(smallest, largest+1)
+    sample_size = np.random.randint(smallest, largest + 1)
 
     num_features = np.random.randint(min(3, max_dim), max(3, max_dim), 1)[0]
 
