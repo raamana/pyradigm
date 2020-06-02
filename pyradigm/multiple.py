@@ -186,7 +186,7 @@ class BaseMultiDataset(object):
 
     @property
     def modality_ids(self):
-        """List of identifiers for all modalities, sorted for reproducibility."""
+        """List of identifiers for all modalities/datasets, sorted for reproducibility."""
         return sorted(list(self._modalities.keys()))
 
     @abstractmethod
@@ -373,8 +373,8 @@ class MultiDatasetClassify(BaseMultiDataset):
             # overriding the "Subset derived from ... "
             ds_out.description = new_id
         else:
-            raise ValueError('One or more classes in {} does not exist in\n{}'
-                             ''.format(sub_group, fp))
+            raise ValueError('One or more classes in {} do not exist in\n{}'
+                             ''.format(subgroup, dataset.description))
 
         self.append(ds_out, identifier=identifier)
 
@@ -424,10 +424,42 @@ class MultiDatasetClassify(BaseMultiDataset):
         Builds a holdout generator for train and test sets for cross-validation.
         Ensures all the classes are represented equally in the training set.
 
+        Parameters
+        ----------
+        train_perc : float
+            Percentage (0, 1) of samplets from each class to be selected for the
+            training set. Remaining IDs from each class will be added to test set.
+
+        num_rep : int
+            Number of holdout repetitions
+
+        return_ids_only : bool
+            Whether to return samplet IDs only, or the corresponding Datasets
+
+        format : str
+            Format of the Dataset to be returned when return_ids_only=False
+            format='MLDataset' returns the full-blown pyradigm data structure, and
+            format='data_matrix' returns just the feature matrix X in ndarray format
+
+        Returns
+        -------
+        train, test : tuple
+            A tuple (in order train, test) of IDs or Datasets
+
+        Raises
+        ------
+        ValueError
+            If train_perc is < 0 or > 1
+            If num_rep is not int, or < 1 or infinite
+
         """
 
         if train_perc <= 0.0 or train_perc >= 1.0:
-            raise ValueError('Train perc > 0.0 and < 1.0')
+            raise ValueError('Train percentage must be > 0.0 and < 1.0')
+
+        num_rep = int(num_rep)
+        if not np.isfinite(num_rep) or num_rep < 1:
+            raise ValueError('Number of repetitions must be > 1 and be finite.')
 
         ids_in_class = {cid: self._dataset.sample_ids_in_class(cid)
                         for cid in self._target_sizes.keys()}
@@ -469,7 +501,7 @@ class MultiDatasetClassify(BaseMultiDataset):
 
 
 class MultiDatasetRegress(BaseMultiDataset):
-    """Container class to manage multimodal classification datasets."""
+    """Container class to manage multimodal regression datasets."""
 
 
     def __init__(self,
@@ -517,10 +549,42 @@ class MultiDatasetRegress(BaseMultiDataset):
         """
         Builds a holdout generator for train and test sets for cross-validation.
 
+        Parameters
+        ----------
+        train_perc : float
+            Percentage (0, 1) of samplets to be selected for the training set.
+            Remaining will be added to the test set.
+
+        num_rep : int
+            Number of holdout repetitions
+
+        return_ids_only : bool
+            Whether to return samplet IDs only, or the corresponding Datasets
+
+        format : str
+            Format of the Dataset to be returned when return_ids_only=False
+            format='MLDataset' returns the full-blown pyradigm data structure, and
+            format='data_matrix' returns just the feature matrix X in ndarray format
+
+        Returns
+        -------
+        train, test : tuple
+            A tuple (in order train, test) of IDs or Datasets
+
+        Raises
+        ------
+        ValueError
+            If train_perc is < 0 or > 1
+            If num_rep is not int, or < 1 or infinite
+
         """
 
         if train_perc <= 0.0 or train_perc >= 1.0:
-            raise ValueError('Train perc > 0.0 and < 1.0')
+            raise ValueError('Train perc must be > 0.0 and < 1.0')
+
+        num_rep = int(num_rep)
+        if not np.isfinite(num_rep) or num_rep < 1:
+            raise ValueError('Number of repetitions must be > 1 and be finite.')
 
         subset_size = np.int64(np.floor(self.num_samplets * train_perc))
 

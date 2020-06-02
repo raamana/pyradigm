@@ -515,8 +515,9 @@ class ClassificationDataset(BaseDataset):
         return self.__str__()
 
 
-    # renaming the method for backwards compatibility
     def data_and_labels(self):
+        """Deprecated: symbolic link to the .data_and_targets() method for
+        backwards compatibility."""
 
         warnings.warn(DeprecationWarning('data_and_labels() is convenient method to '
                                          'access data_and_targets() method.'
