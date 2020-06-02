@@ -186,7 +186,7 @@ class BaseMultiDataset(object):
 
     @property
     def modality_ids(self):
-        """List of identifiers for all modalities, sorted for reproducibility."""
+        """List of identifiers for all modalities/datasets, sorted for reproducibility."""
         return sorted(list(self._modalities.keys()))
 
     @abstractmethod
@@ -373,8 +373,8 @@ class MultiDatasetClassify(BaseMultiDataset):
             # overriding the "Subset derived from ... "
             ds_out.description = new_id
         else:
-            raise ValueError('One or more classes in {} does not exist in\n{}'
-                             ''.format(sub_group, fp))
+            raise ValueError('One or more classes in {} do not exist in\n{}'
+                             ''.format(subgroup, dataset.description))
 
         self.append(ds_out, identifier=identifier)
 
