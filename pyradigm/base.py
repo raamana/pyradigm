@@ -34,6 +34,10 @@ class InfiniteOrNaNValuesException(PyradigmException):
     """Custom exception to catch NaN or Inf values."""
 
 
+class InvalidFeatureNamesException(PyradigmException):
+    """Custom exception to catch bad feature names."""
+
+
 class CompatibilityException(PyradigmException):
     """
     Exception to indicate two datasets are not compatible in some way
@@ -349,6 +353,37 @@ class BaseDataset(ABC):
         else:
             return samplet_id
 
+    def _check_feature_names(self, feature_names, nfeatures):
+        """
+        Check feature names match what was previously used
+
+        if nothing preivously used and nothing given:
+        set to strings like 0,1,...nfeats
+
+        Returns
+        -------
+        feature_names as numpy array or None
+        """
+        # on the first sample we'll make names 0,...,nfeats
+        # but afterwward, dont spend time generating it.
+        # add_samplet wont change the names if None
+        if feature_names is None:
+            if self.num_samplets <= 0:
+                return self._str_names(nfeatures)
+            return None
+
+        feature_names = np.array(feature_names)
+        if len(feature_names) != nfeatures:
+            raise InvalidFeatureNamesException(
+                "Length of supplied feature_names does not match features")
+
+        if self._feature_names is not None and \
+           not np.array_equal(self.feature_names, feature_names):
+            raise InvalidFeatureNamesException(
+                "Supplied feature_names do not match what was previously specified")
+
+        return feature_names
+
 
     def add_samplet(self,
                     samplet_id,
@@ -403,33 +438,18 @@ class BaseDataset(ABC):
 
         features = self._check_features(features)
         target = self._check_target(target)
+        nfeats = features.size if isinstance(features, np.ndarray) \
+            else len(features)
+        feature_names = self._check_feature_names(feature_names, nfeats)
+        # TODO: attr should also be checked before _data is modified?
 
-        if self.num_samplets <= 0:
-            self._data[samplet_id] = features
-            self._targets[samplet_id] = target
-            self._num_features = features.size if isinstance(features,
-                                                             np.ndarray) else len(
-                features)
-            if feature_names is None:
-                self._feature_names = self._str_names(self.num_features)
-        else:
-            if self._num_features != features.size:
-                raise ValueError('dimensionality of this samplet ({}) '
-                                 'does not match existing samplets ({})'
-                                 ''.format(features.size, self._num_features))
-
-            self._data[samplet_id] = features
-            self._targets[samplet_id] = target
-            if feature_names is not None:
-                # if it was never set, allow it
-                # class gets here when adding the first samplet,
-                #   after dataset was initialized with empty constructor
-                if self._feature_names is None:
-                    self._feature_names = np.array(feature_names)
-                else:  # if set already, ensure a match
-                    if not np.array_equal(self.feature_names, np.array(feature_names)):
-                        raise ValueError(
-                            "supplied feature names do not match the existing names!")
+        self._data[samplet_id] = features
+        self._targets[samplet_id] = target
+        self._num_features = nfeats
+        self._targets[samplet_id] = target
+        # even if given featnames=None, will be 0...nfeats for first samplet
+        if feature_names is not None and self._feature_names is None:
+            self._feature_names = feature_names
 
         if attr_names is not None:
             if is_iterable_but_not_str(attr_names):
