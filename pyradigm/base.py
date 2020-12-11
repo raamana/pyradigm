@@ -300,6 +300,11 @@ class BaseDataset(ABC):
         if features.size <= 0:
             raise EmptyFeatureSetException('Provided features are empty.')
 
+        if self._num_features and self._num_features != features.size:
+            raise ValueError('dimensionality of supplied features ({}) '
+                                'does not match existing samplets ({})'
+                                ''.format(features.size, self._num_features))
+
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():
                 raise InfiniteOrNaNValuesException('NaN or Inf values found!'
@@ -1047,10 +1052,6 @@ class BaseDataset(ABC):
 
         if item in self._data:
             features = self._check_features(features)
-            if self._num_features != features.size:
-                raise ValueError('dimensionality of supplied features ({}) '
-                                 'does not match existing samplets ({})'
-                                 ''.format(features.size, self._num_features))
             self._data[item] = features
         else:
             raise KeyError('{} not found in dataset.'
