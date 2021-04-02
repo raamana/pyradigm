@@ -14,7 +14,8 @@ from pyradigm import (ClassificationDataset as ClfDataset,
                       RegressionDataset as RegrDataset)
 from pyradigm.utils import make_random_ClfDataset
 from pyradigm.base import is_iterable_but_not_str, PyradigmException, \
-    ConstantValuesException, InfiniteOrNaNValuesException, EmptyFeatureSetException
+    ConstantValuesException, InfiniteOrNaNValuesException, \
+    InvalidFeatureNamesException, EmptyFeatureSetException
 from pytest import raises, warns
 import numpy as np
 import random
@@ -252,6 +253,39 @@ def test_sanity_checks():
 
     with raises(ConstantValuesException):
         const_ds.save(out_file)
+
+
+def forall_dataset_types(func):
+    "decorator runs func for both dataset types"
+    for cls_type in (RegrDataset, ClfDataset):
+        func(cls_type)
+
+
+@forall_dataset_types
+def test_feature_names_len_mismatch(cls_type):
+    "feature names should align to features"
+    clean_ds = cls_type()
+    feats2 = [1, 2]
+    # too long
+    with raises(InvalidFeatureNamesException):
+        clean_ds.add_samplet('b', feats2, 200, feature_names=['x', 'y', 'z'])
+    # too short
+    with raises(InvalidFeatureNamesException):
+        clean_ds.add_samplet('c', feats2, 100, feature_names=['x'])
+
+
+@forall_dataset_types
+def test_feature_names_change_order(cls_type):
+    """add samplet shouldn't change the order of features
+    TODO: this could be smarter and not throw an error
+    """
+    clean_ds = cls_type()
+    clean_ds.add_samplet('a', [1, 2], 100, feature_names=['x', 'y'])
+    # too short
+    with raises(InvalidFeatureNamesException):
+        clean_ds.add_samplet('c', [4, 3], 200,
+                             feature_names=['y', 'x'])
+
 
 test_attributes()
 # test_save_load()
