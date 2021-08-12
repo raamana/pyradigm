@@ -253,6 +253,7 @@ def test_sanity_checks():
 
     with raises(ConstantValuesException):
         const_ds.save(out_file)
+    ds.del_samplet('all_constant')
 
 
 def forall_dataset_types(func):
