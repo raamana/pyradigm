@@ -1,4 +1,4 @@
-# Research data management in biomedical and machine learning applications with pyradigm 
+# CSVs suck. Upgrade your life with pyradigm for research data management in biomedical and machine learning applications 
 
 [![status](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2/status.svg)](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2)
 [![travis](https://travis-ci.org/raamana/pyradigm.svg?branch=master)](https://travis-ci.org/raamana/pyradigm.svg?branch=master)
@@ -8,14 +8,16 @@
 [![codecov](https://codecov.io/gh/raamana/pyradigm/branch/master/graph/badge.svg)](https://codecov.io/gh/raamana/pyradigm)
 
 
-## CSVs suck. Upgrade your life with pyradigm
+## Documentation
 
-Documentation : http://raamana.github.io/pyradigm/
+API and usage : http://raamana.github.io/pyradigm/
 
-Usage/demo notebook (no setup required) :
+Demo notebook (no setup required) :
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/raamana/pyradigm/master?filepath=docs%2Fusage.ipynb)
 
+
+## Schematic
 
 The illustration below describes the full functionality of `pyradigm` in the latest version `0.6`, for which docs will be updated shortly (see below illustration for docs on previous versions):
 
