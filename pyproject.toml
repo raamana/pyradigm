@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyradigm"
+dynamic = ["version"]
+description = "Python-based data structure to improve handling of datasets in machine learning workflows"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Pradeep Reddy Raamana", email = "raamana@gmail.com" },
+]
+keywords = [
+    "data",
+    "dataset",
+    "learning",
+    "machine",
+    "provenance",
+    "python",
+    "structure",
+    "test",
+    "workflow",
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "setuptools",
+]
+
+[project.scripts]
+pyradigm = "pyradigm.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/raamana/pyradigm"
+
+[tool.hatch.version]
+source = 'vcs'
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/pyradigm",
+]
