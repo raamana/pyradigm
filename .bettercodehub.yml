@@ -1,8 +1,0 @@
-exclude:
-- /conf.py
-- /pyradigm/_version.py
-- /setup.py
-- /versioneer.py
-component_depth: 1
-languages:
-- python
