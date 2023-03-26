@@ -220,7 +220,7 @@ class BaseMultiDataset(object):
 
         format = format.lower()
 
-        features = list()  # returning a dict would be better if AutoMKL() can handle it
+        features = list()  # dict would be better if AutoMKL() can handle it
         for modality, data in self._modalities.items():
             if format in ('ndarray', 'data_matrix'):
                 # turning dict of arrays into a data matrix
