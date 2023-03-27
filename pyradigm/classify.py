@@ -42,17 +42,17 @@ class ClassificationDataset(BaseDataset):
 
         Parameters
         ----------
-        dataset_path : str
+        dataset_path : Path or str
             path to saved Dataset on disk, to directly load it.
 
         in_dataset : Dataset
-            Dataset to be copied to create a new one.
+            Input dataset to be copied to create a new one.
 
         data : dict
-            dict of features (samplet_ids are treated to be samplet ids)
+            Dictionary of features (samplet_ids are treated to be samplet ids)
 
         targets : dict
-            dict of targets
+            Dictionary of targets
             (samplet_ids must match with data/classes, are treated to be samplet ids)
 
         description : str

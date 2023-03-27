@@ -44,6 +44,7 @@ class CompatibilityException(PyradigmException):
         i.e. differing set of samplet IDs, or their target values.
     """
 
+
 def is_iterable_but_not_str(value):
     """Boolean check for iterables that are not strings"""
 
@@ -51,6 +52,7 @@ def is_iterable_but_not_str(value):
 
 
 missing_value_indicator = np.NaN
+
 
 class BaseDataset(ABC):
     """Abstract Base class for Dataset.
@@ -60,6 +62,7 @@ class BaseDataset(ABC):
     self.__class__() refers to the inherited child class instance at runtime!
 
     """
+
 
     def __init__(self,
                  target_type=float,
@@ -132,7 +135,8 @@ class BaseDataset(ABC):
             2D array of shape [num_samplets, num_features]
             with features corresponding row-wise to samplet_ids
         targets : ndarray
-            Array of numeric targets for each samplet corresponding row-wise to samplet_ids
+            Array of numeric targets for each samplet corresponding row-wise to
+            samplet_ids
         samplet_ids : list
             List of samplet ids
 
@@ -173,7 +177,8 @@ class BaseDataset(ABC):
         if isinstance(values, dict):
             if self._targets is not None and len(self._targets) != len(values):
                 raise ValueError(
-                    'number of samplets do not match the previously assigned targets')
+                        'number of samplets do not match the previously assigned '
+                        'targets')
             elif len(values) < 1:
                 raise ValueError('There must be at least 1 samplet in the dataset!')
             else:
@@ -199,13 +204,16 @@ class BaseDataset(ABC):
 
     @targets.setter
     def targets(self, values):
-        """Class targets (such as 1, 2, -1, 'A', 'B' etc.) for each samplet in the dataset."""
+        """Class targets (such as 1, 2, -1, 'A', 'B' etc.) for each samplet in the
+        dataset."""
         if isinstance(values, dict):
             if self._data is not None and len(self._data) != len(values):
                 raise ValueError(
-                    'number of samplets do not match the previously assigned data')
+                        'number of samplets do not match the previously assigned '
+                        'data')
             elif set(self.samplet_ids) != set(list(values)):
-                raise ValueError('samplet ids do not match the previously assigned ids.')
+                raise ValueError(
+                    'samplet ids do not match the previously assigned ids.')
             else:
                 self._targets = values
         else:
@@ -231,6 +239,7 @@ class BaseDataset(ABC):
                              "and length as features.")
 
         self._feature_names = np.array(names)
+
 
     @staticmethod
     def __take(nitems, iterable):
@@ -302,14 +311,15 @@ class BaseDataset(ABC):
 
         if self._num_features and self._num_features != features.size:
             raise ValueError('dimensionality of supplied features ({}) '
-                                'does not match existing samplets ({})'
-                                ''.format(features.size, self._num_features))
+                             'does not match existing samplets ({})'
+                             ''.format(features.size, self._num_features))
 
         if not self._allow_nan_inf:
             if np.isnan(features).any() or np.isinf(features).any():
-                raise InfiniteOrNaNValuesException('NaN or Inf values found!'
-                                 ' They are not allowed and disabled by default.'
-                                 ' Use allow_nan_inf=True if you need to use them.')
+                raise InfiniteOrNaNValuesException(
+                        'NaN or Inf values found! They are not allowed and '
+                        'disabled by default. Use allow_nan_inf=True if you need '
+                        'to use them.')
 
         if features.ndim > 1:
             features = np.ravel(features)
@@ -358,6 +368,7 @@ class BaseDataset(ABC):
         else:
             return samplet_id
 
+
     def _check_feature_names(self, feature_names, nfeatures):
         """
         Check feature names match what was previously used
@@ -380,12 +391,13 @@ class BaseDataset(ABC):
         feature_names = np.array(feature_names)
         if len(feature_names) != nfeatures:
             raise InvalidFeatureNamesException(
-                "Length of supplied feature_names does not match features")
+                    "Length of supplied feature_names does not match features")
 
         if self._feature_names is not None and \
-           not np.array_equal(self.feature_names, feature_names):
+                not np.array_equal(self.feature_names, feature_names):
             raise InvalidFeatureNamesException(
-                "Supplied feature_names do not match what was previously specified")
+                    "Supplied feature_names do not match what was previously "
+                    "specified")
 
         return feature_names
 
@@ -737,6 +749,7 @@ class BaseDataset(ABC):
 
         return self._dataset_attr
 
+
     @dataset_attr.setter
     def dataset_attr(self, values):
         """
@@ -778,7 +791,7 @@ class BaseDataset(ABC):
         if not (max(subset_idx) < self._num_features) and (min(subset_idx) >= 0):
             raise UnboundLocalError('indices out of range for the dataset. '
                                     'Max index: {} Min index : 0'.format(
-                self._num_features))
+                    self._num_features))
 
         sub_data = {samplet: features[subset_idx] for samplet, features in
                     self._data.items()}
@@ -798,7 +811,6 @@ class BaseDataset(ABC):
         subset = [key for key in dictionary if dictionary[key] == value]
 
         return subset
-
 
 
     def transform(self, func, func_description=None):
@@ -942,7 +954,6 @@ class BaseDataset(ABC):
         """
 
 
-
     def get_subset(self, subset_ids):
         """
         Returns a smaller dataset identified by their keys/samplet IDs.
@@ -973,7 +984,7 @@ class BaseDataset(ABC):
             attr_subset, attr_dtype_subset = dict(), dict()
             for attr in self._attr.keys():
                 attr_subset[attr] = self.__get_subset_from_dict(self._attr[attr],
-                                                         subset_ids)
+                                                                subset_ids)
                 attr_dtype_subset[attr] = self._attr_dtype[attr]
             sub_ds.attr = attr_subset
             sub_ds.attr_dtype = attr_dtype_subset
@@ -1004,15 +1015,17 @@ class BaseDataset(ABC):
             return np.empty((0, 0))
 
         if isinstance(subset_ids, set):
-            raise TypeError('Input set is not ordered, hence can not guarantee order! '
-                            'Must provide a list or tuple.')
+            raise TypeError(
+                'Input set is not ordered, hence can not guarantee order! '
+                'Must provide a list or tuple.')
 
         if isinstance(subset_ids, str):
             subset_ids = [subset_ids, ]
 
         num_existing_keys = sum([1 for key in subset_ids if key in self._data])
         if num_existing_keys < len(subset_ids):
-            raise ValueError('One or more IDs from subset do not exist in the dataset!')
+            raise ValueError(
+                'One or more IDs from subset do not exist in the dataset!')
 
         matrix = np.full((num_existing_keys, self.num_features), np.nan)
         for idx, sid in enumerate(subset_ids):
@@ -1030,7 +1043,7 @@ class BaseDataset(ABC):
 
 
     def get(self, item, not_found_value=None):
-        "Method like dict.get() which can return specified value if key not found"
+        """Like dict.get() which can return specified value if key not found"""
 
         if item in self.samplet_ids:
             return self._data[item]
@@ -1039,7 +1052,9 @@ class BaseDataset(ABC):
 
 
     def __getitem__(self, item):
-        "Method to ease data retrieval i.e. turn dataset.data['id'] into dataset['id'] "
+        """Method to ease data retrieval
+            i.e., turn dataset.data['id'] into dataset['id']
+        """
 
         if item in self.samplet_ids:
             return self._data[item]
@@ -1057,6 +1072,7 @@ class BaseDataset(ABC):
             raise KeyError('{} not found in dataset.'
                            ' Can not replace features of a non-existing samplet.'
                            ' Add it first via .add_samplet()'.format(item))
+
 
     def __iter__(self):
         "Iterator over samplets"
@@ -1110,9 +1126,11 @@ class BaseDataset(ABC):
 
         return self._dtype
 
+
     @dtype.setter
     def dtype(self, type_val):
-            raise SyntaxError('Data type can only be set during initialization!')
+        raise SyntaxError('Data type can only be set during initialization!')
+
 
     @property
     def num_samplets(self):
@@ -1141,17 +1159,21 @@ class BaseDataset(ABC):
         else:
             return True
 
+
     @abstractmethod
     def __str__(self):
         """Returns a concise and useful text summary of the dataset."""
+
 
     @abstractmethod
     def __format__(self, fmt_str='s'):
         """Returns variants of str repr to be used in .format() invocations"""
 
+
     @abstractmethod
     def __repr__(self):
         """Evaluatable repr"""
+
 
     def _attr_repr(self):
         """Text summary of attributes, samplet- and dataset-wise, in the dataset."""
@@ -1159,9 +1181,9 @@ class BaseDataset(ABC):
         # newline appended already if this is not empty
         attr_descr = self._dataset_attr_repr()
 
-        if self._attr: # atleast one attribute exists!
+        if self._attr:  # atleast one attribute exists!
             attr_counts = ('{} ({})'.format(attr_name, len(values))
-                            for attr_name, values in self._attr.items())
+                           for attr_name, values in self._attr.items())
             attr_descr += '{} samplet attributes: {}'.format(len(self._attr),
                                                              ', '.join(attr_counts))
 
@@ -1171,7 +1193,7 @@ class BaseDataset(ABC):
     def _dataset_attr_repr(self):
         """Text summary of attributes in the dataset."""
 
-        if self._dataset_attr: # atleast one attribute exists!
+        if self._dataset_attr:  # atleast one attribute exists!
             attr_descr = '{} dataset attributes: {}\n' \
                          ''.format(len(self._dataset_attr),
                                    ', '.join(self._dataset_attr.keys()))
@@ -1227,18 +1249,19 @@ class BaseDataset(ABC):
             uniq_types = set(attr_types)
             if 'numeric' not in uniq_types:
                 raise ValueError(
-                    'Currently only numeric attributes in ARFF are supported!')
+                        'Currently only numeric attributes in ARFF are supported!')
 
             non_numeric = uniq_types.difference({'numeric'})
             if len(non_numeric) > 0:
                 raise ValueError('Non-numeric features provided ({}), '
                                  'without requesting encoding to numeric. '
                                  'Try setting encode_nonnumeric=True '
-                                 'or encode features to numeric!'.format(non_numeric))
+                                 'or encode features to numeric!'.format(
+                    non_numeric))
         else:
             raise NotImplementedError(
-                'encoding non-numeric features to numeric is not implemented yet! '
-                'Encode features beforing to ARFF.')
+                    'encoding non-numeric features to numeric is not implemented '
+                    'yet! Encode features before exporting to ARFF.')
 
         dataset = cls()
         dataset._description = arff_meta.name
@@ -1250,7 +1273,8 @@ class BaseDataset(ABC):
 
         num_samples = len(arff_data)
         num_digits = len(str(num_samples))
-        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index, nd=num_digits)
+        make_id = lambda index: 'row{index:0{nd}d}'.format(index=index,
+                                                           nd=num_digits)
         sample_classes = [cls.decode('utf-8') for cls in arff_data['class']]
         class_set = set(sample_classes)
         label_dict = dict()
@@ -1262,7 +1286,8 @@ class BaseDataset(ABC):
             samplet = arff_data.take([index])[0].tolist()
             sample_attrs = samplet[:-1]
             sample_class = samplet[-1].decode('utf-8')
-            dataset.add_samplet(samplet_id=make_id(index),  # ARFF rows do not have an ID
+            dataset.add_samplet(samplet_id=make_id(index),
+                                # ARFF rows do not have an ID
                                 features=sample_attrs,
                                 target=sample_class)
             # not necessary to set feature_names=attr_names for each samplet,
@@ -1280,9 +1305,10 @@ class BaseDataset(ABC):
             path = os.path.abspath(path)
             with open(path, 'rb') as df:
                 self._data, self._targets, \
-                self._dtype, _loaded_target_type, self._description, \
-                self._num_features, self._feature_names, \
-                self._attr, self._attr_dtype, self._dataset_attr = pickle.load(df)
+                    self._dtype, _loaded_target_type, self._description, \
+                    self._num_features, self._feature_names, \
+                    self._attr, self._attr_dtype, self._dataset_attr \
+                    = pickle.load(df)
         except IOError as ioe:
             raise IOError('Unable to read the dataset from file: {}', format(ioe))
         except:
@@ -1332,11 +1358,14 @@ class BaseDataset(ABC):
 
         """
 
-        # TODO need a file format that is flexible and efficient to allow the following:
-        #   1) being able to read just meta info without having to load the ENTIRE dataset
-        #       i.e. use case: compatibility check with #subjects, ids and their classes
-        #   2) random access layout: being able to read features for a single subject!
-
+        # TODO need a file format that is flexible and efficient to allow the
+        #  following:
+        #   1) being able to read just meta info without having to load the ENTIRE
+        #   dataset
+        #       i.e. use case: compatibility check with #subjects, ids and their
+        #       classes
+        #   2) random access layout: being able to read features for a single
+        #   subject!
 
         # sanity check #1 : per samplet
         if not allow_constant_features:
@@ -1387,6 +1416,7 @@ class BaseDataset(ABC):
 
         return True
 
+
     @staticmethod
     def _check_for_constant_features_in_samplets(data):
         """Helper to catch constant values in the samplets."""
@@ -1396,9 +1426,9 @@ class BaseDataset(ABC):
             # when there is only one unique value, among n features
             if uniq_values.size < 2:
                 raise ConstantValuesException(
-                    'Constant values ({}) detected for {} '
-                    '- double check the process, '
-                    'or disable this check!'.format(uniq_values, samplet))
+                        'Constant values ({}) detected for {} '
+                        '- double check the process, '
+                        'or disable this check!'.format(uniq_values, samplet))
 
 
     def _check_for_constant_features_across_samplets(self, data_matrix):
@@ -1411,15 +1441,15 @@ class BaseDataset(ABC):
             uniq_values = np.unique(col)
             if uniq_values.size < 2:
                 raise ConstantValuesException(
-                    'Constant values ({}) detected for feature {} (index {}) - '
-                    'double check the process, '
-                    'or disable this check (strongly discouraged)!'.format(
-                        uniq_values, self._feature_names[col_ix], col_ix))
+                        'Constant values ({}) detected for feature {} (index {}) - '
+                        'double check the process, '
+                        'or disable this check (strongly discouraged)!'.format(
+                                uniq_values, self._feature_names[col_ix], col_ix))
 
 
     def extend(self, other):
         """
-        Method to extend the dataset vertically (add samplets from  anotehr dataset).
+        Method to extend the dataset vertically (add samplets from  another dataset).
 
         Parameters
         ----------
@@ -1435,7 +1465,8 @@ class BaseDataset(ABC):
 
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
-        # assert self.__dtype==other.dtype, TypeError('Incorrect data type of features!')
+        # assert self.__dtype==other.dtype, TypeError('Incorrect data type of
+        # features!')
         for samplet in other.samplet_ids:
             self.add_samplet(samplet, other.data[samplet], other.targets[samplet])
 
@@ -1459,7 +1490,8 @@ class BaseDataset(ABC):
             combined = self.__class__()
             # populating it with the concatenated feature set
             for samplet in self.samplet_ids:
-                comb_data = np.concatenate([self._data[samplet], other.data[samplet]])
+                comb_data = np.concatenate(
+                        [self._data[samplet], other.data[samplet]])
                 combined.add_samplet(samplet, comb_data, self._targets[samplet])
 
             comb_names = np.concatenate([self._feature_names, other.feature_names])
@@ -1483,13 +1515,13 @@ class BaseDataset(ABC):
         if not isinstance(other, type(self)):
             raise TypeError('Incorrect type of dataset provided!')
 
-        num_existing_keys = len(set(self.samplet_ids).intersection(other.samplet_ids))
-        if num_existing_keys < 1:
+        num_common_keys = len(set(self.samplet_ids).intersection(other.samplet_ids))
+        if num_common_keys < 1:
             warn('None of the samplet ids to be removed found in this dataset '
-                          '- nothing to do.')
-        if len(self.samplet_ids) == num_existing_keys:
+                 '- nothing to do.')
+        if len(self.samplet_ids) == num_common_keys:
             warn('Requested removal of all the samplets - '
-                          'output dataset would be empty.')
+                 'output dataset would be empty.')
 
         removed = copy.deepcopy(self)
         for samplet in other.samplet_ids:
@@ -1521,7 +1553,3 @@ class BaseDataset(ABC):
             return True
         else:
             return True
-
-
-
-

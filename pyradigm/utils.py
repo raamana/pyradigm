@@ -75,7 +75,7 @@ def check_compatibility(datasets,
         RegressionDataset or [the deprecated] MLDataset.
         All datasets being compared must be of the same class type.
 
-    reqd_num_features : int
+    reqd_num_features : int or None
         The required number of features in each dataset.
         Helpful to ensure test sets are compatible with training set,
             as well as within themselves.
