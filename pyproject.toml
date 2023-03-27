@@ -47,7 +47,9 @@ Homepage = "https://github.com/raamana/pyradigm"
 
 [tool.hatch.version]
 source = 'vcs'
-version-file = 'pyradigm/_version.py'
+
+[tool.hatch.build.hooks.vcs]
+version-file = "pyradigm/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
