@@ -15,6 +15,7 @@ if version_info.major > 2:
 else:
     raise NotImplementedError('pyradigm supports only python 3 or higher! '
                               'Upgrade to Python 3+ is recommended.')
+del version_info
 
 
 class BaseMultiDataset(object):

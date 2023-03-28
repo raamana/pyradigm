@@ -12,8 +12,10 @@ if version_info.major >= 3:
     from pyradigm.multiple import MultiDatasetClassify, MultiDatasetRegress
     from pyradigm.utils import check_compatibility
 else:
-    raise NotImplementedError('pyradigm supports only Python 3 or higher! '
-                              'Upgrade to Python 3+ is recommended.')
+    raise NotImplementedError('Python 3 or higher is required to run pyradigm. '
+                              'Please upgrade.')
+
+del version_info
 
 try:
     from ._version import __version__
