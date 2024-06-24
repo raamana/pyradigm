@@ -1,5 +1,6 @@
 # CSVs suck. Upgrade your life with pyradigm for research data management in biomedical and machine learning applications 
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4441ab4ec7d24b62ade8b868c1adc028)](https://www.codacy.com/app/raamana/pyradigm?utm_source=github.com&utm_medium=referral&utm_content=raamana/pyradigm&utm_campaign=badger)
 [![status](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2/status.svg)](http://joss.theoj.org/papers/c5c231486d699bca982ca7ebd9cf32d2)
 [![travis](https://travis-ci.org/raamana/pyradigm.svg?branch=master)](https://travis-ci.org/raamana/pyradigm.svg?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cffd80f290544e2e824011bfccf35ff8)](https://www.codacy.com/app/raamana/pyradigm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=raamana/pyradigm&amp;utm_campaign=Badge_Grade)
