@@ -222,14 +222,14 @@ class BaseDataset(ABC):
 
     @property
     def feature_names(self):
-        "Returns the feature names as an numpy array of strings."
+        """Returns the feature names as an numpy array of strings."""
 
         return self._feature_names
 
 
     @feature_names.setter
     def feature_names(self, names):
-        "Stores the text targets for features"
+        """Stores the text targets for features"""
 
         if len(names) != self.num_features:
             raise ValueError("Number of names do not match the number of features!")
@@ -806,7 +806,7 @@ class BaseDataset(ABC):
 
     @staticmethod
     def _keys_with_value(dictionary, value):
-        "Returns a subset of keys from the dict with the value supplied."
+        """Returns a subset of keys from the dict with the value supplied."""
 
         subset = [key for key in dictionary if dictionary[key] == value]
 
@@ -1035,7 +1035,7 @@ class BaseDataset(ABC):
 
 
     def __contains__(self, item):
-        "Boolean test of membership of a samplet in the dataset."
+        """Boolean test of membership of a samplet in the dataset."""
         if item in self.samplet_ids:
             return True
         else:
@@ -1075,7 +1075,7 @@ class BaseDataset(ABC):
 
 
     def __iter__(self):
-        "Iterator over samplets"
+        """Iterator over samplets"""
 
         for samplet, features in self.data.items():
             yield samplet, features
@@ -1116,7 +1116,7 @@ class BaseDataset(ABC):
 
     @num_features.setter
     def num_features(self, int_val):
-        "Method that should not exist!"
+        """Method that should not exist!"""
         raise AttributeError("num_features property can't be set, only retrieved!")
 
 
@@ -1392,7 +1392,7 @@ class BaseDataset(ABC):
 
     @staticmethod
     def _validate(data, targets):
-        "checking the mechanics, lengths, common dimensionality etc"
+        """checking the mechanics, lengths, common dimensionality etc"""
 
         if not isinstance(data, dict):
             raise TypeError('data must be a dict! '
@@ -1472,7 +1472,7 @@ class BaseDataset(ABC):
 
 
     def __add__(self, other):
-        "Method to combine to MLDatasets, samplet-wise or feature-wise."
+        """Method to combine to MLDatasets, samplet-wise or feature-wise."""
 
         if not isinstance(other, self.__class__):
             raise TypeError('Incorrect type of dataset provided!')
