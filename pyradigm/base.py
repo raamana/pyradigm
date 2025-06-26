@@ -1153,11 +1153,8 @@ class BaseDataset(ABC):
         return self.num_samplets
 
 
-    def __nonzero__(self):
-        if self.num_samplets < 1:
-            return False
-        else:
-            return True
+    def __bool__(self):
+        return self.num_samplets > 0
 
 
     @abstractmethod

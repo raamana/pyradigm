@@ -1128,11 +1128,8 @@ class MLDataset(object):
         return self.num_samples
 
 
-    def __nonzero__(self):
-        if self.num_samples < 1:
-            return False
-        else:
-            return True
+    def __bool__(self):
+        return self.num_samples > 0
 
 
     def __str__(self):
