@@ -259,7 +259,7 @@ def test_membership():
     assert not_member not in test_dataset
 
 def rand_ints_range(n, k):
-    return np.random.random_integers(1, n, min(n, k))
+    return np.random.randint(1, n, min(n, k))
 
 def test_glance():
     for k in np.random.randint(1, test_dataset.num_samples-1, 10):

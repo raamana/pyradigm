@@ -206,12 +206,12 @@ def test_nan_inf_values():
     for cls_type in (RegrDataset, ClfDataset):
 
         cds_clean = cls_type(allow_nan_inf=False)
-        for invalid_value in [np.NaN, np.Inf]:
+        for invalid_value in [np.nan, np.Inf]:
             with raises(InfiniteOrNaNValuesException):
                 cds_clean.add_samplet('a', [1, invalid_value, 3], target_val)
 
         cds_dirty = cls_type(allow_nan_inf=True)
-        for sid, valid_value in zip(('a', 'b'), [np.NaN, np.Inf]):
+        for sid, valid_value in zip(('a', 'b'), [np.nan, np.Inf]):
             try:
                 cds_dirty.add_samplet(sid, [1, valid_value, 3], target_val)
             except:
