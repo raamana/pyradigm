@@ -22,7 +22,7 @@ class RegressionDataset(BaseDataset):
                  targets=None,
                  description='',
                  feature_names=None,
-                 dtype=np.float_,
+                 dtype=np.float64,
                  allow_nan_inf=False,
                  ):
         """
@@ -78,7 +78,7 @@ class RegressionDataset(BaseDataset):
 
         """
 
-        super().__init__(target_type=np.float_,
+        super().__init__(target_type=np.float64,
                          dtype=dtype,
                          allow_nan_inf=allow_nan_inf,
                          )

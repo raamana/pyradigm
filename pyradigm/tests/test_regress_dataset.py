@@ -151,7 +151,7 @@ def test_set_existing_sample():
                          'Retrieved features do not match previously set features.')
 
 def test_data_type():
-    for in_dtype in [np.float_, int, np.bool_]:
+    for in_dtype in [np.float64, int, np.bool_]:
         cds = RegrDataset(dtype=in_dtype)
         cds.add_samplet('a', [1, 2.0, -434], 2)
         if cds.dtype != in_dtype or cds['a'].dtype != in_dtype:

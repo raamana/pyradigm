@@ -24,7 +24,7 @@ class ClassificationDataset(BaseDataset):
                  targets=None,
                  description='',
                  feature_names=None,
-                 dtype=np.float_,
+                 dtype=np.float64,
                  allow_nan_inf=False,
                  ):
         """
