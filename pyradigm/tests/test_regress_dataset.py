@@ -25,7 +25,7 @@ feat_names = np.array([str(x) for x in range(num_features)])
 test_dataset = RegrDataset()
 for target_index, target_id in enumerate(target_set):
     for sub_ix in range(target_sizes[target_index]):
-        subj_id = '{}_S{:05d}'.format(target_id, sub_ix)
+        subj_id = f'{target_id}_S{sub_ix:05d}'
         feat = np.random.random(num_features)
         test_dataset.add_samplet(subj_id, feat, target_id,
                                  feature_names=feat_names)
@@ -40,7 +40,7 @@ for sub_id in test_dataset.samplet_ids:
     same_ids_new_feat.add_samplet(sub_id, feat,
                                   test_dataset.targets[sub_id])
 
-same_ids_new_feat.feature_names = np.array(['new_f{}'.format(x) for x in range(
+same_ids_new_feat.feature_names = np.array([f'new_f{x}' for x in range(
         num_features)])
 
 test_dataset.description = 'test dataset'
@@ -81,7 +81,7 @@ def test_target_type():
     rand_id = test_dataset.samplet_ids[np.random.randint(2, num_samplets)]
     if not isinstance(test_dataset.targets[rand_id],
                       test_dataset._target_type):
-        raise TypeError('invalid target type for samplet id {}'.format(rand_id))
+        raise TypeError(f'invalid target type for samplet id {rand_id}')
 
 
 def test_num_targets():

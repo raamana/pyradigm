@@ -93,8 +93,7 @@ class ClassificationDataset(BaseDataset):
                 raise IOError('Specified file could not be read.')
         elif in_dataset is not None:
             if not isinstance(in_dataset, self.__class__):
-                raise TypeError('Invalid Class input: {} expected!'
-                                ''.format(self.__class__))
+                raise TypeError(f'Invalid Class input: {self.__class__} expected!')
             if in_dataset.num_samplets <= 0:
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
@@ -201,8 +200,7 @@ class ClassificationDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError('Classes {} do not exist in this dataset.'
-                             ''.format(non_existent))
+            raise ValueError(f'Classes {target_ids} do not exist in this dataset.')
 
         subsets = list()
         for target_id in target_ids:
@@ -249,14 +247,14 @@ class ClassificationDataset(BaseDataset):
 
         if count_per_class is None and (0.0 < train_perc < 1.0):
             if train_perc < 1.0 / smallest_class_size:
-                raise ValueError('Training percentage selected too low '
-                                 'to return even one samplet from the smallest class!')
+                raise ValueError(f'Training percentage selected too low '
+                                 f'to return even one samplet from the smallest class!')
             train_set = self.random_subset_ids(train_perc)
         elif train_perc is None and count_per_class > 0:
             if count_per_class >= smallest_class_size:
                 raise ValueError(
-                    'Selections would exclude the smallest class from test set. '
-                    'Reduce samplet count per class for the training set!')
+                    f'Selections would exclude the smallest class from test set. '
+                    f'Reduce samplet count per class for the training set!')
             train_set = self.random_subset_ids_by_count(count_per_class)
         else:
             raise ValueError('Invalid, or out of range selection: '
@@ -350,7 +348,7 @@ class ClassificationDataset(BaseDataset):
                     this_class is None:
                 # warning if none were selected
                 raise ValueError(
-                        'No samplets from class {} were selected.'.format(target_id))
+                        f'No samplets from class {target_id} were selected.')
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -401,8 +399,7 @@ class ClassificationDataset(BaseDataset):
             subset_size_this_class = max(0, min(target_size, count_per_class))
             if subset_size_this_class < 1 or this_class is None:
                 # warning if none were selected
-                warnings.warn('No samplets from class {} were selected.'
-                              ''.format(target_id))
+                warnings.warn(f'No samplets from class {target_id} were selected.')
             else:
                 subsets_this_class = this_class[0:count_per_class]
                 subsets.extend(subsets_this_class)
@@ -436,8 +433,8 @@ class ClassificationDataset(BaseDataset):
         if not isinstance(new_targets, dict):
             raise TypeError('Input targets is not a dict!')
         if not len(new_targets) == self.num_samplets:
-            raise ValueError('Too few items in dict - need {} samplet_ids'
-                             ''.format(self.num_samplets))
+            raise ValueError(f'Too few items in dict - '
+                             f'need {self.num_samplets} samplet_ids')
         if not all([key in self.samplet_ids for key in new_targets]):
             raise ValueError('One or more unrecognized samplet_ids!')
         self._targets = new_targets
@@ -470,8 +467,9 @@ class ClassificationDataset(BaseDataset):
         if self.description not in [None, '']:
             full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samplets, {} classes, {} features'.format(
-                    self.num_samplets, self.num_targets, self.num_features))
+            full_descr.append(f'{self.num_samplets} samplets, '
+                              f'{self.num_targets} classes, '
+                              f'{self.num_features} features')
 
             attr_descr = self._attr_repr()
             if len(attr_descr) > 0:
@@ -495,12 +493,12 @@ class ClassificationDataset(BaseDataset):
 
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
-            descr = '{} samplets x {} features each in {} classes.'.format(
-                     self.num_samplets, self.num_features, self.num_targets)
+            descr = (f'{self.num_samplets} samplets x {self.num_features} features '
+                     f'each in {self.num_targets} classes.')
 
             attr_descr = self._attr_repr()
             if len(attr_descr) > 0:
-                descr += '\n {}'.format(attr_descr)
+                descr += f'\n {attr_descr}'
 
             return descr
         elif fmt_str.lower() in ['f', 'full']:

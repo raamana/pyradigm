@@ -33,7 +33,7 @@ def make_fully_separable_classes(max_class_size=10, max_dim=22):
 
     new_ds = ClfDataset()
     for index, row in enumerate(blobs_X):
-        new_ds.add_samplet('sub{}'.format(index),
+        new_ds.add_samplet(f'sub{index}',
                            row, class_ids[blobs_y[index]])
 
     return new_ds
@@ -90,7 +90,7 @@ def test_init_list_of_paths():
         paths = list()
         for ii in range(num_modalities):
             new_ds = dataset_with_new_features_same_everything_else(ds, max_feat_dim)
-            path = pjoin(out_dir, 'ds{}.pkl'.format(ii))
+            path = pjoin(out_dir, f'ds{ii}.pkl')
             new_ds.save(path)
             paths.append(path)
 

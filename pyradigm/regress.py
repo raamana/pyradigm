@@ -91,8 +91,7 @@ class RegressionDataset(BaseDataset):
                 raise IOError('Specified file could not be read.')
         elif in_dataset is not None:
             if not isinstance(in_dataset, self.__class__):
-                raise TypeError('Invalid Class input: {} expected!'
-                                ''.format(self.__class__))
+                raise TypeError(f'Invalid Class input: {self.__class__} expected!')
             if in_dataset.num_samplets <= 0:
                 raise ValueError('Dataset to copy is empty.')
             self._copy(in_dataset)
@@ -338,7 +337,7 @@ class RegressionDataset(BaseDataset):
         Returns
         -------
         RegressionDataset
-            With subset of samples belonging to the given class(es).
+            With a subset of samples belonging to the given class(es).
 
         Raises
         ------
@@ -357,8 +356,7 @@ class RegressionDataset(BaseDataset):
 
         non_existent = set(self.target_set).intersection(set(target_ids))
         if len(non_existent) < 1:
-            raise ValueError('These targets {} do not exist in this dataset.'
-                             ''.format(non_existent))
+            raise ValueError(f'targets {target_ids} do not exist in this dataset.')
 
         subsets = list()
         for target_id in target_ids:
@@ -395,8 +393,7 @@ class RegressionDataset(BaseDataset):
         if self.description not in [None, '']:
             full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samplets, {} features'.format(
-                    self.num_samplets, self.num_features))
+            full_descr.append(f'{self.num_samplets} samplets, {self.num_features} features')
 
             attr_descr = self._attr_repr()
             if len(attr_descr) > 0:
@@ -420,8 +417,7 @@ class RegressionDataset(BaseDataset):
 
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
-            descr = '{} samplets x {} features each'.format(
-                    self.num_samplets, self.num_features)
+            descr = f'{self.num_samplets} samplets x {self.num_features} features each'
 
             attr_descr = self._attr_repr()
             if len(attr_descr) > 0:

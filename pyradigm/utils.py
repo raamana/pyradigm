@@ -26,11 +26,10 @@ def load_dataset(ds_path):
                      'RegressionDataset as soon as possible.')
                 ds = MLDataset(filepath=ds_path)
             except:
-                raise TypeError('Dataset class @ path below not recognized!'
-                                ' Must be a valid instance of one of '
-                                'ClassificationDataset or '
-                                'RegressionDataset or MLDataset.\n'
-                                ' Ignoring {}'.format(ds_path))
+                raise TypeError(f'Dataset class @ path below not recognized! '
+                                f'Must be a valid instance of one of '
+                                f'ClassificationDataset or RegressionDataset or '
+                                f'MLDataset.\n Ignoring {ds_path}')
 
     return ds
 
@@ -46,9 +45,10 @@ def load_arff_dataset(ds_path):
         except:
             try:
                 ds = MLDataset(arff_path=ds_path)
+                raise TypeError(f'Error in loading the ARFF dataset @ path below!'
+                                f' Ignoring {ds_path}')
             except:
-                raise TypeError('Error in loading the ARFF dataset @ path below!'
-                                ' Ignoring {}'.format(ds_path))
+                pass
 
     return ds
 
@@ -180,7 +180,7 @@ def attr_generator(attr_type, count):
     elif attr_type in ('sex', 'gender'):
         return np.random.choice(['male', 'female', 'other'], count, replace=True)
     elif attr_type in ('site',):
-        return np.random.choice(['site{}'.format(ss) for ss in range(6)],
+        return np.random.choice([f'site{ss}' for ss in range(6)],
                                 count, replace=True)
     elif isinstance(attr_type, Iterable):
         return np.random.choice(attr_type, count, replace=True)

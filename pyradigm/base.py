@@ -96,9 +96,8 @@ class BaseDataset(ABC):
         if np.issubdtype(dtype, np.generic):
             self._dtype = dtype
         else:
-            raise TypeError('data type for features {} not recognized!'
-                            'It must be a subdtype of np.generic'
-                            ''.format(dtype))
+            raise TypeError(f'data type for features {dtype} not recognized!'
+                            'It must be a subdtype of np.generic')
 
         if not isinstance(allow_nan_inf, (bool, str)):
             raise TypeError('allow_nan_inf flag can only be bool or str')
@@ -250,7 +249,7 @@ class BaseDataset(ABC):
     @staticmethod
     def _str_names(num):
 
-        return np.array(['f{}'.format(x) for x in range(num)])
+        return np.array([f'f{x}' for x in range(num)])
 
 
     def glance(self, nitems=5):
@@ -302,9 +301,9 @@ class BaseDataset(ABC):
         try:
             features = features.astype(self.dtype)
         except:
-            raise TypeError("Input features (of dtype {}) can not be converted to "
-                            "Dataset's data type {}"
-                            "".format(features.dtype, self.dtype))
+            raise TypeError(f"Input features (of dtype {features.dtype}) "
+                            f"can not be converted to "
+                            f"Dataset's data type {self.dtype}")
 
         if features.size <= 0:
             raise EmptyFeatureSetException('Provided features are empty.')
@@ -451,7 +450,7 @@ class BaseDataset(ABC):
         samplet_id = self._check_id(samplet_id)
 
         if samplet_id in self._data and not overwrite:
-            raise ValueError('{} already exists in this dataset!'.format(samplet_id))
+            raise ValueError(f'{samplet_id} already exists in this dataset!')
 
         features = self._check_features(features)
         target = self._check_target(target)
@@ -501,7 +500,7 @@ class BaseDataset(ABC):
         else:
             self._data.pop(sample_id)
             self._targets.pop(sample_id)
-            print('{} removed.'.format(sample_id))
+            print(f'{sample_id} removed.')
 
 
     def add_dataset_attr(self, attr_name, attr_value):
@@ -584,10 +583,9 @@ class BaseDataset(ABC):
 
         if self._attr_dtype[attr_name] is not None:
             if not np.issubdtype(type(attr_value), self._attr_dtype[attr_name]):
-                raise TypeError('Datatype of attribute {} is expected to be {}. '
-                                'Value provided is of type: {}'
-                                ''.format(attr_name, self._attr_dtype[attr_name],
-                                          type(attr_value)))
+                raise TypeError(f'Datatype of attribute {attr_name}'
+                                f' is expected to be {self._attr_dtype[attr_name]}. '
+                                f'Value provided is of type: {type(attr_value)}')
         else:
             self._attr_dtype[attr_name] = type(attr_value)
 
@@ -609,17 +607,17 @@ class BaseDataset(ABC):
             for attr_name in values.keys():
                 this_attr = values[attr_name]
                 if not isinstance(this_attr, dict):
-                    raise TypeError('Value of attr {} must be a dict keyed in by '
-                                    'samplet ids.'.format(attr_name))
+                    raise TypeError(f'Value of attr {attr_name} must be a dict '
+                                    f'keyed in by samplet ids.')
                 if len(this_attr) < 1:
-                    warn('Attribute {} is empty.'.format(attr_name))
+                    warn(f'Attribute {attr_name} is empty.')
                     self._attr[attr_name] = dict()
                 else:
                     existing_ids = set(self.samplet_ids).intersection(
                             set(list(this_attr)))
                     if len(existing_ids) < 1:
-                        raise ValueError('None of the samplets set for attr {}'
-                                         ' exist in dataset!'.format(attr_name))
+                        raise ValueError(f'None of the samplets set '
+                                         f'for attr {attr_name} exist in dataset!')
 
                     self._attr[attr_name] = self.__get_subset_from_dict(
                             this_attr, existing_ids)
@@ -644,15 +642,15 @@ class BaseDataset(ABC):
             raise ValueError('Attr dtype must be a dict')
 
         if values.keys() != self._attr.keys():
-            raise ValueError('Differing set of attributes.'
-                             ' Current: {}'.format(self._attr.keys()))
+            raise ValueError(f'Differing set of attributes.'
+                             f' Current: {self._attr.keys()}')
 
         self._attr_dtype = values
 
 
     def get_attr(self, attr_name, samplet_ids='all'):
         """
-        Method to retrieve specified attribute for a list of samplet IDs
+        Method to retrieve a specified attribute for a list of samplet IDs
 
         Parameters
         ----------
@@ -676,8 +674,7 @@ class BaseDataset(ABC):
         """
 
         if attr_name not in self._attr:
-            raise KeyError('Attribute {} is not set for this dataset'
-                           ''.format(attr_name))
+            raise KeyError(f'Attribute {attr_name} is not set for this dataset')
 
         if not is_iterable_but_not_str(samplet_ids):
             if samplet_ids.lower() == 'all':
@@ -690,9 +687,8 @@ class BaseDataset(ABC):
         sid_not_exist = np.array([sid not in self._attr[attr_name]
                                   for sid in samplet_ids])
         if sid_not_exist.any():
-            raise KeyError('Attr {} for {} samplets was not set:\n\t{}'
-                           ''.format(attr_name, sid_not_exist.sum(),
-                                     samplet_ids[sid_not_exist]))
+            raise KeyError(f'Attr {attr_name} for {sid_not_exist.sum()} samplets '
+                           f'was not set:\n\t{samplet_ids[sid_not_exist]}')
 
         return np.array([self._attr[attr_name][sid] for sid in samplet_ids],
                         dtype=self._attr_dtype[attr_name])
@@ -722,7 +718,7 @@ class BaseDataset(ABC):
         """
 
         if attr_name not in self._attr:
-            warn('Attribute {} is not set for this dataset'.format(attr_name),
+            warn(f'Attribute {attr_name} is not set for this dataset',
                  UserWarning)
             return
 
@@ -789,9 +785,8 @@ class BaseDataset(ABC):
 
         subset_idx = np.asarray(subset_idx)
         if not (max(subset_idx) < self._num_features) and (min(subset_idx) >= 0):
-            raise UnboundLocalError('indices out of range for the dataset. '
-                                    'Max index: {} Min index : 0'.format(
-                    self._num_features))
+            raise UnboundLocalError(f'indices out of range for the dataset. '
+                                    f'Max index: {self._num_features} Min index : 0')
 
         sub_data = {samplet: features[subset_idx] for samplet, features in
                     self._data.items()}
@@ -879,21 +874,21 @@ class BaseDataset(ABC):
         """
 
         if not callable(func):
-            raise TypeError('Given function {} is not a callable'.format(func))
+            raise TypeError(f'Given function {func} is not a callable')
 
         xfm_ds = self.__class__()
         for samplet, data in self._data.items():
             try:
                 xfm_data = func(data)
             except:
-                print('Unable to transform features for {}. '
-                      'Quitting.'.format(samplet))
+                print(f'Unable to transform features for {samplet}. '
+                      'Quitting.')
                 raise
 
             xfm_ds.add_samplet(samplet, xfm_data,
                                target=self._targets[samplet])
 
-        xfm_ds.description = "{}\n{}".format(func_description, self._description)
+        xfm_ds.description = f"{func_description}\n{self._description}"
 
         return xfm_ds
 
@@ -1059,7 +1054,7 @@ class BaseDataset(ABC):
         if item in self.samplet_ids:
             return self._data[item]
         else:
-            raise KeyError('{} not found in dataset.'.format(item))
+            raise KeyError(f'{item} not found in dataset.')
 
 
     def __setitem__(self, item, features):
@@ -1069,9 +1064,9 @@ class BaseDataset(ABC):
             features = self._check_features(features)
             self._data[item] = features
         else:
-            raise KeyError('{} not found in dataset.'
-                           ' Can not replace features of a non-existing samplet.'
-                           ' Add it first via .add_samplet()'.format(item))
+            raise KeyError(f'{item} not found in dataset.'
+                           f' Can not replace features of a non-existing samplet.'
+                           f' Add it first via .add_samplet()')
 
 
     def __iter__(self):
@@ -1191,9 +1186,8 @@ class BaseDataset(ABC):
         """Text summary of attributes in the dataset."""
 
         if self._dataset_attr:  # atleast one attribute exists!
-            attr_descr = '{} dataset attributes: {}\n' \
-                         ''.format(len(self._dataset_attr),
-                                   ', '.join(self._dataset_attr.keys()))
+            keys = ', '.join(self._dataset_attr.keys())
+            attr_descr = f'{len(self._dataset_attr)} dataset attributes: {keys}\n'
         else:
             attr_descr = ''
 
@@ -1250,11 +1244,10 @@ class BaseDataset(ABC):
 
             non_numeric = uniq_types.difference({'numeric'})
             if len(non_numeric) > 0:
-                raise ValueError('Non-numeric features provided ({}), '
+                raise ValueError(f'Non-numeric features provided ({non_numeric}), '
                                  'without requesting encoding to numeric. '
                                  'Try setting encode_nonnumeric=True '
-                                 'or encode features to numeric!'.format(
-                    non_numeric))
+                                 'or encode features to numeric!')
         else:
             raise NotImplementedError(
                     'encoding non-numeric features to numeric is not implemented '
@@ -1307,7 +1300,7 @@ class BaseDataset(ABC):
                     self._attr, self._attr_dtype, self._dataset_attr \
                     = pickle.load(df)
         except IOError as ioe:
-            raise IOError('Unable to read the dataset from file: {}', format(ioe))
+            raise IOError(f'Unable to read the dataset from file: {ioe}')
         except:
             raise
         else:
@@ -1316,8 +1309,7 @@ class BaseDataset(ABC):
 
             # validating target type
             if not np.issubdtype(_loaded_target_type, np.dtype(self._target_type)):
-                raise TypeError('Unexpected target type {}. It must be {} or alike!'
-                                ''.format(_loaded_target_type, self._target_type))
+                raise TypeError(f'Unexpected target type {_loaded_target_type}. It must be {self._target_type} or alike!')
 
 
     def save(self, file_path,
@@ -1385,7 +1377,7 @@ class BaseDataset(ABC):
                             df)
             return
         except IOError as ioe:
-            raise IOError('Unable to save the dataset to file: {}', format(ioe))
+            raise IOError(f'Unable to save the dataset to file: {ioe}')
         except:
             raise
 
@@ -1407,9 +1399,8 @@ class BaseDataset(ABC):
 
         num_features_in_elements = [samplet.size for samplet in data.values()]
         if len(np.unique(num_features_in_elements)) > 1:
-            raise ValueError('Different samplets have different number of features '
-                             '- invalid! Different dimensionalities detected: {}'
-                             ''.format(num_features_in_elements))
+            raise ValueError(f'Different samplets have different number of features '
+                             f'- invalid! Different dimensionalities detected: {num_features_in_elements}')
 
         return True
 

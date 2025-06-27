@@ -53,8 +53,8 @@ def _not_equal(array_one, array_two):
                     not_equal = True
                     break
         except:
-            print('not_equal type of array_one {},'
-                  'array_two {}'.format(type(array_one), type(array_two)))
+            print(f'not_equal type of array_one {type(array_one)}, '
+                  f'array_two {type(array_two)}')
             raise
     else:
         not_equal = array_one != array_two
@@ -72,7 +72,7 @@ def test_constructor_must_offer_params():
         for param in constructor_must_offer_param_list:
             if not param in cls_sign.parameters:
                 raise SyntaxError('Class {} does not offer {} as an argument '
-                                  'during init!'.format(cls, param))
+                                  f'during init!')
 
 
 def test_attributes():
@@ -175,7 +175,7 @@ def test_save_load():
                 for key, val in orig_val.items():
                     if _not_equal(val, reloaded[key]):
                         warn('Values differ for attr {} in samplet {}'
-                                         ' when reloaded from disk'.format(attr, key))
+                                         f'when reloaded from disk')
                         not_equal = True
                         break
             elif is_iterable_but_not_str(orig_val):
@@ -196,8 +196,8 @@ def test_save_load():
             not_equal = any(not_equal)
 
         if not_equal:
-            raise AttributeError('Attribute {} differs between the reloaded'
-                                 ' and the original datasets'.format(attr))
+            raise AttributeError(f'Attribute {attr} differs between the reloaded'
+                                 f' and the original datasets')
 
 
 def test_nan_inf_values():

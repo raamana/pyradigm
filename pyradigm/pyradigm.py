@@ -301,7 +301,7 @@ class MLDataset(object):
     @staticmethod
     def __str_names(num):
 
-        return np.array(['f{}'.format(x) for x in range(num)])
+        return np.array([f'f{x}' for x in range(num)])
 
 
     def glance(self, nitems=5):
@@ -419,7 +419,7 @@ class MLDataset(object):
         """
 
         if sample_id in self.__data and not overwrite:
-            raise ValueError('{} already exists in this dataset!'.format(sample_id))
+            raise ValueError(f'{sample_id} already exists in this dataset!')
 
         # ensuring there is always a class name, even when not provided by the user.
         # this is needed, in order for __str__ method to work.
@@ -441,11 +441,10 @@ class MLDataset(object):
                 self.__feature_names = self.__str_names(self.num_features)
         else:
             if self.__num_features != features.size:
-                raise ValueError('dimensionality of this sample ({}) '
-                                 'does not match existing samples ({})'
-                                 ''.format(features.size, self.__num_features))
+                raise ValueError(f'dimensionality of this sample ({features.size}) '
+                             f'does not match existing samples ({self.__num_features})')
             if not isinstance(features, self.__dtype):
-                raise TypeError("Mismatched dtype. Provide {}".format(self.__dtype))
+                raise TypeError(f"Mismatched dtype. Provide {self.__dtype}")
 
             self.__data[sample_id] = features
             self.__labels[sample_id] = label
@@ -483,7 +482,7 @@ class MLDataset(object):
             self.__data.pop(sample_id)
             self.__classes.pop(sample_id)
             self.__labels.pop(sample_id)
-            print('{} removed.'.format(sample_id))
+            print(f'{sample_id} removed.')
 
 
     def get_feature_subset(self, subset_idx):
@@ -509,9 +508,8 @@ class MLDataset(object):
 
         subset_idx = np.asarray(subset_idx)
         if not (max(subset_idx) < self.__num_features) and (min(subset_idx) >= 0):
-            raise UnboundLocalError('indices out of range for the dataset. '
-                                    'Max index: {} Min index : 0'.format(
-                self.__num_features))
+            raise UnboundLocalError(f'indices out of range for the dataset. '
+                                    f'Max index: {self.__num_features} Min index : 0')
 
         sub_data = {sample: features[subset_idx] for sample, features in
                     self.__data.items()}
@@ -565,7 +563,7 @@ class MLDataset(object):
         non_existent = set(self.class_set).intersection(set(class_ids))
         if len(non_existent) < 1:
             raise ValueError(
-                'These classes {} do not exist in this dataset.'.format(non_existent))
+                f'These classes {non_existent} do not exist in this dataset.')
 
         subsets = list()
         for class_id in class_ids:
@@ -636,21 +634,21 @@ class MLDataset(object):
         """
 
         if not callable(func):
-            raise TypeError('Given function {} is not a callable'.format(func))
+            raise TypeError(f'Given function {func} is not a callable')
 
         xfm_ds = MLDataset()
         for sample, data in self.__data.items():
             try:
                 xfm_data = func(data)
             except:
-                print('Unable to transform features for {}. Quitting.'.format(sample))
+                print(f'Unable to transform features for {sample}. Quitting.')
                 raise
 
             xfm_ds.add_sample(sample, xfm_data,
                               label=self.__labels[sample],
                               class_id=self.__classes[sample])
 
-        xfm_ds.description = "{}\n{}".format(func_description, self.__description)
+        xfm_ds.description = f"{func_description}\n{self.__description}"
 
         return xfm_ds
 
@@ -754,7 +752,7 @@ class MLDataset(object):
             subset_size_this_class = max(0, min(class_size, count_per_class))
             if subset_size_this_class < 1 or this_class is None:
                 # warning if none were selected
-                warn('No subjects from class {} were selected.'.format(class_id))
+                warn(f'No subjects from class {class_id} were selected.')
             else:
                 subsets_this_class = this_class[0:count_per_class]
                 subsets.extend(subsets_this_class)
@@ -814,7 +812,7 @@ class MLDataset(object):
             if subset_size_this_class < 1 or len(this_class) < 1 or this_class is None:
                 # warning if none were selected
                 raise ValueError(
-                    'No subjects from class {} were selected.'.format(class_id))
+                    f'No subjects from class {class_id} were selected.')
             else:
                 subsets_this_class = this_class[0:subset_size_this_class]
                 subsets.extend(subsets_this_class)
@@ -970,7 +968,7 @@ class MLDataset(object):
         if item in self.keys:
             return self.__data[item]
         else:
-            raise KeyError('{} not found in dataset.'.format(item))
+            raise KeyError(f'{item} not found in dataset.')
 
 
     def __setitem__(self, item, features):
@@ -979,17 +977,16 @@ class MLDataset(object):
         if item in self.__data:
             features = self.check_features(features)
             if self.__num_features != features.size:
-                raise ValueError('dimensionality of supplied features ({}) '
-                                 'does not match existing samples ({})'
-                                 ''.format(features.size, self.__num_features))
+                raise ValueError(f'dimensionality of supplied features ({features.size}) '
+                                 f'does not match existing samples ({self.__num_features})')
             self.__data[item] = features
         else:
-            raise KeyError('{} not found in dataset.'
-                           ' Can not replace features of a non-existing sample.'
-                           ' Add it first via .add_sample()'.format(item))
+            raise KeyError(f'{item} not found in dataset.'
+                           f' Can not replace features of a non-existing sample.'
+                           f' Add it first via .add_sample()')
 
     def __iter__(self):
-        "Iterator over samples"
+        """Iterator over samples"""
 
         for subject, data in self.data.items():
             yield subject, data
@@ -1118,7 +1115,7 @@ class MLDataset(object):
         if not isinstance(classes, dict):
             raise TypeError('Input classes is not a dict!')
         if not len(classes) == self.num_samples:
-            raise ValueError('Too few items - need {} keys'.format(self.num_samples))
+            raise ValueError(f'Too few items - need {self.num_samples} keys')
         if not all([key in self.keys for key in classes]):
             raise ValueError('One or more unrecognized keys!')
         self.__classes = classes
@@ -1138,8 +1135,9 @@ class MLDataset(object):
         if self.description not in [None, '']:
             full_descr.append(self.description)
         if bool(self):
-            full_descr.append('{} samples, {} classes, {} features'.format(
-                    self.num_samples, self.num_classes, self.num_features))
+            full_descr.append(f'{self.num_samples} samples, '
+                              f'{self.num_classes} classes, '
+                              f'{self.num_features} features')
             class_ids = list(self.class_sizes)
             max_width = max([len(cls) for cls in class_ids])
             num_digit = max([len(str(val)) for val in self.class_sizes.values()])
@@ -1157,8 +1155,8 @@ class MLDataset(object):
 
     def __format__(self, fmt_str='s'):
         if fmt_str.lower() in ['', 's', 'short']:
-            return '{} samples x {} features each in {} classes'.format(
-                    self.num_samples, self.num_features, self.num_classes)
+            return (f'{self.num_samples} samples x {self.num_features} features each'
+                    f' in {self.num_classes} classes')
         elif fmt_str.lower() in ['f', 'full']:
             return self.__str__()
         else:
@@ -1269,9 +1267,9 @@ class MLDataset(object):
                 'encoding non-numeric features to numeric is not implemented yet! '
                 'Encode features beforing to ARFF.')
 
-        self.__description = arff_meta.name  # to enable it as a label e.g. in neuropredict
+        self.__description = arff_meta.name  # to enable it as a label e.g., in neuropredict
 
-        # initializing the key containers, before calling self.add_sample
+        # initializing the key containers before calling self.add_sample
         self.__data = OrderedDict()
         self.__labels = OrderedDict()
         self.__classes = OrderedDict()

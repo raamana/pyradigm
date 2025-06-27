@@ -16,13 +16,13 @@ class_sizes  = np.random.randint(10, 100, num_classes)
 num_features = np.random.randint(10, 100)
 num_samples = sum(class_sizes)
 
-class_set    = np.array([ 'C{:05d}'.format(x) for x in range(num_classes)])
+class_set    = np.array([ f'C{x:05d}' for x in range(num_classes)])
 feat_names   = np.array([ str(x) for x in range(num_features) ])
 
 test_dataset = MLDataset()
 for class_index, class_id in enumerate(class_set):
     for sub_ix in range(class_sizes[class_index]):
-        subj_id = '{}_S{:05d}'.format(class_set[class_index],sub_ix)
+        subj_id = f'{class_set[class_index]}_S{sub_ix:05d}'
         feat = np.random.random(num_features)
         test_dataset.add_sample(subj_id, feat, class_index, class_id, feat_names)
 
@@ -37,7 +37,7 @@ for sub_id in test_dataset.keys:
                                  test_dataset.labels[sub_id],
                                  test_dataset.classes[sub_id])
 
-same_ids_new_feat.feature_names = np.array([ 'new_f{}'.format(x) for x in range(
+same_ids_new_feat.feature_names = np.array([ f'new_f{x}' for x in range(
         num_features) ])
 
 test_dataset.description = 'test dataset'

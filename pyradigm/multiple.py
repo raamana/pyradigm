@@ -108,7 +108,7 @@ class BaseMultiDataset(object):
         if not isinstance(dataset, self._dataset_class):
             raise CompatibilityException('Incompatible dataset. '
                                          'You can only add instances of '
-                                         'type {}'.format(self._dataset_class))
+                                         f'type {self._dataset_class}')
 
         if len(dataset.description)>0:
             identifier = dataset.description
@@ -155,8 +155,7 @@ class BaseMultiDataset(object):
                 self.feature_names[identifier] = dataset.feature_names
                 self.num_features.append(dataset.num_features)
             else:
-                raise KeyError('{} already exists in MultiDataset'
-                               ''.format(identifier))
+                raise KeyError(f'{identifier} already exists in MultiDataset')
 
             if hasattr(dataset, 'attr'):
                 if len(self._common_attr) < 1:
@@ -173,7 +172,7 @@ class BaseMultiDataset(object):
                             raise ValueError(
                                     'Values and/or IDs differ for attribute {}. '
                                     'Ensure all datasets have common attributes '
-                                    'with the same values'.format(a_name))
+                                    f'with the same values')
 
 
         # each addition should be counted, if successful
@@ -279,8 +278,7 @@ class BaseMultiDataset(object):
         data, dtypes = list(), list()
         for name in names:
             if name not in self._common_attr:
-                raise AttributeError('Attr {} not set for this MultiDataset'
-                                     ''.format(name))
+                raise AttributeError(f'Attr {name} not set for this MultiDataset')
 
             this_data = np.array([self._common_attr[name].get(sid, not_found_value)
                                   for sid in subset],
@@ -296,8 +294,7 @@ class BaseMultiDataset(object):
         """Method to set modality-/dataset-specific attributes"""
 
         if ds_id not in self._modalities:
-            raise KeyError('Dataset {} not in this {} multi_dataset'
-                           ''.format(ds_id, self._name))
+            raise KeyError(f'Dataset {ds_id} not in this {self._name} multi_dataset')
 
         if ds_id not in self._attr:
             self._attr[ds_id] = dict()
@@ -309,13 +306,12 @@ class BaseMultiDataset(object):
         """Method to retrieve modality-/dataset-specific attributes"""
 
         if ds_id not in self._modalities:
-            raise KeyError('Dataset {} not in this {} multi_dataset'
-                           ''.format(ds_id, self._name))
+            raise KeyError(f'Dataset {ds_id} not in this {self._name} multi_dataset')
 
         try:
             return self._attr[ds_id][attr_name]
         except KeyError:
-            msg = 'attribute {} not set for dataset {}'.format(attr_name, ds_id)
+            msg = f'attribute {attr_name} not set for dataset {ds_id}'
             if not_found_value.lower() in ('raise', ):
                 raise KeyError(msg)
             else:
@@ -374,8 +370,8 @@ class MultiDatasetClassify(BaseMultiDataset):
             # overriding the "Subset derived from ... "
             ds_out.description = new_id
         else:
-            raise ValueError('One or more classes in {} do not exist in\n{}'
-                             ''.format(subgroup, dataset.description))
+            raise ValueError(f'One or more classes in {subgroup} do not exist '
+                             f'in {dataset.description}')
 
         self.append(ds_out, identifier=identifier)
 
@@ -434,6 +430,9 @@ class MultiDatasetClassify(BaseMultiDataset):
         num_rep : int
             Number of holdout repetitions
 
+        stratified : bool
+            Flag to indicate whether the splits should be stratified
+
         return_ids_only : bool
             Whether to return samplet IDs only, or the corresponding Datasets
 
@@ -474,7 +473,7 @@ class MultiDatasetClassify(BaseMultiDataset):
             raise ValueError('size spec differs in num elements with class sizes!')
 
         for rep in range(num_rep):
-            print('rep {}'.format(rep))
+            print(f'rep {rep}')
 
             train_set = list()
             for index, (cls_id, class_size) in enumerate(self._target_sizes.items()):
@@ -483,8 +482,7 @@ class MultiDatasetClassify(BaseMultiDataset):
 
                 subset_size = max(0, min(class_size, size_per_class[index]))
                 if subset_size < 1 or class_size < 1:
-                    warn('No subjects from class {} were selected.'
-                                  ''.format(cls_id))
+                    warn(f'No subjects from class {cls_id} were selected.')
                 else:
                     subsets_this_class = ids_in_class[cls_id][0:size_per_class[index]]
                     train_set.extend(subsets_this_class)
@@ -517,7 +515,7 @@ class MultiDatasetRegress(BaseMultiDataset):
             List of pyradigms, or absolute paths to serialized pyradigm Datasets.
 
         name : str
-            human readable name for printing purposes
+            human-readable name for printing purposes
 
         """
 
