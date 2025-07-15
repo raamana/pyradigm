@@ -13,7 +13,7 @@ class ClassificationDataset(BaseDataset):
     """
     The main class for user-facing ClassificationDataset.
 
-    Note: samplet is defined  to refer to a single row in feature matrix X: N x p
+    Note: samplet is defined to refer to a single row in feature matrix X: N x p
     """
 
 
@@ -29,7 +29,7 @@ class ClassificationDataset(BaseDataset):
                  ):
         """
         Default constructor.
-        Recommended way to construct the dataset is via add_samplet method,
+        The recommended way to construct the dataset is via the add_samplet method,
         one samplet at a time, as it allows for unambiguous identification of
         each row in data matrix.
 
@@ -65,10 +65,10 @@ class ClassificationDataset(BaseDataset):
             Data type of the features to be stored
 
         allow_nan_inf : bool or str
-            Flag to indicate whether raise an error if NaN or Infinity values are
-            found. If False, adding samplets with NaN or Inf features raises an error
-            If True, neither NaN nor Inf raises an error. You can pass 'NaN' or
-            'Inf' to specify which value to allow depending on your needs.
+            Flag to indicate whether to raise an error if NaN or Infinity values are
+            found. If False, adding samplets with NaN / Inf features raises an error.
+            You can pass 'NaN' or 'Inf' to specify which value to allow depending
+            on your needs.
 
         Raises
         ------
@@ -220,7 +220,7 @@ class ClassificationDataset(BaseDataset):
         Parameters
         ----------
         train_perc : float
-            fraction of samplets from each class to build the training subset.
+            the fraction of samplets from each class to build the training subset.
 
         count_per_class : int
             exact count of samplets from each class to build the training subset.
@@ -311,7 +311,7 @@ class ClassificationDataset(BaseDataset):
         Returns
         -------
         subset : list
-            Combined list of sample ids from all classes.
+            The combined list of sample ids from all classes.
 
         Raises
         ------
@@ -373,7 +373,7 @@ class ClassificationDataset(BaseDataset):
         Returns
         -------
         subset : list
-            Combined list of sample ids from all classes.
+            The combined list of sample ids from all classes.
 
         """
 
@@ -426,8 +426,8 @@ class ClassificationDataset(BaseDataset):
         TypeError
             If targets is not a dict.
         ValueError
-            If all samples in dataset are not present in input dict,
-            or one of they samples in input is not recognized.
+            If all samples in the dataset are not present in input dict,
+            or one of the samples in input is not recognized.
 
         """
         if not isinstance(new_targets, dict):

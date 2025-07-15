@@ -27,7 +27,7 @@ class RegressionDataset(BaseDataset):
                  ):
         """
         Default constructor.
-        Recommended way to construct the dataset is via add_samplet method,
+        The recommended way to construct the dataset is via the add_samplet method,
         one samplet at a time, as it allows for unambiguous identification of
         each row in data matrix.
 
@@ -63,10 +63,10 @@ class RegressionDataset(BaseDataset):
             Data type of the features to be stored
 
         allow_nan_inf : bool or str
-            Flag to indicate whether raise an error if NaN or Infinity values are
-            found. If False, adding samplets with NaN or Inf features raises an error
-            If True, neither NaN nor Inf raises an error. You can pass 'NaN' or
-            'Inf' to specify which value to allow depending on your needs.
+            Flag to indicate whether to raise an error if NaN or Infinity values are
+            found. If False, adding samplets with NaN / Inf features raises an error.
+            You can pass 'NaN' or 'Inf' to specify which value to allow depending
+            on your needs.
 
         Raises
         ------
@@ -175,7 +175,7 @@ class RegressionDataset(BaseDataset):
         Parameters
         ----------
         train_perc : float
-            fraction of samplets to build the training subset, between 0 and 1
+            The fraction of samplets to build the training subset, between 0 and 1
 
         count : int
             exact count of samplets to build the training subset, between 1 and N-1

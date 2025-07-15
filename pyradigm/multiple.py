@@ -1,16 +1,17 @@
 import random
-from warnings import warn
-from collections.abc import Iterable
+from abc import abstractmethod
 from collections import Counter
+from collections.abc import Iterable
 from copy import copy
 from operator import itemgetter
 from sys import version_info
-from abc import abstractmethod
+from warnings import warn
+
 import numpy as np
 
 if version_info.major > 2:
     from pyradigm.base import BaseDataset, CompatibilityException
-    from pyradigm import MLDataset, ClassificationDataset as ClfDataset, \
+    from pyradigm import ClassificationDataset as ClfDataset, \
         RegressionDataset as RegrDataset
 else:
     raise NotImplementedError('pyradigm supports only python 3 or higher! '
@@ -23,7 +24,7 @@ class BaseMultiDataset(object):
     Container data structure to hold and manage multiple MLDataset instances.
 
     Key uses:
-        - Uniform processing individual MLDatasets e.g. querying same set of IDs
+        - Uniform processing individual MLDatasets e.g., querying the same set of IDs
         - ensuring correspondence across multiple datasets in CV
 
     """
@@ -70,7 +71,7 @@ class BaseMultiDataset(object):
 
         if dataset_spec is not None:
             if not isinstance(dataset_spec, Iterable) or len(dataset_spec) < 1:
-                raise ValueError('Input must be a list of atleast two datasets.')
+                raise ValueError('Input must be a list of at least two datasets.')
 
             self._load(dataset_spec)
 
@@ -336,7 +337,7 @@ class MultiDatasetClassify(BaseMultiDataset):
             List of pyradigms, or absolute paths to serialized pyradigm Datasets.
 
         name : str
-            human readable name for printing purposes
+            human-readable name for printing purposes
 
         """
 
@@ -590,7 +591,7 @@ class MultiDatasetRegress(BaseMultiDataset):
         # clipping the range to [1, n]
         subset_size = max(1, min(self.num_samplets, subset_size))
 
-        # making it indexible with a local copy
+        # making it indexable with a local copy
         id_list = list(self._ids)
 
         for rep in range(num_rep):

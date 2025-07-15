@@ -22,7 +22,7 @@ class PyradigmException(Exception):
 
 
 class EmptyFeatureSetException(PyradigmException):
-    """Custom exception to catch empty feature set"""
+    """Custom exception to catch an empty feature set"""
 
 
 class ConstantValuesException(PyradigmException):
@@ -41,7 +41,7 @@ class InvalidFeatureNamesException(PyradigmException):
 class CompatibilityException(PyradigmException):
     """
     Exception to indicate two datasets are not compatible in some way
-        i.e. differing set of samplet IDs, or their target values.
+        i.e., differing set of samplet IDs, or their target values.
     """
 
 
@@ -57,7 +57,7 @@ missing_value_indicator = np.nan
 class BaseDataset(ABC):
     """Abstract Base class for Dataset.
 
-    samplet is a term reserved to referred to a single row in feature matrix X: N x p
+    samplet is a term reserved to refer to a single row in feature matrix X: N x p
 
     self.__class__() refers to the inherited child class instance at runtime!
 
@@ -82,10 +82,10 @@ class BaseDataset(ABC):
             Data type of the features to be stored
 
         allow_nan_inf : bool or str
-            Flag to indicate whether raise an error if NaN or Infinity values are
-            found. If False, adding samplets with NaN or Inf features raises an error
-            If True, neither NaN nor Inf raises an error. You can pass 'NaN' or
-            'Inf' to specify which value to allow depending on your needs.
+            Flag to indicate whether to raise an error if NaN or Infinity values are
+            found. If False, adding samplets with NaN / Inf features raises an error.
+            You can pass 'NaN' or 'Inf' to specify which value to allow depending
+            on your needs.
         """
 
         if not callable(target_type):
@@ -156,7 +156,7 @@ class BaseDataset(ABC):
     def data(self, values, feature_names=None):
         """
         Populates this dataset with the provided data.
-        Usage of this method is discourage (unless you know what you are doing).
+        Usage of this method is discouraged (unless you know what you are doing).
 
         Parameters
         ----------
@@ -169,8 +169,8 @@ class BaseDataset(ABC):
         Raises
         ------
         ValueError
-            If number of samplets does not match the size of existing set, or
-            If atleast one samplet is not provided.
+            If the number of samplets does not match the size of an existing set, or
+            If at least one samplet is not provided.
 
         """
         if isinstance(values, dict):
@@ -372,16 +372,16 @@ class BaseDataset(ABC):
         """
         Check feature names match what was previously used
 
-        if nothing preivously used and nothing given:
+        if nothing was previously used and nothing given:
         set to strings like 0,1,...nfeats
 
         Returns
         -------
-        feature_names as numpy array or None
+        feature_names as a numpy array or None
         """
         # on the first sample we'll make names 0,...,nfeats
-        # but afterwward, dont spend time generating it.
-        # add_samplet wont change the names if None
+        # but afterward, don't spend time generating it.
+        # add_samplet won't change the names if None
         if feature_names is None:
             if self.num_samplets <= 0:
                 return self._str_names(nfeatures)
@@ -442,7 +442,7 @@ class BaseDataset(ABC):
             If dimensionality of the current samplet does not match the current, or
             If `feature_names` do not match existing names
         TypeError
-            If samplet to be added is of different data type compared to existing
+            If samplet to be added is of a different data type compared to existing
             samplets.
 
         """
@@ -463,7 +463,7 @@ class BaseDataset(ABC):
         self._targets[samplet_id] = target
         self._num_features = nfeats
         self._targets[samplet_id] = target
-        # even if given featnames=None, will be 0...nfeats for first samplet
+        # even if given featnames=None, will be 0...nfeats for the first samplet
         if feature_names is not None and self._feature_names is None:
             self._feature_names = feature_names
 
@@ -507,9 +507,9 @@ class BaseDataset(ABC):
         """
         Adds dataset-wide attributes (common to all samplets).
 
-        This is a great way to add meta data (such as version, processing details,
+        This is a great way to add meta-data (such as version, processing details,
         anything else common to all samplets). This is better than encoding the info
-        into the description field, as this allow programmatic retrieval.
+        into the description field, as this allows programmatic retrieval.
 
         Parameters
         ----------
@@ -696,7 +696,7 @@ class BaseDataset(ABC):
 
     def del_attr(self, attr_name, samplet_ids='all'):
         """
-        Method to retrieve specified attribute for a list of samplet IDs
+        Method to retrieve a specified attribute for a list of samplet IDs
 
         Parameters
         ----------
