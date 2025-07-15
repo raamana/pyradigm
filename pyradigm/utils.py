@@ -211,7 +211,7 @@ def make_random_dataset(max_num_classes=20,
         min_num_classes = 2
 
     if max_num_classes <= min_num_classes:
-        max_num_classes = min_num_classes
+        max_num_classes = min_num_classes + 1
 
     num_classes = np.random.randint(min_num_classes, max_num_classes, 1)
 
